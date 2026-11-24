@@ -516,9 +516,10 @@
       el.innerHTML = "";
       var L = window.L;
       bigMap = L.map(el, { zoomControl: true, attributionControl: true, scrollWheelZoom: false });
-      L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png", {
-        maxZoom: 18, subdomains: "abcd",
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions" target="_blank" rel="noopener">CARTO</a>'
+      // OpenStreetMap 기본 타일 (API 키 불필요, 출처 표기 필수)
+      L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        maxZoom: 19,
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors'
       }).addTo(bigMap);
       mapLayers = { pts: {}, routes: {} };
       var bounds = L.latLngBounds([]);

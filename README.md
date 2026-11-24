@@ -23,5 +23,5 @@
 - **로그인 잠금**: `/api/login` 이 비밀번호를 확인. 같은 접속 주소에서 5번 틀리면 10분 잠금 (실패 기록: Blob `auth/fail/`)
 - **오프라인**: `sw.js` 가 페이지·데이터·글꼴을 기기에 저장. 홈 화면에 추가 가능 (`manifest.webmanifest`, 아이콘)
 - **저장소 사용량 절약**: `/api/data` 는 최신 내용을 60초 동안 서버에 기억 (`?fresh=1` 은 바로 확인). 편집 시작·저장은 항상 최신 확인
-- **지도 탭**: Leaflet + OpenStreetMap(CARTO 타일), 경로는 OSRM 공개 서버로 계산 (실패하면 점선)
+- **지도 탭**: Leaflet + OpenStreetMap 기본 타일, 경로는 OSRM 공개 서버로 계산 (실패하면 점선)
 - **현지 정보 탭**: `info.draft: true` 인 동안 "작성 중" 표시
