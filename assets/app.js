@@ -336,8 +336,8 @@
     var n = Number(T.travelers) || 1;
 
     var h = staticHead("COST", "비용 상세", "엑셀 「비용 정리」 기준 · " + n + "명 균등 분담");
-    h += '<div class="total"><div><span class="total-k">총 비용 (확정분)</span><span class="total-v serif">' + krw(total) + "</span></div>" +
-      '<div><span class="total-k">1인당</span><span class="total-v serif">' + krw(total / n) + "</span></div></div>";
+    h += '<div class="total per-person"><div><span class="total-k">1인당 (확정분)</span><span class="total-v serif">' + krw(total / n) + "</span></div>" +
+      '<div><span class="total-k">총 비용 · ' + n + '명</span><span class="total-v small">' + krw(total) + "</span></div></div>";
 
     h += '<ul class="cost-list">' + items.map(function (it, i) {
       var p = "cost.items." + i, st = STATUS[it.status] || STATUS[""];
@@ -349,10 +349,10 @@
       var inner = del(p) +
         '<div class="cost-top"><span class="cost-name">' + E(p + ".name", { plain: true }) + " <em>" + E(p + ".sub", { plain: true, ph: "업체" }) + "</em></span>" + badge + "</div>" +
         '<div class="cost-rows">' +
-        '<div class="cost-cell"><span>총액</span><b>' + (editing ? "₩ " + E(p + ".krw", { kind: "num", plain: true, ph: "원화" }) : (it.krw ? krw(it.krw) : "—")) + "</b>" +
-        (editing ? "<em>" + E(p + ".nok", { kind: "num", plain: true, ph: "NOK" }) + " NOK</em>" : (it.nok ? "<em>" + nok(it.nok) + "</em>" : "")) + "</div>" +
-        '<div class="cost-cell"><span>1인 (' + n + '명)</span><b>' + (it.krw ? krw(it.krw / n) : "—") + "</b>" +
-        (it.nok ? "<em>" + nok(Math.round(it.nok / n * 100) / 100) + "</em>" : "") + "</div></div>";
+        '<div class="cost-cell main"><span>1인 (' + n + '명)</span><b>' + (it.krw ? krw(it.krw / n) : "—") + "</b>" +
+        (it.nok ? "<em>" + nok(Math.round(it.nok / n * 100) / 100) + "</em>" : "") + "</div>" +
+        '<div class="cost-cell sub"><span>총액</span><b>' + (editing ? "₩ " + E(p + ".krw", { kind: "num", plain: true, ph: "원화" }) : (it.krw ? krw(it.krw) : "—")) + "</b>" +
+        (editing ? "<em>" + E(p + ".nok", { kind: "num", plain: true, ph: "NOK" }) + " NOK</em>" : (it.nok ? "<em>" + nok(it.nok) + "</em>" : "")) + "</div></div>";
       return "<li>" + A("#" + it.tab, inner) + "</li>";
     }).join("") + "</ul>" + add("cost.items", "cost", "비용 항목 추가");
     h += '<p class="note">' + (editing ? "금액은 숫자만 입력 (쉼표는 자동 처리). 합계는 저장 후 다시 계산돼요." : "MOXY 숙박비는 확정되면 합계에 더해집니다. 렌터카는 픽업 시 현지에서 결제해요.") + "</p>";
@@ -479,7 +479,6 @@
     var T = D();
     var meta = document.getElementById("heroMeta");
     meta.innerHTML = E("period", { plain: true }) + " · " + esc(T.travelers) + "명";
-    document.querySelector(".hero-img").style.backgroundImage = "url('" + T.heroImage + "')";
   }
   function render(scroll) {
     var id = current();
@@ -611,7 +610,7 @@
 
   function renderBar() {
     if (!editing) {
-      bar.innerHTML = '<button type="button" class="fab" data-act="edit">✏️ 편집</button>';
+      bar.innerHTML = "";   // 편집 버튼은 페이지 맨 아래(footer)에 있다
       return;
     }
     bar.innerHTML = '<div class="bar-in"><span class="bar-state ' + (dirty ? "dirty" : "") + '">' +
@@ -620,6 +619,8 @@
       '<button type="button" data-act="cancel">취소</button>' +
       '<button type="button" class="primary" data-act="save"' + (dirty ? "" : " disabled") + ">저장</button></div>";
   }
+
+  document.getElementById("footEdit").addEventListener("click", function () { if (!editing) startEdit(); });
 
   bar.addEventListener("click", function (e) {
     var b = e.target.closest("button[data-act]");
