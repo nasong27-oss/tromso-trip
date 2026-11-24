@@ -448,8 +448,18 @@
      렌더 · 라우터
      ========================================================= */
   var tabsEl = document.querySelector("#tabs .tabs-inner");
+  // 메인 '일정' 탭: 오로라 색 지붕 + 작은 별이 달린 집 아이콘, 뒤에 얇은 구분선
+  var HOME_IC = '<svg class="home-ic" viewBox="0 0 20 20" aria-hidden="true">' +
+    '<defs><linearGradient id="homeG" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4fd6a2"/><stop offset="1" stop-color="#8b7bf0"/></linearGradient></defs>' +
+    '<path d="M3.2 9.2 10 3.6l6.8 5.6" fill="none" stroke="url(#homeG)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>' +
+    '<path d="M5 8.6V16a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V8.6" fill="url(#homeG)" opacity=".22"/>' +
+    '<path d="M5 8.6V16a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V8.6" fill="none" stroke="url(#homeG)" stroke-width="1.8" stroke-linejoin="round"/>' +
+    '<rect x="8.4" y="11.6" width="3.2" height="5.4" rx="1.4" fill="url(#homeG)"/>' +
+    '<path class="home-star" d="M16.2 1.2l.55 1.25 1.25.55-1.25.55-.55 1.25-.55-1.25-1.25-.55 1.25-.55z" fill="#ffcf4a"/></svg>';
   tabsEl.innerHTML = TABS.map(function (t) {
-    return '<a role="tab" href="#' + t.id + '" data-tab="' + t.id + '">' + esc(t.label) + "</a>";
+    var home = t.id === "home";
+    return '<a role="tab" href="#' + t.id + '" data-tab="' + t.id + '"' + (home ? ' class="tab-home"' : "") + ">" +
+      (home ? HOME_IC : "") + esc(t.label) + "</a>" + (home ? '<span class="tab-sep" aria-hidden="true"></span>' : "");
   }).join("");
 
   function current() {
@@ -498,7 +508,9 @@
     var id = current();
     document.body.classList.toggle("editing", editing);
     renderHero();
-    app.innerHTML = '<div class="view view-' + id + '">' + VIEWS[id]() + "</div>";
+    var slide = swipeDir ? " slide-" + swipeDir : "";
+    swipeDir = null;
+    app.innerHTML = '<div class="view view-' + id + slide + '">' + VIEWS[id]() + "</div>";
     tabsEl.querySelectorAll("a").forEach(function (a) {
       var on = a.getAttribute("data-tab") === id;
       a.classList.toggle("on", on);
@@ -516,6 +528,38 @@
     }
   }
   window.addEventListener("hashchange", function () { render(true); });
+
+  /* ---------- 좌우 스와이프로 탭 이동 (터치 기기) ----------
+     - 옆으로 60px 이상, 세로보다 1.5배 이상 옆으로 움직였을 때만
+     - 화면 가장자리(뒤로 가기 제스처), 지도·탭 바·편집 중에는 동작 안 함 */
+  var swipeDir = null;
+  var sw = null;
+  var EDGE = 24, MIN_DX = 60;
+  app.addEventListener("touchstart", function (e) {
+    sw = null;
+    if (editing || e.touches.length !== 1) return;
+    var t = e.touches[0];
+    if (t.clientX < EDGE || t.clientX > window.innerWidth - EDGE) return;
+    if (e.target.closest("details.map, iframe, .ed, input, select, textarea, .modal, .history")) return;
+    sw = { x: t.clientX, y: t.clientY, dir: null };
+  }, { passive: true });
+  app.addEventListener("touchmove", function (e) {
+    if (!sw || sw.dir) return;
+    var t = e.touches[0], dx = t.clientX - sw.x, dy = t.clientY - sw.y;
+    if (Math.abs(dx) < 10 && Math.abs(dy) < 10) return;
+    sw.dir = Math.abs(dx) > Math.abs(dy) * 1.5 ? "h" : "v";
+  }, { passive: true });
+  app.addEventListener("touchend", function (e) {
+    if (!sw || sw.dir !== "h") { sw = null; return; }
+    var t = e.changedTouches[0], dx = t.clientX - sw.x, dy = t.clientY - sw.y;
+    sw = null;
+    if (Math.abs(dx) < MIN_DX || Math.abs(dx) < Math.abs(dy) * 1.5) return;
+    var idx = TABS.findIndex(function (x) { return x.id === current(); });
+    var next = idx + (dx < 0 ? 1 : -1);
+    if (next < 0 || next >= TABS.length) return;   // 처음·마지막 탭에서는 그대로
+    swipeDir = dx < 0 ? "next" : "prev";
+    location.hash = TABS[next].id;
+  }, { passive: true });
 
   /* =========================================================
      편집: 입력 · 추가 · 삭제
