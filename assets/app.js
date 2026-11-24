@@ -633,11 +633,42 @@
     collapseY = Math.max(heroEl.offsetHeight - MINI - safeTop(), 0);
     topEl.style.top = -collapseY + "px";   // sticky 가 이만큼 올라간 뒤 멈춘다
     topEl.style.setProperty("--cy", collapseY + "px"); // 효과 방식의 애니메이션 구간
+    // 아이폰 Safari 는 animation-range 안의 var() 를 무시한다 → 숫자로 직접 넣는다
+    if (FX) FX_ELS.forEach(function (el) {
+      el.style.animationRangeStart = "0px";
+      el.style.animationRangeEnd = collapseY + "px";
+    });
     onScroll();
+  }
+  var FX_ELS = [".hero-inner", ".hero-glow", ".mini", ".aurora", ".hero-shade"].map(function (q) { return document.querySelector(q); });
+  /* 안전장치: 효과가 스크롤과 맞게 진행되는지 한 번 확인 → 어긋나면 이 기기는 단순 방식으로 */
+  var fxCheck = FX ? "확인 전" : "해당 없음";
+  var fxBad = 0;
+  function fxProgress() {
+    var el = FX_ELS[0];
+    if (!el.getAnimations) return null;
+    var a = el.getAnimations()[0];
+    if (!a) return -1;
+    var p = a.effect.getComputedTiming().progress;
+    return p == null ? -1 : p;
+  }
+  function checkFx() {
+    if (!FX || fxCheck === "정상" || collapseY < 100) return;
+    var want = window.scrollY / collapseY;
+    if (want < 0.2 || want > 0.8) return;
+    var got = fxProgress();
+    if (got === null) { fxCheck = "확인 불가"; return; }
+    if (Math.abs(got - want) < 0.2) { fxCheck = "정상"; fxBad = 0; return; }
+    if (++fxBad < 3) return;
+    fxCheck = "어긋남(" + got.toFixed(2) + " / " + want.toFixed(2) + ") → 단순 방식";
+    FX = false;
+    document.documentElement.classList.remove("fx");
+    layoutTop();
   }
   function onScroll() {
     ticking = false;
     // 단순 방식은 큰 제목의 날짜 줄이 걸치기 전에 조금 일찍 덮는다
+    checkFx();
     var on = window.scrollY >= collapseY - (FX ? 2 : 90);
     if (topEl.classList.contains("collapsed") !== on) topEl.classList.toggle("collapsed", on);
   }
@@ -1209,7 +1240,7 @@
   });
 
   /* ---------- 진단 창: 맨 아래 "Tromsø 2026" 을 5번 연속 누르면 ---------- */
-  var APP_VERSION = "2026-11-24.d1";
+  var APP_VERSION = "2026-11-24.d2";
   var brandTaps = [];
   document.getElementById("footBrand").addEventListener("click", function () {
     var now = Date.now();
@@ -1232,6 +1263,8 @@
       "아이폰/아이패드 판정": ENV.ios,
       "상태바 높이": safeTop() + "px",
       "접히는 거리": collapseY + "px",
+      "효과 구간": (hi.animationRangeStart || "-") + " ~ " + (hi.animationRangeEnd || "-"),
+      "효과 진행 확인": fxCheck,
       "오프라인 도우미": navigator.serviceWorker && navigator.serviceWorker.controller ? "작동 중" : "없음",
       "브라우저 정보": UA
     };
