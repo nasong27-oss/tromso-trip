@@ -524,7 +524,13 @@
     renderBar();
     if (scroll) {
       // 탭을 바꾸면 그 탭의 맨 위(접힌 상단 바로 아래)에서 시작
-      if (window.scrollY > collapseY) window.scrollTo(0, collapseY);
+      // 새 탭은 맨 위에서 바로 시작 — 부드러운 스크롤 애니메이션 없이 순간 이동
+      if (window.scrollY > collapseY) {
+        var html = document.documentElement, prev = html.style.scrollBehavior;
+        html.style.scrollBehavior = "auto";
+        window.scrollTo(0, collapseY);
+        html.style.scrollBehavior = prev;
+      }
     }
   }
   window.addEventListener("hashchange", function () { render(true); });
