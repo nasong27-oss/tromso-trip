@@ -1,10 +1,10 @@
 /* 오프라인 지원 — 한 번 연 내용은 인터넷이 끊겨도 보이게
    - 페이지(/): 네트워크 우선, 안 되면 저장본
-   - /assets/*: 저장본을 먼저 보여주고 뒤에서 새로 받아 둠
+   - /assets/*: 네트워크 우선(4초) — 인터넷이 되면 항상 최신 파일, 끊겼을 때만 저장본
    - /api/data: 네트워크 우선(5초), 안 되면 마지막 저장본 (응답에 x-tt-offline 표시)
    - 글꼴: 한 번 받으면 저장본 사용
    - 지도·사진·편집 요청은 저장하지 않음 */
-const VERSION = "tt-v1";
+const VERSION = "tt-v2";
 const SHELL = ["/", "/assets/style.css", "/assets/app.js", "/assets/data.js"];
 
 self.addEventListener("install", (e) => {
@@ -78,7 +78,7 @@ self.addEventListener("fetch", (e) => {
           { headers: { "Content-Type": "text/html; charset=utf-8" } })));
       return;
     }
-    if (url.pathname.startsWith("/assets/")) { e.respondWith(staleWhileRevalidate(req)); return; }
+    if (url.pathname.startsWith("/assets/")) { e.respondWith(networkFirst(req, url.pathname, 4000)); return; }
     if (url.pathname === "/api/data") { e.respondWith(networkFirst(req, "/api/data", 5000)); return; }
     return; // 편집·이력·로그인 등은 항상 네트워크
   }

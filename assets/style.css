@@ -571,3 +571,7 @@ body.editing .view { animation: none; }
 
 /* 상태바가 겹치는 홈 화면 앱: 작은 제목 줄을 상태바 높이만큼 위로 늘려 덮는다 */
 .mini { height: calc(48px + var(--safe-top)); padding-top: var(--safe-top); box-sizing: border-box; }
+
+/* 진단 창 */
+.diag { margin: 0; padding: 12px; border-radius: 10px; background: var(--line-2); font-size: 12px; line-height: 1.6; white-space: pre-wrap; word-break: break-all; font-family: ui-monospace, Menlo, monospace; }
+#footBrand { cursor: default; -webkit-user-select: none; user-select: none; }

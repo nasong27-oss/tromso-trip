@@ -1208,6 +1208,40 @@
     openA2Sheet(ENV.ios ? "ios" : "android");
   });
 
+  /* ---------- 진단 창: 맨 아래 "Tromsø 2026" 을 5번 연속 누르면 ---------- */
+  var APP_VERSION = "2026-11-24.d1";
+  var brandTaps = [];
+  document.getElementById("footBrand").addEventListener("click", function () {
+    var now = Date.now();
+    brandTaps = brandTaps.filter(function (t) { return now - t < 3000; });
+    brandTaps.push(now);
+    if (brandTaps.length >= 5) { brandTaps = []; showDiag(); }
+  });
+  function showDiag() {
+    var hi = getComputedStyle(document.querySelector(".hero-inner"));
+    var info = {
+      "버전": APP_VERSION,
+      "효과 방식(fx)": document.documentElement.classList.contains("fx"),
+      "스크롤 연동 CSS 지원": !!(window.CSS && CSS.supports && CSS.supports("animation-timeline: scroll()")),
+      "제목 애니메이션": (hi.animationName || "-") + " / " + (hi.animationTimeline || "지원 안 함"),
+      "화면 폭×높이": innerWidth + "×" + innerHeight + " (dpr " + (window.devicePixelRatio || 1) + ")",
+      "폭 700 이하": matchMedia("(max-width: 700px)").matches,
+      "홈 화면 앱": ENV.standalone,
+      "움직임 줄이기 설정": matchMedia("(prefers-reduced-motion: reduce)").matches,
+      "앱 안 브라우저 판정": ENV.inApp,
+      "아이폰/아이패드 판정": ENV.ios,
+      "상태바 높이": safeTop() + "px",
+      "접히는 거리": collapseY + "px",
+      "오프라인 도우미": navigator.serviceWorker && navigator.serviceWorker.controller ? "작동 중" : "없음",
+      "브라우저 정보": UA
+    };
+    var text = Object.keys(info).map(function (k) { return k + ": " + info[k]; }).join("\n");
+    dialog("진단 정보", '<pre class="diag">' + esc(text) + "</pre><p class=\"note\">이 화면을 캡처해서 보내 주세요</p>",
+      [{ label: "복사", value: "copy" }, { label: "닫기", value: null, primary: true }]).then(function (v) {
+      if (v === "copy" && navigator.clipboard) navigator.clipboard.writeText(text).then(function () { toast("복사했어요"); }, function () {});
+    });
+  }
+
   /* ---------- 오프라인 지원 ---------- */
   function setOffline(on) {
     var el = document.getElementById("offlineBar");
