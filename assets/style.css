@@ -108,6 +108,9 @@ strong { font-weight: 650; }
 .hero-glow { position: absolute; inset: 0; color: #8ef5cc; text-shadow: 0 0 18px rgba(111,227,180,.85), 0 0 42px rgba(111,227,180,.55); opacity: 0; pointer-events: none; will-change: opacity; }
 .hero-lat { margin: 6px 0 14px; font-size: clamp(17px, 3.4vw, 24px); font-weight: 400; color: inherit; opacity: .72; letter-spacing: 0; }
 .hero-meta { margin: 0; font-size: 14px; color: rgba(255,255,255,.82); }
+/* 흐린 제목 사본: 흐림은 고정(한 번만 그림), 오로라 빛깔로 물든 상태 — 스크롤 중엔 투명도만 바뀐다 */
+.hero-ghost { filter: blur(6px); opacity: 0; pointer-events: none; }
+.hero-ghost .hero-glow { opacity: 1; }
 .hero-shade { z-index: 1; }
 .hero-inner { z-index: 2; }
 .aurora { z-index: 3; }

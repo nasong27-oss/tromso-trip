@@ -623,6 +623,7 @@
   var barEl = document.getElementById("topbar");
   var H = {
     inner: heroEl.querySelector(".hero-inner"),
+    ghost: null,
     glow: heroEl.querySelector(".hero-glow"),
     shade: heroEl.querySelector(".hero-shade"),
     aurora: heroEl.querySelector(".aurora"),
@@ -641,6 +642,22 @@
     var inApp = /KAKAOTALK|NAVER\(inapp|Instagram|FBAN|FBAV|FB_IAB|Line\/|DaumApps|everytimeApp|; wv\)/i.test(ua);
     return ipad || inApp;
   }
+  // 흐린 제목 사본: 흐림은 한 번만 그려 두고, 스크롤 중에는 선명한 제목과 투명도만 맞바꾼다
+  // (흐림 값을 매번 바꾸면 Safari 가 글자를 계속 다시 그려 버벅인다)
+  if (!LITE) {
+    H.ghost = document.createElement("div");
+    H.ghost.className = "hero-inner hero-ghost";
+    H.ghost.setAttribute("aria-hidden", "true");
+    H.inner.parentNode.insertBefore(H.ghost, H.inner.nextSibling);
+  }
+  function syncGhost() {
+    if (!H.ghost) return;
+    H.ghost.innerHTML = H.inner.innerHTML;
+    H.ghost.querySelectorAll("*").forEach(function (el) {
+      el.removeAttribute("id"); el.removeAttribute("contenteditable"); el.removeAttribute("tabindex");
+      el.classList.remove("ed");
+    });
+  }
   // 구간별 직선 보간: stops = [[진행도, 값], ...]
   function seg(p, stops) {
     if (p <= stops[0][0]) return stops[0][1];
@@ -657,9 +674,15 @@
     if (p === lastP) return;
     lastP = p;
     var y = REDUCED ? 0 : -56 * p, sc = REDUCED ? 1 : 1 - 0.1 * p;
-    H.inner.style.transform = "translate3d(0," + y.toFixed(1) + "px,0) scale(" + sc.toFixed(3) + ")";
-    H.inner.style.opacity = seg(p, [[0.45, 1], [0.8, 0.7], [1, 0]]).toFixed(3);
-    if (!LITE) H.inner.style.filter = p > 0 ? "blur(" + seg(p, [[0, 0], [0.45, 0.5], [0.8, 3], [1, 7]]).toFixed(2) + "px)" : "";
+    var tf = "translate3d(0," + y.toFixed(1) + "px,0) scale(" + sc.toFixed(3) + ")";
+    H.inner.style.transform = tf;
+    if (H.ghost) {
+      H.inner.style.opacity = seg(p, [[0.25, 1], [0.75, 0]]).toFixed(3);
+      H.ghost.style.transform = tf;
+      H.ghost.style.opacity = seg(p, [[0.2, 0], [0.6, 0.85], [0.8, 0.7], [1, 0]]).toFixed(3);
+    } else {
+      H.inner.style.opacity = seg(p, [[0.45, 1], [0.8, 0.7], [1, 0]]).toFixed(3);
+    }
     H.glow.style.opacity = seg(p, [[0, 0], [0.4, 0.35], [0.75, 0.95], [1, 1]]).toFixed(3);
     H.shade.style.opacity = (0.92 * p).toFixed(3);
     H.aurora.style.transform = REDUCED ? "" : "translate3d(0," + (collapseY * 0.78 * p).toFixed(1) + "px,0)";
@@ -692,6 +715,7 @@
     var T = D();
     var meta = document.getElementById("heroMeta");
     meta.innerHTML = E("period", { plain: true });
+    syncGhost();
   }
   function render(scroll) {
     var id = current();
@@ -1246,7 +1270,7 @@
   });
 
   /* ---------- 진단 창: 맨 아래 "Tromsø 2026" 을 5번 연속 누르면 ---------- */
-  var APP_VERSION = "2026-11-24.h1";
+  var APP_VERSION = "2026-11-24.h2";
   var brandTaps = [];
   document.getElementById("footBrand").addEventListener("click", function () {
     var now = Date.now();
@@ -1258,8 +1282,8 @@
     var hi = getComputedStyle(document.querySelector(".hero-inner"));
     var info = {
       "버전": APP_VERSION,
-      "상단 효과": "스크립트" + (LITE ? " (흐림 없음)" : " (흐림 포함)"),
-      "현재 제목 상태": "투명도 " + hi.opacity + " / " + (hi.filter || "-"),
+      "상단 효과": "스크립트" + (LITE ? " (흐림 없음)" : " (흐린 사본 겹치기)"),
+      "현재 제목 상태": "선명 " + hi.opacity + " / 흐림 사본 " + (H.ghost ? getComputedStyle(H.ghost).opacity : "-"),
       "화면 폭×높이": innerWidth + "×" + innerHeight + " (dpr " + (window.devicePixelRatio || 1) + ")",
       "폭 700 이하": matchMedia("(max-width: 700px)").matches,
       "홈 화면 앱": ENV.standalone,
