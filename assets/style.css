@@ -560,3 +560,6 @@ body.editing .view { animation: none; }
   .foot { flex-direction: column; align-items: flex-start; gap: 2px; }
   .foot-actions { justify-content: flex-start; }
 }
+
+/* 추가 정보 탭 상단 안내 */
+.info-notice { margin: 18px 0 -10px; padding: 10px 14px; border-radius: 12px; font-size: 13.5px; font-weight: 600; color: var(--info); background: var(--info-soft); }

@@ -25,7 +25,7 @@
     { id: "aurora", label: "오로라 투어" },
     { id: "car", label: "렌터카" },
     { id: "picks", label: "추천" },
-    { id: "info", label: "현지 정보" }
+    { id: "info", label: "추가 정보" }
   ];
 
   /* =========================================================
@@ -563,8 +563,9 @@
 
   function viewInfo() {
     var d = D().info;
-    if (!d) return staticHead("LOCAL INFO", "현지 정보", "준비 중이에요");
-    var h = (d.draft ? '<p class="draft-note">✍️ 작성 중이에요 — 내용을 확인하는 중이라 바뀔 수 있어요</p>' : "") + head("info");
+    if (!d) return staticHead("LOCAL INFO", "추가 정보", "준비 중이에요");
+    var h = head("info");
+    if (d.notice || editing) h = h.replace(BACK, BACK + '<p class="info-notice">🔄 ' + E("info.notice", { plain: true, ph: "안내 문구" }) + "</p>");
     h += callout("info.warn");
     (d.sections || []).forEach(function (_, i) { h += section("info.sections." + i); });
     if (editing) h += '<div class="ed-row">' + add("info.sections", "section", "섹션 추가") + "</div>";
@@ -1089,6 +1090,10 @@
     { p: "stay3.warn", fromTitle: "예약 확정", to: { title: "개별 예약", tone: "info", items: ["3번째 숙소는 **MOXY로 확정 · 각자 개별 예약**", "공항 바로 옆이라 12/30 렌터카 반납 후 이동, 1/1 출국이 편해요"] } },
     { p: "stay2.warn", fromTitle: "체크인 준비물", to: null, moveToSection: { h: "체크인 안내", list: ["파손 보증(가승인)용 **신용카드 지참** — Visa / Mastercard / Eurocard (퇴실 시 이상 없으면 해제)", "첫날 **22:00 전 도착** 및 리셉션 연락"] } },
     { addDeadline: { at: "2026-12-16T12:00:00+09:00", title: "Airbnb 숙박비 결제 예정", tab: "stay1", dateOnly: true } }
+  ]}, { id: "2026-11-24-info", ops: [
+    { p: "info.draft", from: true, to: false },
+    { p: "info.title", from: "현지 정보", to: "추가 정보" },
+    { p: "info.notice", from: undefined, to: "확인하면서 계속 업데이트 합니다" }
   ]}];
   function migrate(doc) {
     // 새로 생긴 큰 항목(예: 현지 정보)은 저장본에 없으면 기본값을 붙인다

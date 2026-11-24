@@ -320,9 +320,10 @@ window.TRIP = {
 
   /* ---------- 현지 정보 (출처: Visit Tromsø · tromsowinter.com · 외교부 · UiT 등, 2026-11 조사) ---------- */
   info: {
-    draft: true,
+    draft: false,
+    notice: "확인하면서 계속 업데이트 합니다",
     eyebrow: "LOCAL INFO",
-    title: "현지 정보",
+    title: "추가 정보",
     original: "출발 직전에 한 번 더 확인하세요 · 영업시간은 매년 조금씩 달라요",
     warn: { title: "연휴 주의 — 도착일(12/25)은 마트 대부분 휴무", items: [
       "**12/24(목)** 상점 대부분 13시 전후 마감 (법적으로 16시까지) · 마트·주류점(Vinmonopolet) 15시 전후",
