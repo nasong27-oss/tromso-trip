@@ -17,13 +17,15 @@
 
   var TABS = [
     { id: "home", label: "일정" },
+    { id: "map", label: "지도" },
     { id: "cost", label: "비용 상세" },
     { id: "stay1", label: "12/25–28 숙소" },
     { id: "stay2", label: "12/28–30 숙소" },
     { id: "stay3", label: "12/30–1/1 숙소" },
     { id: "aurora", label: "오로라 투어" },
     { id: "car", label: "렌터카" },
-    { id: "picks", label: "추천" }
+    { id: "picks", label: "추천" },
+    { id: "info", label: "현지 정보" }
   ];
 
   /* =========================================================
@@ -103,10 +105,12 @@
       if (opts.view) return opts.view(v);
       return opts.plain ? esc(v) : md(v);
     }
-    var kind = opts.kind || "text";
+    // 굵게가 가능한 칸(md): 실제 굵은 글씨로 보여주고 B 버튼으로 바꾼다. 나머지는 글자만
+    var kind = opts.kind || (opts.plain ? "text" : "md");
     var raw = kind === "dt" ? isoToInput(v) : (v == null ? "" : String(v));
-    return '<span class="ed' + (opts.block ? " ed-block" : "") + '" contenteditable="plaintext-only" spellcheck="false"' +
-      ' data-p="' + esc(path) + '" data-kind="' + kind + '" data-ph="' + esc(opts.ph || "입력") + '">' + esc(raw) + "</span>";
+    var html = kind === "md" ? esc(raw).replace(/\*\*(.+?)\*\*/g, "<b>$1</b>") : esc(raw);
+    return '<span class="ed' + (opts.block ? " ed-block" : "") + '" contenteditable="' + (kind === "md" ? "true" : "plaintext-only") + '" spellcheck="false"' +
+      ' data-p="' + esc(path) + '" data-kind="' + kind + '" data-ph="' + esc(opts.ph || "입력") + '">' + html + "</span>";
   }
   // 보기 모드에서만 링크, 편집 모드에선 그냥 상자 (글자를 눌러도 이동하지 않게)
   function A(href, inner, cls, ext) {
@@ -433,6 +437,140 @@
     return h;
   }
 
+  /* =========================================================
+     전체 지도 (오픈스트리트맵 · Leaflet) — 탭을 열 때만 불러온다
+     ========================================================= */
+  var MAP_POINTS = [
+    { id: "stay1", kind: "stay", n: "1", name: "숙소 1 · 12/25–28", sub: "Dramsvegen 167", at: [69.6715376, 18.9654358], tab: "stay1" },
+    { id: "stay2", kind: "stay", n: "2", name: "숙소 2 · 12/28–30", sub: "Lauklines Kystferie 캐빈", at: [69.6209136, 18.285743], tab: "stay2" },
+    { id: "stay3", kind: "stay", n: "3", name: "숙소 3 · 12/30–1/1", sub: "MOXY Tromsø (공항 옆)", q: "Huldervegen 2, 9016 Tromsø, Norway", near: [69.6812, 18.9225], tab: "stay3" },
+    { id: "airport", kind: "place", n: "✈", name: "트롬쇠 공항", sub: "렌터카 픽업 12/25 · 반납 12/30", at: [69.683333, 18.918919], tab: "car" },
+    { id: "aurora", kind: "place", n: "★", name: "오로라 투어 집결지", sub: "Scandic Ishavshotel 앞 · 12/26 17:20", at: [69.649595612, 18.961887359], tab: "aurora" },
+    { id: "sommaroy", kind: "place", n: "◆", name: "Sommarøy", sub: "12/29 드라이브", at: [69.635942, 18.004582] }
+  ];
+  var MAP_ROUTES = [
+    { name: "12/25 공항 → 숙소 1", color: "#2f6fde", pts: [[69.683333, 18.918919], [69.6715376, 18.9654358]] },
+    { name: "12/28 해안 드라이브 → 캐빈", color: "#d97706", pts: [[69.6715376, 18.9654358], [69.6942065, 18.6203726], [69.7774907, 18.5398493], [69.7795494, 18.3999063], [69.6209136, 18.285743]] },
+    { name: "12/29 캐빈 → Sommarøy", color: "#db2777", pts: [[69.6209136, 18.285743], [69.635942, 18.004582]] },
+    { name: "12/30 캐빈 → 공항 (렌터카 반납)", color: "#7c3aed", pts: [[69.6209136, 18.285743], [69.683333, 18.918919]] }
+  ];
+
+  function viewMap() {
+    var h = staticHead("MAP", "전체 지도", "숙소 3곳과 이동 경로를 한 장에");
+    h += '<div class="bigmap-wrap"><div id="bigmap" class="bigmap"><p class="bigmap-msg">지도를 불러오는 중…</p></div></div>';
+    h += '<section class="block"><h3 class="block-h">장소</h3><ul class="legend">' + MAP_POINTS.map(function (pt) {
+      return '<li><button type="button" class="legend-item" data-pt="' + pt.id + '"><span class="pin pin-' + pt.kind + '">' + esc(pt.n) + "</span>" +
+        '<span class="legend-txt"><b>' + esc(pt.name) + "</b><small>" + esc(pt.sub) + "</small></span></button></li>";
+    }).join("") + "</ul></section>";
+    h += '<section class="block"><h3 class="block-h">이동 경로</h3><ul class="legend">' + MAP_ROUTES.map(function (r, i) {
+      return '<li><button type="button" class="legend-item" data-route="' + i + '"><span class="route-sw" style="background:' + r.color + '"></span>' +
+        '<span class="legend-txt"><b>' + esc(r.name) + "</b></span></button></li>";
+    }).join("") + '</ul><p class="note">지도는 OpenStreetMap · 경로는 OSRM 계산 결과예요. 계산이 안 되면 점선으로 표시돼요. 지도는 인터넷이 연결돼 있어야 보여요.</p></section>';
+    setTimeout(initBigMap, 0);
+    return h;
+  }
+
+  var leafletLoading = null, bigMap = null, mapLayers = {};
+  function loadLeaflet() {
+    if (window.L) return Promise.resolve();
+    if (leafletLoading) return leafletLoading;
+    leafletLoading = new Promise(function (resolve, reject) {
+      var css = document.createElement("link");
+      css.rel = "stylesheet"; css.href = "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css";
+      document.head.appendChild(css);
+      var js = document.createElement("script");
+      js.src = "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js";
+      js.onload = function () { resolve(); };
+      js.onerror = function () { leafletLoading = null; reject(new Error("leaflet")); };
+      document.head.appendChild(js);
+    });
+    return leafletLoading;
+  }
+  function geocode(pt) {   // 좌표를 모르는 곳만 주소로 찾고, 찾은 값은 이 기기에 기억
+    if (pt.at) return Promise.resolve(pt.at);
+    var key = "tt-geo-" + pt.id, hit = store(key);
+    if (hit) { pt.at = hit; return Promise.resolve(hit); }
+    return fetch("https://nominatim.openstreetmap.org/search?format=json&limit=1&q=" + encodeURIComponent(pt.q))
+      .then(function (r) { return r.json(); })
+      .then(function (j) { var at = j && j[0] ? [Number(j[0].lat), Number(j[0].lon)] : pt.near; pt.at = at; if (j && j[0]) store(key, at); return at; })
+      .catch(function () { pt.at = pt.near; return pt.near; });
+  }
+  function routeGeometry(r) {   // OSRM 으로 실제 도로 경로 (이 기기에 기억)
+    var key = "tt-route-" + r.pts.map(function (p) { return p.join(","); }).join(";"), hit = store(key);
+    if (hit) return Promise.resolve(hit);
+    var coords = r.pts.map(function (p) { return p[1] + "," + p[0]; }).join(";");
+    return fetch("https://router.project-osrm.org/route/v1/driving/" + coords + "?overview=full&geometries=geojson")
+      .then(function (res) { return res.json(); })
+      .then(function (j) {
+        if (!j.routes || !j.routes[0]) throw new Error("no route");
+        var line = j.routes[0].geometry.coordinates.map(function (c) { return [c[1], c[0]]; });
+        store(key, line);
+        return line;
+      });
+  }
+  function initBigMap() {
+    var el = document.getElementById("bigmap");
+    if (!el) return;
+    loadLeaflet().then(function () {
+      if (!document.getElementById("bigmap")) return;
+      el.innerHTML = "";
+      var L = window.L;
+      bigMap = L.map(el, { zoomControl: true, attributionControl: true, scrollWheelZoom: false });
+      L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png", {
+        maxZoom: 18, subdomains: "abcd",
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions" target="_blank" rel="noopener">CARTO</a>'
+      }).addTo(bigMap);
+      mapLayers = { pts: {}, routes: {} };
+      var bounds = L.latLngBounds([]);
+      MAP_ROUTES.forEach(function (r, i) {
+        r.pts.forEach(function (p) { bounds.extend(p); });
+        var dashed = L.polyline(r.pts, { color: r.color, weight: 3, opacity: .7, dashArray: "6 8" }).addTo(bigMap);
+        mapLayers.routes[i] = dashed;
+        routeGeometry(r).then(function (line) {
+          if (!bigMap) return;
+          bigMap.removeLayer(dashed);
+          mapLayers.routes[i] = L.polyline(line, { color: r.color, weight: 4, opacity: .85 }).addTo(bigMap).bindTooltip(r.name);
+        }).catch(function () { dashed.bindTooltip(r.name + " (대략적인 선)"); });
+      });
+      Promise.all(MAP_POINTS.map(geocode)).then(function () {
+        if (!bigMap) return;
+        MAP_POINTS.forEach(function (pt) {
+          if (!pt.at) return;
+          bounds.extend(pt.at);
+          var icon = L.divIcon({ className: "", html: '<span class="pin pin-' + pt.kind + '">' + esc(pt.n) + "</span>", iconSize: [28, 28], iconAnchor: [14, 14] });
+          var gm = "https://www.google.com/maps/search/?api=1&query=" + pt.at[0] + "," + pt.at[1];
+          var pop = "<b>" + esc(pt.name) + "</b><br><small>" + esc(pt.sub) + '</small><div class="pop-links">' +
+            (pt.tab ? '<a href="#' + pt.tab + '">자세히 보기</a>' : "") + '<a href="' + gm + '" target="_blank" rel="noopener">구글맵 ↗</a></div>';
+          mapLayers.pts[pt.id] = L.marker(pt.at, { icon: icon }).addTo(bigMap).bindPopup(pop);
+        });
+        bigMap.fitBounds(bounds, { padding: [24, 24] });
+      });
+      bigMap.fitBounds(bounds, { padding: [24, 24] });
+    }).catch(function () {
+      el.innerHTML = '<p class="bigmap-msg">지도를 불러오지 못했어요. 인터넷 연결을 확인해 주세요.</p>';
+    });
+  }
+  app.addEventListener("click", function (e) {
+    var it = e.target.closest(".legend-item");
+    if (!it || !bigMap) return;
+    var id = it.getAttribute("data-pt"), ri = it.getAttribute("data-route");
+    if (id && mapLayers.pts[id]) { bigMap.flyTo(mapLayers.pts[id].getLatLng(), 13, { duration: .6 }); mapLayers.pts[id].openPopup(); }
+    if (ri != null && mapLayers.routes[ri]) bigMap.flyToBounds(mapLayers.routes[ri].getBounds(), { padding: [30, 30], duration: .6 });
+    var wrap = document.querySelector(".bigmap-wrap");
+    if (wrap) { var y = wrap.getBoundingClientRect().top + window.scrollY - 110; if (window.scrollY > y) window.scrollTo(0, y); }
+  });
+
+  function viewInfo() {
+    var d = D().info;
+    if (!d) return staticHead("LOCAL INFO", "현지 정보", "준비 중이에요");
+    var h = (d.draft ? '<p class="draft-note">✍️ 작성 중이에요 — 내용을 확인하는 중이라 바뀔 수 있어요</p>' : "") + head("info");
+    h += callout("info.warn");
+    (d.sections || []).forEach(function (_, i) { h += section("info.sections." + i); });
+    if (editing) h += '<div class="ed-row">' + add("info.sections", "section", "섹션 추가") + "</div>";
+    h += '<section class="block"><h3 class="block-h">유용한 링크</h3>' + refs("info.links") + "</section>";
+    return h;
+  }
+
   var VIEWS = {
     home: viewHome,
     cost: viewCost,
@@ -441,7 +579,9 @@
     stay3: function () { return viewDetail("stay3"); },
     aurora: function () { return viewDetail("aurora"); },
     car: function () { return viewDetail("car", breakdownBlock("car.breakdown")); },
-    picks: viewPicks
+    picks: viewPicks,
+    map: viewMap,
+    info: viewInfo
   };
 
   /* =========================================================
@@ -456,11 +596,16 @@
     '<path d="M5 8.6V16a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V8.6" fill="none" stroke="url(#homeG)" stroke-width="1.8" stroke-linejoin="round"/>' +
     '<rect x="8.4" y="11.6" width="3.2" height="5.4" rx="1.4" fill="url(#homeG)"/>' +
     '<path class="home-star" d="M16.2 1.2l.55 1.25 1.25.55-1.25.55-.55 1.25-.55-1.25-1.25-.55 1.25-.55z" fill="#ffcf4a"/></svg>';
-  tabsEl.innerHTML = TABS.map(function (t) {
-    var home = t.id === "home";
-    return '<a role="tab" href="#' + t.id + '" data-tab="' + t.id + '"' + (home ? ' class="tab-home"' : "") + ">" +
-      (home ? HOME_IC : "") + esc(t.label) + "</a>" + (home ? '<span class="tab-sep" aria-hidden="true"></span>' : "");
-  }).join("");
+  function renderTabs() {
+    var info = D().info;
+    tabsEl.innerHTML = TABS.map(function (t) {
+      var home = t.id === "home";
+      var badge = t.id === "info" && info && info.draft ? '<span class="tab-badge">작성 중</span>' : "";
+      return '<a role="tab" href="#' + t.id + '" data-tab="' + t.id + '"' + (home ? ' class="tab-home"' : "") + ">" +
+        (home ? HOME_IC : "") + esc(t.label) + badge + "</a>" + (home ? '<span class="tab-sep" aria-hidden="true"></span>' : "");
+    }).join("");
+  }
+  renderTabs();
 
   function current() {
     var id = (location.hash || "#home").slice(1);
@@ -510,7 +655,9 @@
     renderHero();
     var slide = swipeDir ? " slide-" + swipeDir : "";
     swipeDir = null;
+    if (bigMap) { try { bigMap.remove(); } catch (e) { /* 무시 */ } bigMap = null; }
     app.innerHTML = '<div class="view view-' + id + slide + '">' + VIEWS[id]() + "</div>";
+    var sl = tabsEl.scrollLeft; renderTabs(); tabsEl.scrollLeft = sl;
     tabsEl.querySelectorAll("a").forEach(function (a) {
       var on = a.getAttribute("data-tab") === id;
       a.classList.toggle("on", on);
@@ -546,7 +693,7 @@
     if (editing || e.touches.length !== 1) return;
     var t = e.touches[0];
     if (t.clientX < EDGE || t.clientX > window.innerWidth - EDGE) return;
-    if (e.target.closest("details.map, iframe, .ed, input, select, textarea, .modal, .history")) return;
+    if (e.target.closest("details.map, iframe, .leaflet-container, .ed, input, select, textarea, .modal, .history")) return;
     sw = { x: t.clientX, y: t.clientY, dir: null };
   }, { passive: true });
   app.addEventListener("touchmove", function (e) {
@@ -577,7 +724,9 @@
     if (!el || !editing) return;
     var kind = el.getAttribute("data-kind"), txt = el.textContent.replace(/ /g, " ");
     var val = txt;
-    if (kind === "num") {
+    if (kind === "md") {
+      val = toMd(el);
+    } else if (kind === "num") {
       var cleaned = txt.replace(/[^\d.\-]/g, "");
       val = cleaned === "" ? null : Number(cleaned);
       if (cleaned !== "" && isNaN(val)) return;
@@ -589,6 +738,41 @@
     setPath(WORK, el.getAttribute("data-p"), val);
     markDirty();
   });
+  // 굵은 글씨가 섞인 편집 칸 → **굵게** 표기로
+  function toMd(el) {
+    function walk(node) {
+      var out = "";
+      node.childNodes.forEach(function (n) {
+        if (n.nodeType === 3) { out += n.nodeValue; return; }
+        if (n.nodeType !== 1) return;
+        if (n.tagName === "BR") { out += " "; return; }
+        var inner = walk(n);
+        var fw = n.style && n.style.fontWeight;
+        var bold = n.tagName === "B" || n.tagName === "STRONG" || fw === "bold" || Number(fw) >= 600;
+        out += bold && inner.trim() ? "**" + inner + "**" : inner;
+      });
+      return out;
+    }
+    return walk(el).replace(/\u00a0/g, " ").replace(/\*\*\*\*/g, "").replace(/\*\*(\s*)\*\*/g, "$1");
+  }
+  // B 버튼: 굵게 가능한 칸에 커서가 있을 때만 켜진다
+  var boldReady = false;
+  document.addEventListener("focusin", function (e) {
+    var on = !!(editing && e.target.closest && e.target.closest('.ed[data-kind="md"]'));
+    if (on !== boldReady) { boldReady = on; syncBold(); }
+  });
+  document.addEventListener("focusout", function () {
+    setTimeout(function () {
+      var a = document.activeElement;
+      var on = !!(editing && a && a.closest && a.closest('.ed[data-kind="md"]'));
+      if (on !== boldReady) { boldReady = on; syncBold(); }
+    }, 0);
+  });
+  function syncBold() {
+    var b = bar.querySelector('[data-act="bold"]');
+    if (b) b.disabled = !boldReady;
+  }
+
   // 편집 칸에서 Enter = 줄바꿈 대신 다음 칸으로
   document.addEventListener("keydown", function (e) {
     var el = e.target.closest && e.target.closest(".ed");
@@ -679,12 +863,21 @@
     }
     bar.innerHTML = '<div class="bar-in"><span class="bar-state ' + (dirty ? "dirty" : "") + '">' +
       (dirty ? "저장 안 된 변경 있음" : "편집 중 · 글자를 눌러 수정") + "</span>" +
+      '<button type="button" class="bold-btn" data-act="bold" title="굵게 (글자를 선택한 뒤)"' + (boldReady ? "" : " disabled") + '><b>B</b></button>' +
       '<button type="button" data-act="history">이력</button>' +
       '<button type="button" data-act="cancel">취소</button>' +
       '<button type="button" class="primary" data-act="save"' + (dirty ? "" : " disabled") + ">저장</button></div>";
   }
 
   document.getElementById("footEdit").addEventListener("click", function () { if (!editing) startEdit(); });
+
+  // B 버튼을 눌러도 편집 칸의 선택이 풀리지 않게
+  bar.addEventListener("pointerdown", function (e) {
+    if (e.target.closest('[data-act="bold"]')) e.preventDefault();
+  });
+  bar.addEventListener("mousedown", function (e) {
+    if (e.target.closest('[data-act="bold"]')) e.preventDefault();
+  });
 
   bar.addEventListener("click", function (e) {
     var b = e.target.closest("button[data-act]");
@@ -694,6 +887,13 @@
     if (act === "cancel") cancelEdit();
     if (act === "save") save(false);
     if (act === "history") openHistory();
+    if (act === "bold") {
+      var a = document.activeElement;
+      if (!a || !a.closest || !a.closest('.ed[data-kind="md"]')) return toast("굵게 할 글자를 먼저 선택해 주세요");
+      try { document.execCommand("styleWithCSS", false, false); } catch (err) { /* 무시 */ }
+      document.execCommand("bold", false, null);
+      a.dispatchEvent(new Event("input", { bubbles: true }));
+    }
   });
 
   function api(method, url, body) {
@@ -784,7 +984,7 @@
 
   function enterEdit() {
     // 다른 사람이 그 사이 고쳤을 수 있으니 최신 내용으로 시작
-    return loadLatest().then(function () {
+    return loadLatest(true).then(function () {
       WORK = clone(DOC);
       editing = true;
       dirty = false;
@@ -890,6 +1090,8 @@
     { addDeadline: { at: "2026-12-16T12:00:00+09:00", title: "Airbnb 숙박비 결제 예정", tab: "stay1", dateOnly: true } }
   ]}];
   function migrate(doc) {
+    // 새로 생긴 큰 항목(예: 현지 정보)은 저장본에 없으면 기본값을 붙인다
+    Object.keys(DEFAULT).forEach(function (k) { if (k !== "_patches" && !(k in doc)) doc[k] = clone(DEFAULT[k]); });
     doc._patches = doc._patches || [];
     PATCHES.forEach(function (patch) {
       if (doc._patches.indexOf(patch.id) >= 0) return;
@@ -915,18 +1117,37 @@
   DEFAULT._patches = PATCHES.map(function (x) { return x.id; });
   DOC._patches = DEFAULT._patches.slice();
 
-  function loadLatest() {
+  function loadLatest(fresh) {
     var ctrl = window.AbortController ? new AbortController() : null;
     var timer = setTimeout(function () { if (ctrl) ctrl.abort(); }, 4000);
-    return fetch("/api/data", { cache: "no-store", credentials: "same-origin", signal: ctrl ? ctrl.signal : undefined })
-      .then(function (r) { return r.ok ? r.json() : null; })
+    return fetch("/api/data" + (fresh ? "?fresh=1" : ""), { cache: "no-store", credentials: "same-origin", signal: ctrl ? ctrl.signal : undefined })
+      .then(function (r) { setOffline(!!r.headers.get("x-tt-offline")); return r.ok ? r.json() : null; })
       .then(function (j) {
         if (j && j.doc) { DOC = migrate(j.doc); VERSION = j.version; }
         else if (j && j.storage && !j.doc) { VERSION = null; }
       })
-      .catch(function () { /* 서버 없으면 data.js 그대로 */ })
+      .catch(function () { setOffline(!navigator.onLine); /* 서버 없으면 data.js 그대로 */ })
       .then(function () { clearTimeout(timer); });
   }
+
+  /* ---------- 오프라인 지원 ---------- */
+  function setOffline(on) {
+    var el = document.getElementById("offlineBar");
+    if (el) el.hidden = !on;
+  }
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", function () { navigator.serviceWorker.register("/sw.js").catch(function () {}); });
+  }
+  window.addEventListener("online", function () { if (!editing) loadLatest().then(function () { render(false); }); });
+  window.addEventListener("offline", function () { setOffline(true); });
+  // 로그아웃하면 이 기기에 저장해 둔 여행 내용도 지운다
+  document.getElementById("logout").addEventListener("click", function (e) {
+    if (!window.caches) return;
+    e.preventDefault();
+    var href = this.getAttribute("href");
+    caches.keys().then(function (ks) { return Promise.all(ks.map(function (k) { return caches.delete(k); })); })
+      .catch(function () {}).then(function () { location.href = href; });
+  });
 
   // 저장된 최신 내용을 받아서 그린다 (서버가 느리면 최대 4초 뒤 data.js 로)
   app.innerHTML = '<p class="loading">불러오는 중…</p>';

@@ -19,7 +19,7 @@ export default async function handler(req, res) {
       if (!target) return send(res, 404, { error: "not-found" });
       const v = await readVersion(target);
       const when = new Date(Number(target.id)).toLocaleString("ko-KR", { timeZone: "Asia/Seoul" });
-      const id = await writeVersion(v.doc, { editor: editorName(req), note: when + " 버전으로 되돌림" });
+      const id = await writeVersion(v.doc, { editor: editorName(req), note: when + " 버전으로 되돌림" }, list);
       return send(res, 200, { ok: true, version: id, doc: v.doc });
     }
 

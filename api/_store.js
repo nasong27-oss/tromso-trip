@@ -17,27 +17,33 @@ export function storageReady() {
 async function fsBackend() {
   const fs = await import("node:fs/promises");
   const path = await import("node:path");
-  const dir = path.join(process.env.STORE_DIR, "trip", "v");
-  await fs.mkdir(dir, { recursive: true });
+  const root = process.env.STORE_DIR;
   return {
-    async list() {
-      const names = (await fs.readdir(dir)).filter((n) => n.endsWith(".json"));
-      return names.map((n) => ({ pathname: PREFIX + n, url: path.join(dir, n) }));
+    async list(prefix) {
+      const dir = path.join(root, prefix);
+      await fs.mkdir(dir, { recursive: true });
+      const names = (await fs.readdir(dir)).filter((n) => !n.startsWith("."));
+      return names.map((n) => ({ pathname: prefix + n, url: path.join(dir, n) }));
     },
     async read(item) { return JSON.parse(await fs.readFile(item.url, "utf8")); },
-    async write(pathname, json) { await fs.writeFile(path.join(dir, pathname.slice(PREFIX.length)), json); },
+    async write(pathname, body) {
+      const full = path.join(root, pathname);
+      await fs.mkdir(path.dirname(full), { recursive: true });
+      await fs.writeFile(full, body);
+    },
+    async remove(items) { await Promise.all(items.map((it) => fs.rm(it.url, { force: true }))); },
   };
 }
 
 /* ---------- Vercel Blob 백엔드 ---------- */
 async function blobBackend() {
-  const { put, list, get } = await import("@vercel/blob");
+  const { put, list, get, del } = await import("@vercel/blob");
   return {
-    async list() {
+    async list(prefix) {
       const out = [];
       let cursor;
       do {
-        const r = await list({ prefix: PREFIX, limit: 1000, cursor });
+        const r = await list({ prefix, limit: 1000, cursor });
         out.push(...r.blobs.map((b) => ({ pathname: b.pathname, url: b.url })));
         cursor = r.hasMore ? r.cursor : undefined;
       } while (cursor);
@@ -52,19 +58,20 @@ async function blobBackend() {
       if (!res.ok) throw new Error("blob read failed " + res.status);
       return res.json();
     },
-    async write(pathname, json) {
+    async write(pathname, body) {
       const opts = { contentType: "application/json", addRandomSuffix: true };
       try {
-        await put(pathname, json, { ...opts, access: "private" });
+        await put(pathname, body, { ...opts, access: "private" });
       } catch (e) {
         // public 으로 만든 저장소면 private 쓰기가 거부됨 → public 으로 재시도 (랜덤 주소라 추측 불가)
-        await put(pathname, json, { ...opts, access: "public" });
+        await put(pathname, body, { ...opts, access: "public" });
       }
     },
+    async remove(items) { if (items.length) await del(items.map((it) => it.url)); },
   };
 }
 
-async function backend() {
+export async function backend() {
   return process.env.STORE_DIR ? fsBackend() : blobBackend();
 }
 
@@ -73,10 +80,10 @@ function stamp(pathname) {
   return m ? m[1] : "0";
 }
 
-/** 버전 목록 (최신순) — 각 항목 id 는 13자리 타임스탬프 */
+/** 버전 목록 (최신순) — 각 항목 id 는 13자리 타임스탬프. Blob 의 list 1회 사용 */
 export async function versions() {
   const b = await backend();
-  const items = await b.list();
+  const items = await b.list(PREFIX);
   const byId = new Map();
   for (const it of items) byId.set(stamp(it.pathname), it); // 같은 ms 중복은 하나만
   return [...byId.entries()]
@@ -89,15 +96,27 @@ export async function readVersion(entry) {
   return b.read(entry.item);
 }
 
-export async function writeVersion(doc, meta) {
+/** 새 버전 저장. known = 방금 조회한 versions() 결과 (list 호출을 아끼려고 재사용) */
+export async function writeVersion(doc, meta, known) {
   const b = await backend();
   let id = String(Date.now());
-  const existing = new Set((await versions()).map((v) => v.id));
+  const existing = new Set((known || []).map((v) => v.id));
   while (existing.has(id)) id = String(Number(id) + 1);
   const payload = JSON.stringify({ doc, meta: { ...meta, at: new Date(Number(id)).toISOString() } });
   await b.write(PREFIX + id + ".json", payload);
+  setCurrent({ doc, version: id, meta: { ...meta, at: new Date(Number(id)).toISOString() } });
   return id;
 }
+
+/* ---------- 현재 내용 메모리 캐시 ----------
+   페이지를 열 때마다 저장소 목록을 조회하면 무료 한도(월 2천 회 안팎)를 금방 쓴다.
+   서버 인스턴스가 최신 내용을 60초 기억해 두고, 편집 시작·저장 때만 새로 확인한다. */
+const TTL = 60 * 1000;
+let CURRENT = null; // { doc, version, meta, at }
+export function getCurrent() {
+  return CURRENT && Date.now() - CURRENT.at < TTL ? CURRENT : null;
+}
+export function setCurrent(v) { CURRENT = v ? { ...v, at: Date.now() } : null; }
 
 /* ---------- 쿠키 · 편집 권한 ---------- */
 export function cookie(req, name) {
