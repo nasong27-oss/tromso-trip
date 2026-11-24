@@ -1,7 +1,10 @@
 {
   "name": "tromso-trip",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "private": true,
   "type": "module",
-  "description": "트롬쇠 여행 안내 페이지 (정적 사이트 + Vercel 미들웨어 비밀번호 게이트)"
+  "description": "트롬쇠 여행 안내 페이지 (정적 사이트 + Vercel 미들웨어 비밀번호 게이트 + 페이지 내 편집)",
+  "dependencies": {
+    "@vercel/blob": "2.9.0"
+  }
 }
