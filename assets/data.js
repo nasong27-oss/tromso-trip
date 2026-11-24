@@ -1,0 +1,351 @@
+/* =========================================================
+   트롬쇠 여행 데이터 — 내용 수정은 이 파일만 고치면 됩니다.
+   시간은 모두 현지(노르웨이, UTC+1) 기준.
+   ========================================================= */
+window.TRIP = {
+  title: "Tromsø, 북극의 겨울",
+  period: "2026. 12. 24 (목) – 2027. 1. 1 (금)",
+  start: "2026-12-24T00:00:00+09:00",
+  travelers: 3,
+  heroImage: "https://commons.wikimedia.org/wiki/Special:FilePath/Troms%C3%B8_Aurora,_Norway.jpg?width=2400",
+
+  /* ---------- 마감·주의 일정 (홈 상단에 자동 정렬) ---------- */
+  deadlines: [
+    { at: "2026-12-24T17:00:00+01:00", title: "Airbnb 무료 취소 마감", tab: "stay1" },
+    { at: "2026-12-25T16:30:00+01:00", title: "오로라 투어 무료 취소 마감 (25시간 전)", tab: "aurora" },
+    { at: "2026-12-25T17:30:00+01:00", title: "오로라 투어 eWaiver 전원 작성", tab: "aurora", urgent: true },
+    { at: "2026-12-26T17:20:00+01:00", title: "오로라 투어 집합 · Scandic Ishavshotel 앞", tab: "aurora" },
+    { at: "2026-12-28T22:00:00+01:00", title: "Lauklines 캐빈 도착 마감 (리셉션 연락)", tab: "stay2" },
+    { at: "2026-12-30T17:00:00+01:00", title: "렌터카 반납 · 트롬쇠 공항", tab: "car" }
+  ],
+
+  /* ---------- 숙소 요약 (홈 카드) ---------- */
+  stays: [
+    { tab: "stay1", dates: "12/25 – 12/28", nights: 3, name: "전망 좋은 모던 아파트", area: "트롬쇠 시내 · Dramsvegen", label: "AIRBNB" },
+    { tab: "stay2", dates: "12/28 – 12/30", nights: 2, name: "Lauklines Kystferie 캐빈", area: "Kvaløya 섬 해안", label: "CABIN" },
+    { tab: "stay3", dates: "12/30 – 1/1", nights: 2, name: "MOXY Tromsø", area: "트롬쇠 공항 옆", label: "HOTEL" }
+  ],
+
+  /* ---------- 일자별 일정 ---------- */
+  days: [
+    { date: "2026-12-24", tag: "출국", tone: "blue", items: [
+      { text: "한국 출발 · 트롬쇠로 이동" }
+    ]},
+    { date: "2026-12-25", tag: "도착", tone: "blue", items: [
+      { time: "10:00", text: "트롬쇠 공항 Hertz 키오스크에서 **렌터카 픽업** (Peugeot e-3008 전기차)", tab: "car" },
+      { text: "식사 · 짧은 드라이브" },
+      { time: "17:00", text: "**Airbnb 셀프 체크인** (열쇠 보관함) · Dramsvegen 167", tab: "stay1" }
+    ], maps: [{ label: "숙소 위치", q: "Dramsvegen 167, 9010 Tromsø", open: "https://maps.app.goo.gl/sdqMFhLAw8rqRB2V6?g_st=ic" }]},
+    { date: "2026-12-26", tag: "오로라", tone: "violet", items: [
+      { text: "트롬쇠 시내 관광 · 경우에 따라 드라이브" },
+      { time: "17:20", text: "**Scandic Ishavshotel 앞 집합** (5~10분 전 밖에서 대기)", tab: "aurora" },
+      { time: "17:30", text: "**Wandering Owl · Adults Only Aurora Hunt** (약 6시간)", tab: "aurora" }
+    ], maps: [{ label: "오로라 투어 집결지", q: "Scandic Ishavshotel, Fredrik Langes gate 2, Tromsø" }]},
+    { date: "2026-12-27", tag: "휴식", tone: "green", items: [
+      { text: "야간 투어 후 늦은 오전까지 휴식" },
+      { text: "가벼운 시내 관광 — Fjellheisen 케이블카 · Arctic Cathedral · 항구 산책 · Mack Brewery", tab: "picks" }
+    ]},
+    { date: "2026-12-28", tag: "이동", tone: "amber", items: [
+      { time: "11:00", text: "Airbnb 체크아웃" },
+      { text: "Kvaløya 해안 드라이브" },
+      { time: "15:00", text: "**Lauklines Kystferie 캐빈 체크인** · 22시 전 도착 필수", tab: "stay2" }
+    ], maps: [{ label: "숙소 → 캐빈", from: "Dramsvegen 167, Tromsø", to: "Lauklines Kystferie, Vasstrandvegen 578, Tromsø", open: "https://maps.app.goo.gl/JYZ4CbfSqsY8wjuD7?g_st=ic", openLabel: "저장해 둔 해안 드라이브 경로" }]},
+    { date: "2026-12-29", tag: "드라이브", tone: "amber", items: [
+      { text: "**Sommarøy 드라이브** — 하얀 모래 해변과 Sommarøy 대교" }
+    ], maps: [{ label: "캐빈 → Sommarøy", from: "Lauklines Kystferie, Vasstrandvegen 578, Tromsø", to: "Sommarøy, Norway", open: "https://maps.app.goo.gl/7A2YrVG594i1ryEU7?g_st=ic", openLabel: "저장해 둔 Sommarøy 경로" }]},
+    { date: "2026-12-30", tag: "이동", tone: "amber", items: [
+      { time: "10:00", text: "캐빈 체크아웃 (보증금 가승인 해제 확인)" },
+      { time: "17:00", text: "**렌터카 반납** · 트롬쇠 공항", tab: "car" },
+      { text: "**MOXY Tromsø 체크인** — 공항 바로 옆이라 반납 후 이동이 편해요", tab: "stay3" }
+    ], maps: [{ label: "MOXY Tromsø", q: "Moxy Tromso, Huldervegen 2, 9016 Tromsø" }]},
+    { date: "2026-12-31", tag: "연말", tone: "rose", items: [
+      { text: "호텔 중심으로 휴식 · 연말 마무리" },
+      { text: "Arctic Cathedral 새해 전야 콘서트 · 자정 불꽃놀이" }
+    ], quote: "트롬쇠의 12/31 밤은 보통 대형 거리축제보다는 조용한 식사 + 교회/성당 음악회 + 자정 전후 불꽃놀이 감상 중심으로 보내는 편입니다. 특히 Arctic Cathedral의 새해 전야 오르간 콘서트가 유명합니다. — Perplexity" },
+    { date: "2027-01-01", tag: "귀국", tone: "blue", items: [
+      { text: "MOXY 체크아웃 · 귀국" }
+    ]}
+  ],
+
+  /* ---------- 출발 전 체크리스트 ---------- */
+  checklist: [
+    { id: "ewaiver", text: "오로라 투어 eWaiver 3명 모두 작성 (12/25 17:30까지)", link: "https://forms.office.com/r/Xrt2DEEeBF" },
+    { id: "idp", text: "국제운전면허증 · 국내 면허증 · 여권 · 본인 명의 신용카드 (렌터카)" },
+    { id: "flight", text: "Hertz 예약에 항공편명 입력" },
+    { id: "towel", text: "Airbnb용 수건 · 세면도구 · 화장지 챙기기 (제공 안 됨)" },
+    { id: "deposit", text: "Lauklines 보증용 신용카드 (Visa / Mastercard)" },
+    { id: "insurance", text: "여행자 보험 가입" },
+    { id: "moxy", text: "MOXY 예약 정보(예약번호·비용) 페이지에 추가" }
+  ],
+
+  /* ---------- 비용 (엑셀 「비용 정리」) ---------- */
+  cost: {
+    items: [
+      { name: "12/25–28 숙소", sub: "Airbnb", krw: 2237654, nok: null, status: "", tab: "stay1" },
+      { name: "12/28–30 숙소", sub: "Lauklines", krw: 1038413, nok: 7438, status: "paid", tab: "stay2" },
+      { name: "오로라 투어", sub: "Wandering Owl", krw: 1026127, nok: 7350, status: "paid", tab: "aurora" },
+      { name: "렌터카", sub: "Hertz", krw: 1229677, nok: 8808.75, status: "onsite", tab: "car" },
+      { name: "12/30–1/1 숙소", sub: "MOXY", krw: null, nok: null, status: "tbd", tab: "stay3" }
+    ]
+  },
+
+  /* ---------- 숙소 1 ---------- */
+  stay1: {
+    eyebrow: "STAY 01 · 12/25 – 12/28 · 3박",
+    title: "전망 좋은 모던 아파트",
+    original: "Moderne leilighet med fin utsikt og bilparkering",
+    facts: [
+      { k: "체크인", v: "12/25 (금) 17:00", s: "셀프 체크인 · 열쇠 보관함" },
+      { k: "체크아웃", v: "12/28 (월) 11:00", s: "3박" },
+      { k: "예약 코드", v: "HMH3CT2TN2", copy: true },
+      { k: "총 비용", v: "₩2,237,654", s: "1인 ₩745,885" }
+    ],
+    address: "Dramsvegen 167 Leilighet, 9010 Tromsø, 노르웨이",
+    mapQ: "Dramsvegen 167, 9010 Tromsø",
+    mapOpen: "https://maps.app.goo.gl/sdqMFhLAw8rqRB2V6?g_st=ic",
+    warn: { title: "챙겨야 할 것", items: [
+      "수건 · 시트 · 비누 · 화장지 등 **필수용품 제공 안 됨**",
+      "건조기 · 에어컨 없음",
+      "일산화탄소 경보기 설치 여부 정보 없음 (화재경보기 · 구급상자는 있음)"
+    ]},
+    sections: [
+      { h: "숙소 구성", list: [
+        "임대 호실 전체 — 단층 · 계단 없음 · 전용 출입구",
+        "침실 2 · 침대 2 · 욕실 2",
+        "게스트 3명 (최대 4명)",
+        "건물 아래 전용 공간 **무료 주차**"
+      ]},
+      { h: "찾아가는 길", list: [
+        "공항에서 시내버스 24번 → **Greholtvegen** 정류장 하차 (숙소에서 50m)",
+        "식료품점 100m"
+      ]},
+      { h: "시설", chips: ["와이파이", "TV", "장작 벽난로", "전기 · 이동식 난방기", "주방", "냉장고", "오븐", "식기세척기", "식기류", "식탁", "세탁기", "온수", "침구"] },
+      { h: "이용 규칙", list: [
+        "최대 4명 · 흡연 · 전자담배 금지",
+        "소음 제한 22:00 ~ 07:00",
+        "파티 · 이벤트 · 상업적 촬영 금지"
+      ]},
+      { h: "환불 정책", list: [
+        "**12/24 17:00 전**까지 무료 취소",
+        "12/25 17:00 체크인 전 취소 시 부분 환불"
+      ]},
+      { h: "호스트 · 후기", list: [
+        "Asbjørn (공동 호스트 Kirsten) · 경력 4년",
+        "호스트 평점 4.83 (24개) · 응답률 80% (몇 시간 내 응답)",
+        "숙소 평점 **5.0** — 2026년 4월 후기 2건 모두 별점 5점"
+      ]}
+    ],
+    links: [{ label: "Airbnb 숙소 페이지", href: "https://www.airbnb.co.kr/rooms/1623739938268623685" }]
+  },
+
+  /* ---------- 숙소 2 ---------- */
+  stay2: {
+    eyebrow: "STAY 02 · 12/28 – 12/30 · 2박",
+    title: "Lauklines Kystferie",
+    original: "Standard cabin · 성인 3명 · 100m²",
+    facts: [
+      { k: "체크인", v: "12/28 (월) 15:00", s: "22:00 전 도착 · 리셉션 연락" },
+      { k: "체크아웃", v: "12/30 (수) 10:00", s: "2박" },
+      { k: "예약 코드", v: "PB72GY58WG", copy: true, s: "예약자 seungmin na" },
+      { k: "총 비용", v: "7,438 NOK", s: "≈ ₩1,038,413 · 완납" }
+    ],
+    address: "Vasstrandvegen 578, Tromsø (Lauklines Kystferie)",
+    mapQ: "Lauklines Kystferie, Vasstrandvegen 578, Tromsø",
+    warn: { title: "체크인 준비물", items: [
+      "파손 보증(가승인)용 **신용카드 지참 필수** — Visa / Mastercard / Eurocard",
+      "퇴실 시 이상 없으면 가승인 해제",
+      "첫날 **22:00 전 도착** 및 리셉션 연락 필요"
+    ]},
+    cancelBands: { checkin: "2026-12-28T15:00:00+01:00", bands: [
+      { minDays: 60, text: "60일 전까지 — 수수료 495 NOK만 공제" },
+      { minDays: 31, text: "59 ~ 31일 전 — 25% 위약금" },
+      { minDays: 15, text: "30 ~ 15일 전 — 50% 위약금" },
+      { minDays: -999, text: "14일 이내 — 환불 불가" }
+    ], note: "취소는 반드시 서면으로" },
+    sections: [
+      { h: "결제 내역", list: [
+        "공급가 6,641 NOK + VAT 12% 797 NOK (1박 3,719 NOK)",
+        "2026-07-23 Visa 1,512 NOK · 2026-11-15 Visa 5,927 NOK — **잔액 0 NOK**",
+        "확인 메일: nasong27@gmail.com"
+      ]},
+      { h: "포함 사항", chips: ["침대 시트(린넨)", "수건", "퇴실 청소", "냉동고", "전기", "난방", "와이파이", "온수 · 냉수"] },
+      { h: "분리수거", recycle: [
+        { color: "#8b5cf6", label: "보라", what: "플라스틱" },
+        { color: "#22a06b", label: "초록", what: "음식물" },
+        { color: "#2f6fde", label: "파랑", what: "종이팩 · 잡지 · 종이" },
+        { color: "#d9d6cf", label: "흰색", what: "일반 쓰레기" }
+      ], note: "쓰레기통 4개 · 색상별 봉투 구비" },
+      { h: "주방 가전 · 소모품", chips: ["토스터", "전기포트", "커피메이커 · 필터", "전자레인지", "소금 · 후추", "행주 · 핸드타월", "오븐장갑 2", "식기세척기 세제", "주방세제 · 솔", "키친롤"] },
+      { h: "주방 식기 · 조리도구", details: [
+        "접시 · 깊은 접시 · 작은 접시 · 수프볼 · 찻잔 · 커피잔 각 8 / 유리잔 16 · 와인잔 8 · 에그컵 6",
+        "오븐용기 2 · 계량컵 · 강판 · 유리 저그 · 그레이비 보트 · 채반 · 유리볼 3 · 플라스틱 볼 · 빵바구니 · 차 거름망 · 보온병",
+        "스푼 · 나이프 · 포크 · 티스푼 각 8 / 조리용 칼 5 · 칼갈이 · 가위 · 도마 3",
+        "감자 필러 · 치즈 슬라이서 · 피자 커터 · 바비큐 커틀러리 · 샐러드 서버 · 뒤집개 · 스파출라 · 거품기 · 국자 2 · 스파게티 스푼",
+        "캔 오프너 · 와인 오프너 · 코르크 받침 3 · 냄비 · 프라이팬 5"
+      ]},
+      { h: "이용 규칙", list: [
+        "2박 이상 예약 전용",
+        "기상(흐림 · 비 · 눈 · 약풍) 사유로 액티비티 취소 불가 · 오로라 관측 미보장",
+        "캐빈 최대 정원 5+1명 · 싱글 침대 구성"
+      ]}
+    ],
+    links: [
+      { label: "Lauklines 홈페이지", href: "https://lauklines.no" },
+      { label: "post@lauklines.no", href: "mailto:post@lauklines.no" }
+    ]
+  },
+
+  /* ---------- 숙소 3 ---------- */
+  stay3: {
+    eyebrow: "STAY 03 · 12/30 – 1/1 · 2박",
+    title: "MOXY Tromsø",
+    original: "Marriott 계열 · 트롬쇠 공항 옆",
+    facts: [
+      { k: "체크인", v: "12/30 (수)", s: "24시간 체크인" },
+      { k: "체크아웃", v: "1/1 (금)", s: "2박" },
+      { k: "예약 번호", v: "추가 예정", muted: true },
+      { k: "총 비용", v: "추가 예정", muted: true }
+    ],
+    address: "Huldervegen 2, 9016 Tromsø",
+    mapQ: "Moxy Tromso, Huldervegen 2, 9016 Tromsø",
+    warn: { title: "예약 확정", tone: "info", items: [
+      "3번째 숙소는 **MOXY로 확정**",
+      "예약번호 · 비용 · 체크인/아웃 시간은 확인되는 대로 이 탭에 추가",
+      "공항 바로 옆이라 12/30 렌터카 반납 후 이동, 1/1 출국이 편해요"
+    ]},
+    sections: [
+      { h: "연락처", list: ["+47 902 27 061"] }
+    ],
+    links: [{ label: "Marriott 호텔 페이지", href: "https://www.marriott.com/en-us/hotels/tosox-moxy-tromso/overview/" }]
+  },
+
+  /* ---------- 오로라 투어 ---------- */
+  aurora: {
+    eyebrow: "AURORA · 12/26 (토) 17:30",
+    title: "Adults Only Aurora Hunt",
+    original: "Wandering Owl AS · PUDGSF · 성인 전용",
+    image: "https://commons.wikimedia.org/wiki/Special:FilePath/Nordlicht-hilles%C3%B8ya.jpg?width=1600",
+    imageCredit: { text: "Nordlicht-hillesøya · M.Buschmann · CC BY-SA 3.0", href: "https://commons.wikimedia.org/wiki/File:Nordlicht-hilles%C3%B8ya.jpg" },
+    facts: [
+      { k: "집합", v: "17:20", s: "5~10분 전 밖에서 대기 · 지각 시 환불 불가" },
+      { k: "투어 시작", v: "12/26 (토) 17:30", s: "약 6시간" },
+      { k: "예약 번호", v: "OWL038504", copy: true, s: "예약일 2026-10-28" },
+      { k: "총 비용", v: "7,350 NOK", s: "2,450 NOK × 3명 · 완납" }
+    ],
+    address: "Scandic Ishavshotel 앞 · Fredrik Langes gate 2, Tromsø (별도 간판 없음)",
+    mapQ: "Scandic Ishavshotel, Fredrik Langes gate 2, Tromsø",
+    warn: { title: "필수 — eWaiver", tone: "urgent", items: [
+      "출발 **최소 24시간 전까지 3명 모두** eWaiver 작성 (12/25 17:30까지)",
+      "미작성 시 방한복 · 식사 · 사진 제공 불가"
+    ], cta: { label: "eWaiver 작성하기", href: "https://forms.office.com/r/Xrt2DEEeBF" } },
+    sections: [
+      { h: "포함 사항", chips: ["영어 가이드", "이동 교통", "식사 (수프 · 식사 · 음료)", "방한복", "삼각대", "스노우슈즈", "사진 촬영"] },
+      { h: "하차", list: ["사전 지정한 숙소 반경 200m 내 안전한 하차 지점"] },
+      { h: "취소 · 환불", list: [
+        "투어 시작 **25시간 전**까지 서면 취소 — 전액 환불 (수수료 200 NOK 공제)",
+        "24시간 이내 취소 · 지각 · 노쇼 — 환불 불가",
+        "투어 진행 시 오로라 미관측 환불 불가"
+      ]},
+      { h: "유의사항", list: [
+        "눈 · 빙판길 200m 도보 이동 가능해야 함",
+        "대여 장비 분실 · 파손 시 실비 변상",
+        "여행자 보험 가입 권장",
+        "비용 내역: 교통세 214.08 NOK · 식사세 35.50 NOK 포함"
+      ]},
+      { h: "예약자", list: ["Seungmin Na · nas627@naver.com"] }
+    ],
+    links: [
+      { label: "예약 확인서", href: "https://wanderingowlnordic.rezdy.com/print/OWL038504?hash=1005df2a4dee0f640406df78095d0be2&hsa=d2FuZGVyaW5nb3dsbm9yZGlj" },
+      { label: "info@wanderingowl.com", href: "mailto:info@wanderingowl.com" },
+      { label: "+47 484 60 081", href: "tel:+4748460081" }
+    ]
+  },
+
+  /* ---------- 렌터카 ---------- */
+  car: {
+    eyebrow: "RENTAL CAR · 12/25 – 12/30",
+    title: "Hertz · Peugeot e-3008",
+    original: "Midsize Wagon · 자동 변속 · 에어컨 · 전기차 · 무제한 주행",
+    facts: [
+      { k: "픽업", v: "12/25 (금) 10:00", s: "트롬쇠 공항 셀프 키오스크" },
+      { k: "반납", v: "12/30 (수) 17:00", s: "같은 지점" },
+      { k: "예약 번호", v: "L662EC702E2", copy: true },
+      { k: "총 비용", v: "8,808.75 NOK", s: "≈ ₩1,229,677 · 현지 결제" }
+    ],
+    address: "Tromsø Lufthavn Langnes, NO 9016 · +47 4826 2000",
+    mapQ: "Tromsø Airport Langnes",
+    warn: { title: "필수 지참물", items: [
+      "국내 운전면허증 + **국제운전면허증(IDP)**",
+      "**본인 명의 신용카드** (직불카드 불가) · 여권",
+      "보증금 약 $200 가승인"
+    ]},
+    breakdown: [
+      { k: "차량 기본료 (6일 × 891.58)", v: 5349.48 },
+      { k: "세금", v: 1653.75 },
+      { k: "영업소 서비스", v: 903.92 },
+      { k: "CDW (차량손실 면책)", v: 240 },
+      { k: "Super Cover (완전면책)", v: 240 },
+      { k: "WINTER (동계 옵션)", v: 201.6 },
+      { k: "도로세", v: 160 },
+      { k: "도난 보험 (TP)", v: 60 }
+    ],
+    sections: [
+      { h: "포함 보험 · 옵션", chips: ["무제한 주행거리", "CDW", "Super Cover", "도난 보험 (TP)", "WINTER"] },
+      { h: "영업소 운영시간", list: [
+        "월 ~ 금 08:00 ~ 23:00 · 토 ~ 일 10:00 ~ 22:00",
+        "영업시간 외 픽업 · 반납 시 625 NOK 추가 — 현재 일정은 모두 영업시간 내"
+      ]},
+      { h: "유의사항", list: [
+        "셀프서비스 키오스크 이용 가능 지점",
+        "항공편 이용 시 **항공편명 입력 필수**",
+        "통행료(AutoPASS 등) · 전기 충전비 별도",
+        "일정 · 반납지 변경 시 현지 요금으로 재산정될 수 있음"
+      ]},
+      { h: "결제 · 회원 정보", list: [
+        "등록 카드 AMEX ••••2305 · 렌탈 시 현지 지불",
+        "Hertz Gold Plus Rewards 15939574 · CDP: ASIA GOLD MEMBERS"
+      ]}
+    ]
+  },
+
+  /* ---------- 추천 (노션 · ChatGPT) ---------- */
+  picks: {
+    groups: [
+      { stars: 5, title: "반드시 추천", items: [
+        { name: "오로라 헌팅 투어", desc: "첫 방문이라면 가장 추천. 12/26 Wandering Owl로 예약 완료.", time: "반나절",
+          imgs: ["Troms%C3%B8_Aurora,_Norway.jpg", "Nordlicht-hilles%C3%B8ya.jpg"],
+          link: { label: "다니엘 투어 후기", href: "https://misdias.tistory.com/64" } },
+        { name: "Fjellheisen 케이블카", desc: "트롬쇠 최고의 전망. 낮 · 블루아워 모두 좋고 시내 전경을 한눈에.", time: "2~3시간",
+          imgs: ["View_of_Troms%C3%B8_from_Fjelleisen_06.jpg", "Troms%C3%B8_Cable_cars_Fjellheisen_01.jpg", "Fjellheisen,_Tromsdalen,_and_Troms%C3%B8ysundet_-_Troms%C3%B8,_Norway_2023-07-08.jpg"] },
+        { name: "Arctic Cathedral", desc: "케이블카와 함께 묶기 좋음. 12/31 새해 전야 오르간 콘서트로도 유명.", time: "30~60분",
+          imgs: ["Tromsdalen_kirke_%28Ishavskatedralen%29_-_The_Arctic_Cathedral_%285557802765%29.jpg", "Arctic_Cathedral_in_Tromsoe.jpg", "Troms%C3%B8_Ishavskatedralen_Interior_01.jpg"] },
+        { name: "Sommarøy · Kvaløya 드라이브", desc: "이미 일정에 포함 — 계획한 코스가 가장 좋음.", time: "하루",
+          imgs: ["Sommar%C3%B8y1.jpg", "Sommaroy_panorama.jpg", "Sommar%C3%B8ybrua_depuis_l%27%C3%AEle_de_Sommar%C3%B8ya.jpg"] }
+      ]},
+      { stars: 4, title: "추천", items: [
+        { name: "Polar Museum", desc: "북극 탐험 역사 — 아문센, 난센, 극지 생활.", time: "약 1시간",
+          imgs: ["Polar_Museum_in_Troms%C3%B8_%28Jul_2019%29_1.jpg", "Polarmuseet.jpg"] },
+        { name: "Polaria", desc: "북극 전시 · 수족관 · 물범 먹이주기. 날씨가 안 좋은 날 가기 좋은 실내 코스.", time: "1~2시간",
+          imgs: ["Polaria_Troms%C3%B8.jpg"] },
+        { name: "Mack Brewery · Ølhallen", desc: "1877년 시작된 트롬쇠 대표 양조장. 1928년 문을 연 펍 Ølhallen에서 시음.", time: "1~2시간" },
+        { name: "Magic Ice Bar", desc: "관광객에게 인기 있는 얼음 바.", time: "30~40분" }
+      ]},
+      { stars: 4, title: "액티비티", items: [
+        { name: "개썰매", desc: "트롬쇠 대표 액티비티. 다만 오로라 투어와 겹치면 피곤할 수 있음.", time: "반나절",
+          imgs: ["White_huskies_dog_sledding.jpg"] },
+        { name: "순록 체험", desc: "사미 문화 · 순록 먹이주기 · 전통 식사.", time: "반나절",
+          imgs: ["A_man_holds_a_reindeer_with_a_sled._Winter,_Finnmarksvidda.jpg", "Sami_woman_with_white_reindeer.jpg", "Reindeer_herding.jpg"] },
+        { name: "고래 투어", desc: "12월이면 가능성은 있으나 자연 드라이브 일정이 많아 우선순위 낮음." }
+      ]}
+    ],
+    extras: [
+      { k: "전망 카페", v: "Smørtorget · Risø · Raketten — 눈 오는 날 쉬기 좋음" },
+      { k: "항구 산책", v: "저녁 · 블루아워 · 사진 촬영" },
+      { k: "쇼핑", v: "네르스트란다 쇼핑센터 · Storgata" },
+      { k: "음식", v: "Fiskekompaniet · Emma's Dream Kitchen · Bardus Bistro · Full Steam · Mathallen · 버거 Burgr · 피자 Yonas" },
+      { k: "사진 포인트", v: "Tromsø Bridge · 항구 · Prestvannet · 케이블카 정상" },
+      { k: "시간이 남으면", v: "Tromvik · Rekvik · Kaldfjord · Hillesøy · Brensholmen · Kattfjordeidet 드라이브" }
+    ],
+    summary: "현재 계획에 Fjellheisen + Arctic Cathedral + Polar Museum + Mack Brewery만 더해도 트롬쇠 핵심 볼거리는 거의 다 경험하는 일정이 됩니다."
+  }
+};
