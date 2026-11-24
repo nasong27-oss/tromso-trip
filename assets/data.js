@@ -49,10 +49,25 @@ window.TRIP = {
       { time: "11:00", text: "Airbnb 체크아웃" },
       { text: "Kvaløya 해안 드라이브" },
       { time: "15:00", text: "**Lauklines Kystferie 캐빈 체크인** · 22시 전 도착 필수", tab: "stay2" }
-    ], maps: [{ label: "숙소 → 캐빈", from: "Dramsvegen 167, Tromsø", to: "Lauklines Kystferie, Vasstrandvegen 578, Tromsø", open: "https://maps.app.goo.gl/JYZ4CbfSqsY8wjuD7?g_st=ic", openLabel: "저장해 둔 해안 드라이브 경로" }]},
+    ], maps: [{ label: "해안 드라이브 · 숙소 → 캐빈",
+      stops: [
+        { name: "Dramsvegen 167 (숙소)", at: "69.6715376,18.9654358" },
+        { name: "Ersfjordbotn", at: "69.6942065,18.6203726" },
+        { name: "Grøtfjorden", at: "69.7774907,18.5398493" },
+        { name: "Tromtindvegen 327", at: "69.7795494,18.3999063" },
+        { name: "Lauklines Kystferie", at: "69.6209136,18.285743" }
+      ],
+      open: "https://www.google.com/maps/dir/Dramsvegen+167,+9010+Troms%C3%B8/Ersfjordbotn,+9107/Gr%C3%B8tfjorden,+9107/Tromtindvegen+327,+9107+Kval%C3%B8ya/Lauklines+Kystferie,+Vasstrandvegen+578,+9108+Kval%C3%B8ya/@69.6991271,17.9736168,9z/data=!3m1!4b1!4m32!4m31!1m5!1m1!1s0x45c4c442ec7852d3:0x97da1429c9fc70d9!2m2!1d18.9654358!2d69.6715376!1m5!1m1!1s0x45c4b888660da56d:0xd7a32a72843fe1f8!2m2!1d18.6203726!2d69.6942065!1m5!1m1!1s0x45c4be93c6cee039:0xa5860d119593876b!2m2!1d18.5398493!2d69.7774907!1m5!1m1!1s0x45c4bc6602e95183:0x8ee28103c4e1e14f!2m2!1d18.3999063!2d69.7795494!1m5!1m1!1s0x45c4b126d44ac6c9:0xeced82e449daa8c2!2m2!1d18.285743!2d69.6209136!3e0",
+      openLabel: "구글맵에서 이 경로 열기" }]},
     { date: "2026-12-29", tag: "드라이브", tone: "amber", items: [
       { text: "**Sommarøy 드라이브** — 하얀 모래 해변과 Sommarøy 대교" }
-    ], maps: [{ label: "캐빈 → Sommarøy", from: "Lauklines Kystferie, Vasstrandvegen 578, Tromsø", to: "Sommarøy, Norway", open: "https://maps.app.goo.gl/7A2YrVG594i1ryEU7?g_st=ic", openLabel: "저장해 둔 Sommarøy 경로" }]},
+    ], maps: [{ label: "캐빈 → Sommarøy",
+      stops: [
+        { name: "Lauklines Kystferie", at: "69.6209136,18.285743" },
+        { name: "Sommarøy", at: "Sommarøy, 9110 Norway" }
+      ],
+      open: "https://www.google.com/maps/dir/?api=1&origin=Lauklines+Kystferie,+Vasstrandvegen+578,+9108+Kval%C3%B8ya&destination=Sommar%C3%B8y,+9110&travelmode=driving",
+      openLabel: "구글맵에서 이 경로 열기" }]},
     { date: "2026-12-30", tag: "이동", tone: "amber", items: [
       { time: "10:00", text: "캐빈 체크아웃 (보증금 가승인 해제 확인)" },
       { time: "17:00", text: "**렌터카 반납** · 트롬쇠 공항", tab: "car" },

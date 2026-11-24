@@ -133,6 +133,12 @@
 
   /* ---------- 지도 ---------- */
   function mapSrc(m) {
+    // 저장해 둔 경로: 출발 → 경유지들 → 도착 (좌표 그대로)
+    if (m.stops && m.stops.length > 1) {
+      var pts = m.stops.map(function (s) { return s.at; });
+      return "https://www.google.com/maps?saddr=" + encodeURIComponent(pts[0]) +
+        "&daddr=" + encodeURIComponent(pts.slice(1).join(" to:")) + "&dirflg=d&hl=ko&output=embed";
+    }
     if (m.from) return "https://www.google.com/maps?saddr=" + encodeURIComponent(m.from) + "&daddr=" + encodeURIComponent(m.to) + "&hl=ko&output=embed";
     return "https://www.google.com/maps?q=" + encodeURIComponent(m.q) + "&hl=ko&z=13&output=embed";
   }
@@ -142,9 +148,10 @@
     return "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(m.q);
   }
   function mapBlock(m, open) {
-    if (!m.q && !m.from) return "";
+    if (!m.q && !m.from && !m.stops) return "";
+    var route = m.stops ? '<p class="map-route">' + m.stops.map(function (s) { return esc(s.name); }).join(' <i>→</i> ') + "</p>" : "";
     return '<details class="map"' + (open ? " open" : "") + ">" +
-      '<summary><span class="map-ic" aria-hidden="true"></span>' + esc(m.label || "지도") + '<span class="map-toggle">지도</span></summary>' +
+      '<summary><span class="map-ic" aria-hidden="true"></span>' + esc(m.label || "지도") + '<span class="map-toggle">지도</span></summary>' + route +
       '<div class="map-frame"><iframe loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="' + esc(m.label || "지도") + '" data-src="' + esc(mapSrc(m)) + '"></iframe></div>' +
       '<a class="map-open" href="' + esc(mapOpenHref(m)) + '" target="_blank" rel="noopener">' + esc(m.openLabel || "구글맵에서 열기") + " ↗</a></details>";
   }

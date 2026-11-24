@@ -391,3 +391,5 @@ body.editing .view { animation: none; }
 .cost-cell b { font-size: 17px; font-weight: 700; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
 .cost-cell em { font-style: normal; font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
 .cost-sum { margin: 14px 0 0; font-size: 13px; color: var(--muted); }
+.map-route { margin: 0; padding: 0 12px 10px; font-size: 12.5px; color: var(--ink-2); line-height: 1.7; }
+.map-route i { font-style: normal; color: var(--muted); margin: 0 2px; }
