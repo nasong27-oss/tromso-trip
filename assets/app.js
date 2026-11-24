@@ -624,8 +624,13 @@
   var collapseY = 0;
   var ticking = false;
   var scrollTimer = null;
+  var safeProbe = document.createElement("div");
+  safeProbe.style.cssText = "position:fixed;left:0;top:0;width:0;height:var(--safe-top);visibility:hidden;pointer-events:none";
+  document.body.appendChild(safeProbe);
+  function safeTop() { return safeProbe.offsetHeight || 0; }
   function layoutTop() {
-    collapseY = Math.max(heroEl.offsetHeight - MINI, 0);
+    // 홈 화면 앱(아이폰)은 상태바가 페이지 위에 겹친다 → 그 높이만큼 덜 접어서 작은 제목 줄이 보이게
+    collapseY = Math.max(heroEl.offsetHeight - MINI - safeTop(), 0);
     topEl.style.top = -collapseY + "px";   // sticky 가 이만큼 올라간 뒤 멈춘다
     topEl.style.setProperty("--cy", collapseY + "px"); // 효과 방식의 애니메이션 구간
     onScroll();

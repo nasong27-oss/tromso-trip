@@ -1,5 +1,6 @@
 /* ============ tokens ============ */
 :root {
+  --safe-top: env(safe-area-inset-top, 0px);
   --paper: #f6f4ef;
   --card: #ffffff;
   --ink: #15171c;
@@ -158,7 +159,7 @@ strong { font-weight: 650; }
 .fx .mini { display: flex; }
 /* 단순 방식에서도 접히면 오로라 빛 깔린 작은 제목 줄이 남는다.
    스크롤마다 계산하지 않고, 접히는 순간 클래스 한 번 → 0.25초 페이드 (GPU 처리) */
-html:not(.fx) .mini { display: flex; max-width: none; padding: 0 max(20px, calc(50% - 360px));
+html:not(.fx) .mini { display: flex; max-width: none; padding-left: max(20px, calc(50% - 360px)); padding-right: max(20px, calc(50% - 360px));
   background:
     radial-gradient(60% 140% at 22% 0%, rgba(80,255,170,.30), transparent 70%),
     radial-gradient(45% 120% at 70% 10%, rgba(150,120,255,.22), transparent 70%),
@@ -499,7 +500,7 @@ body.editing .view { animation: none; }
 .ed b, .ed strong { font-weight: 700; }
 
 /* 오프라인 안내 줄 */
-.offline-bar { position: sticky; top: 99px; z-index: 15; margin: 0; padding: 8px 16px; text-align: center; font-size: 12.5px; font-weight: 600; color: #6b4300; background: #fff3d6; border-bottom: 1px solid #f0d9a6; }
+.offline-bar { position: sticky; top: calc(99px + var(--safe-top)); z-index: 15; margin: 0; padding: 8px 16px; text-align: center; font-size: 12.5px; font-weight: 600; color: #6b4300; background: #fff3d6; border-bottom: 1px solid #f0d9a6; }
 .offline-bar[hidden] { display: none; }
 @media (prefers-color-scheme: dark) { .offline-bar { color: #ffd59a; background: #3a2a10; border-color: #5a4318; } }
 
@@ -567,3 +568,6 @@ body.editing .view { animation: none; }
 /* 하단 여백: 안드로이드 제스처 바 · 카카오톡 하단 도구막대에 가리지 않게 넉넉히 */
 .foot { padding-bottom: calc(72px + env(safe-area-inset-bottom)); }
 @media (max-width: 640px) { .foot { padding-bottom: calc(96px + env(safe-area-inset-bottom)); } }
+
+/* 상태바가 겹치는 홈 화면 앱: 작은 제목 줄을 상태바 높이만큼 위로 늘려 덮는다 */
+.mini { height: calc(48px + var(--safe-top)); padding-top: var(--safe-top); box-sizing: border-box; }
