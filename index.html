@@ -7,6 +7,21 @@
   <meta name="theme-color" content="#0c1424">
   <title>Tromsø 2026</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230c1424'/%3E%3Cpath d='M10 44 C22 18 42 18 54 30' stroke='%2367e8b9' stroke-width='5' fill='none' stroke-linecap='round'/%3E%3Ccircle cx='46' cy='16' r='3' fill='%23fff'/%3E%3C/svg%3E">
+  <script>
+    /* 제목이 오로라 속으로 녹아드는 효과는 부드럽게 도는 게 확인된 환경에서만 켠다.
+       조건: 스크롤 연동 CSS 지원 + 휴대폰 크기 화면 + 인앱 브라우저 아님 + 움직임 줄이기 설정 아님.
+       판별이 애매하면 단순 방식(기본값)으로 간다. */
+    (function () {
+      try {
+        var ua = navigator.userAgent || "";
+        var inApp = /KAKAOTALK|NAVER\(inapp|Instagram|FBAN|FBAV|FB_IAB|Line\/|DaumApps|everytimeApp|; wv\)|Whale\/.*Mobile.*inapp/i.test(ua);
+        var ok = window.CSS && CSS.supports && CSS.supports("animation-timeline: scroll()") &&
+          window.matchMedia("(max-width: 700px)").matches &&
+          !window.matchMedia("(prefers-reduced-motion: reduce)").matches && !inApp;
+        if (ok) document.documentElement.classList.add("fx");
+      } catch (e) { /* 단순 방식 */ }
+    })();
+  </script>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
   <link rel="stylesheet" href="/assets/style.css">
 </head>

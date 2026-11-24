@@ -456,28 +456,33 @@
     var id = (location.hash || "#home").slice(1);
     return VIEWS[id] ? id : "home";
   }
-  /* ---------- 접히는 상단: 사진 → 작은 제목 + 탭 ---------- */
+  /* ---------- 접히는 상단 ----------
+     FX(효과 방식)는 index.html 머리에서 기기를 보고 정한다.
+     - 단순 방식: 사진이 통째로 밀려 올라가고 탭 바만 남는다 (스크롤에 연결된 계산 없음)
+     - 효과 방식: 작은 제목 줄(48px)이 남고, 제목이 오로라 속으로 녹아드는 효과는 CSS 가 처리 */
   var topEl = document.getElementById("top");
   var heroEl = document.getElementById("hero");
-  var SCROLL_TL = !!(window.CSS && CSS.supports && CSS.supports("animation-timeline: scroll()"));
-  var MINI = 48;          // 접혔을 때 남는 제목 줄 높이
+  var FX = document.documentElement.classList.contains("fx");
+  var MINI = FX ? 48 : 0;
   var collapseY = 0;
   var ticking = false;
+  var scrollTimer = null;
   function layoutTop() {
     collapseY = Math.max(heroEl.offsetHeight - MINI, 0);
     topEl.style.top = -collapseY + "px";   // sticky 가 이만큼 올라간 뒤 멈춘다
-    topEl.style.setProperty("--cy", collapseY + "px"); // 제목 애니메이션 구간
+    topEl.style.setProperty("--cy", collapseY + "px"); // 효과 방식의 애니메이션 구간
     onScroll();
   }
   function onScroll() {
     ticking = false;
-    var p = collapseY ? Math.min(Math.max(window.scrollY / collapseY, 0), 1) : 0;
-    // 스크롤 타임라인을 지원하면 CSS 가 직접 처리 → 매 프레임 스타일 재계산을 피한다
-    if (!SCROLL_TL) topEl.style.setProperty("--p", p.toFixed(3));
-    topEl.classList.toggle("collapsed", p >= 0.99);
+    if (FX) topEl.classList.toggle("collapsed", window.scrollY >= collapseY - 2);
   }
   window.addEventListener("scroll", function () {
-    if (!ticking) { ticking = true; requestAnimationFrame(onScroll); }
+    // 스크롤하는 동안만 오로라를 멈춘다 (클래스는 스크롤 시작·끝에 한 번씩만 바뀜)
+    if (!scrollTimer) document.documentElement.classList.add("scrolling");
+    clearTimeout(scrollTimer);
+    scrollTimer = setTimeout(function () { scrollTimer = null; document.documentElement.classList.remove("scrolling"); }, 180);
+    if (FX && !ticking) { ticking = true; requestAnimationFrame(onScroll); }
   }, { passive: true });
   window.addEventListener("resize", layoutTop);
   layoutTop();
