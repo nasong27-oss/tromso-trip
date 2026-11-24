@@ -530,3 +530,54 @@ body.editing .view { animation: none; }
 /* 진단 창 */
 .diag { margin: 0; padding: 12px; border-radius: 10px; background: var(--line-2); font-size: 12px; line-height: 1.6; white-space: pre-wrap; word-break: break-all; font-family: ui-monospace, Menlo, monospace; }
 #footBrand { cursor: default; -webkit-user-select: none; user-select: none; }
+
+/* ============ 상단 디자인 시안 (?hero=a|b|c|d) — 스크롤 계산 효과 없이 브라우저 기본 동작만 ============ */
+.hero-cue, .mini-aurora, .cover-a { display: none; }
+.hv .mini { transition: opacity .25s ease; }
+.hv .topbar.stuck .mini { opacity: 1; }
+
+/* A. 오로라 띠: 오로라가 흐르는 띠 + 탭이 항상 위에, 큰 제목은 본문 첫머리 */
+html.hv-a .hero { display: none; }
+.hv-a .topbar { margin-top: 0; }
+.hv-a .mini { position: relative; overflow: hidden; height: 56px; opacity: 1; pointer-events: auto; background: linear-gradient(180deg, #060d20, #0c1a33); }
+.hv-a .mini > span:not(.mini-aurora) { position: relative; z-index: 1; }
+.hv-a .mini-aurora { display: block; position: absolute; inset: -60% -15%; pointer-events: none; }
+.hv-a .mini-aurora i { position: absolute; display: block; border-radius: 50%; will-change: transform, opacity; }
+.hv-a .mini-aurora i:nth-child(1) { left: 0; top: 15%; width: 70%; height: 80%; background: radial-gradient(ellipse at center, rgba(80,255,170,.55), rgba(40,220,150,.15) 45%, transparent 70%); animation: sway1 11s ease-in-out infinite alternate; }
+.hv-a .mini-aurora i:nth-child(2) { left: 40%; top: 5%; width: 60%; height: 80%; background: radial-gradient(ellipse at center, rgba(170,120,255,.45), rgba(120,90,230,.12) 45%, transparent 70%); animation: sway3 14s ease-in-out infinite alternate; }
+.hv-a .mini-aurora i:nth-child(3) { left: 65%; top: 30%; width: 45%; height: 70%; background: radial-gradient(ellipse at center, rgba(90,255,190,.45), transparent 70%); animation: sway2 9s ease-in-out infinite alternate-reverse; }
+.scrolling .mini-aurora i { animation-play-state: paused; }
+html.hv-a body[data-tab="home"] .cover-a { display: block; }
+.cover-a { max-width: 760px; margin: 0 auto; padding: 30px 20px 6px; }
+.cover-title { margin: 0; font-size: clamp(40px, 11vw, 64px); line-height: 1.04; font-weight: 700; letter-spacing: -0.035em; color: var(--ink); }
+.cover-lat { margin: 6px 0 10px; font-size: 18px; color: var(--muted); }
+.cover-meta { margin: 0; font-size: 14px; color: var(--ink-2); }
+.cover-a::after { content: ""; display: block; width: 64px; height: 3px; margin-top: 18px; border-radius: 3px; background: linear-gradient(90deg, #3ee0a0, #8a7bff); }
+.hv-a .offline-bar { top: 107px; }
+
+/* B. 표지: 첫 화면 전체가 오로라 표지, "일정 보기 ↓" */
+html.hv-b .hero { height: 100vh; height: 100svh; min-height: 480px; }
+.hv-b .hero-inner { bottom: 34%; }
+.hv-b .hero-title { font-size: clamp(42px, 12vw, 72px); }
+.hv-b .hero-cue { display: block; position: absolute; left: 0; right: 0; bottom: 92px; z-index: 3; text-align: center; font-size: 14px; font-weight: 600; letter-spacing: .02em; color: rgba(255,255,255,.82); text-decoration: none; animation: cue-bob 2.4s ease-in-out infinite; }
+@keyframes cue-bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(6px); } }
+
+/* C. 낮은 표지: 사진 높이 절반, 효과 없이 그대로 스크롤 */
+html.hv-c .hero { height: 236px; min-height: 0; }
+.hv-c .hero-inner { padding-bottom: 62px; }
+.hv-c .hero-title { font-size: clamp(32px, 8.5vw, 48px); }
+.hv-c .hero-lat { margin: 4px 0 8px; font-size: 16px; }
+.hv-c .hero-meta { font-size: 13px; }
+
+/* D. 글자 중심 매거진: 종이 배경 + 큰 글씨 + 오로라 빛줄기 */
+html.hv-d .hero { height: 300px; min-height: 0; background: var(--paper); color: var(--ink); }
+.hv-d .hero-sky, .hv-d .hero-shade, .hv-d .aurora, .hv-d .hero-glow { display: none; }
+.hv-d .hero-inner { padding-bottom: 66px; }
+.hv-d .hero-title { font-size: clamp(40px, 10.5vw, 72px); }
+.hv-d .hero-lat { color: var(--muted); opacity: 1; }
+.hv-d .hero-meta { color: var(--ink-2); }
+.hv-d .hero-inner::after { content: ""; display: block; width: 100%; max-width: 240px; height: 3px; margin-top: 18px; border-radius: 3px;
+  background: linear-gradient(90deg, #3ee0a0, #6fd3ff, #8a7bff, #3ee0a0); background-size: 300% 100%; animation: aurora-line 8s linear infinite; }
+@keyframes aurora-line { to { background-position: 300% 0; } }
+.hv-d .mini { background: var(--paper); color: var(--ink); }
+.hv-d .mini-meta { color: var(--muted); }

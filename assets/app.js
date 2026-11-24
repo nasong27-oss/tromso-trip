@@ -634,6 +634,7 @@
   var ticking = false;
   var scrollTimer = null;
   var lastP = -1;
+  var HV = (document.documentElement.className.match(/\bhv-([abcd])\b/) || [])[1] || ""; // 상단 시안 비교용
   var REDUCED = matchMedia("(prefers-reduced-motion: reduce)").matches;
   var LITE = REDUCED || ENV_LITE();
   function ENV_LITE() {
@@ -644,7 +645,7 @@
   }
   // 흐린 제목 사본: 흐림은 한 번만 그려 두고, 스크롤 중에는 선명한 제목과 투명도만 맞바꾼다
   // (흐림 값을 매번 바꾸면 Safari 가 글자를 계속 다시 그려 버벅인다)
-  if (!LITE) {
+  if (!LITE && !HV) {
     H.ghost = document.createElement("div");
     H.ghost.className = "hero-inner hero-ghost";
     H.ghost.setAttribute("aria-hidden", "true");
@@ -670,6 +671,7 @@
     return stops[stops.length - 1][1];
   }
   function paintHero(p) {
+    if (HV) return; // 시안은 스크롤 계산 효과 없음 (작은 제목 줄은 CSS 클래스로)
     p = Math.round(p * 1000) / 1000;
     if (p === lastP) return;
     lastP = p;
@@ -695,7 +697,7 @@
     ticking = false;
     var y = window.scrollY;
     paintHero(collapseY ? Math.min(Math.max(y / collapseY, 0), 1) : 1);
-    var on = y >= collapseY - 1;
+    var on = y >= collapseY - (HV ? 30 : 1);
     if (barEl.classList.contains("stuck") !== on) barEl.classList.toggle("stuck", on);
   }
   window.addEventListener("scroll", function () {
@@ -707,15 +709,22 @@
   }, { passive: true });
   window.addEventListener("resize", layoutTop);
   layoutTop();
+  document.getElementById("heroCue").addEventListener("click", function (e) {
+    e.preventDefault();
+    window.scrollTo({ top: collapseY, behavior: "smooth" });
+  });
 
   function renderHero() {
     var T = D();
     var meta = document.getElementById("heroMeta");
     meta.innerHTML = E("period", { plain: true });
+    var cm = document.getElementById("coverMeta");
+    if (cm) cm.textContent = meta.textContent;
     syncGhost();
   }
   function render(scroll) {
     var id = current();
+    document.body.setAttribute("data-tab", id);
     document.body.classList.toggle("editing", editing);
     renderHero();
     var slide = swipeDir ? " slide-" + swipeDir : "";
@@ -737,7 +746,7 @@
     if (scroll) {
       // 탭을 바꾸면 그 탭의 맨 위(접힌 상단 바로 아래)에서 시작
       // 새 탭은 맨 위에서 바로 시작 — 부드러운 스크롤 애니메이션 없이 순간 이동
-      if (window.scrollY > collapseY) {
+      if (window.scrollY > collapseY || HV === "b") {
         var html = document.documentElement, prev = html.style.scrollBehavior;
         html.style.scrollBehavior = "auto";
         window.scrollTo(0, collapseY);
@@ -1267,7 +1276,7 @@
   });
 
   /* ---------- 진단 창: 맨 아래 "Tromsø 2026" 을 5번 연속 누르면 ---------- */
-  var APP_VERSION = "2026-11-24.h3";
+  var APP_VERSION = "2026-11-24.h4";
   var brandTaps = [];
   document.getElementById("footBrand").addEventListener("click", function () {
     var now = Date.now();
@@ -1279,6 +1288,7 @@
     var hi = getComputedStyle(document.querySelector(".hero-inner"));
     var info = {
       "버전": APP_VERSION,
+      "상단 시안": HV ? HV.toUpperCase() : "현재",
       "상단 효과": "스크립트" + (LITE ? " (흐림 없음)" : " (흐린 사본 겹치기)"),
       "현재 제목 상태": "선명 " + hi.opacity + " / 흐림 사본 " + (H.ghost ? getComputedStyle(H.ghost).opacity : "-"),
       "화면 폭×높이": innerWidth + "×" + innerHeight + " (dpr " + (window.devicePixelRatio || 1) + ")",
