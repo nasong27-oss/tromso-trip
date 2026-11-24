@@ -461,6 +461,7 @@
   function layoutTop() {
     collapseY = Math.max(heroEl.offsetHeight - MINI, 0);
     topEl.style.top = -collapseY + "px";   // sticky 가 이만큼 올라간 뒤 멈춘다
+    topEl.style.setProperty("--cy", collapseY + "px"); // 제목 애니메이션 구간
     onScroll();
   }
   function onScroll() {
@@ -478,7 +479,7 @@
   function renderHero() {
     var T = D();
     var meta = document.getElementById("heroMeta");
-    meta.innerHTML = E("period", { plain: true }) + " · " + esc(T.travelers) + "명";
+    meta.innerHTML = E("period", { plain: true });
   }
   function render(scroll) {
     var id = current();

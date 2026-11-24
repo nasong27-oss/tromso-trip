@@ -101,13 +101,46 @@ strong { font-weight: 650; }
 @keyframes sway3 { 0% { transform: translate3d(0, -4%, 0) rotate(-4deg); opacity: .35; } 100% { transform: translate3d(-12%, 6%, 0) rotate(8deg) scaleY(1.3); opacity: .7; } }
 @media (prefers-reduced-motion: reduce) { .aurora i { animation: none; } }
 .ridge { position: absolute; left: 0; right: 0; bottom: 0; width: 100%; height: 34%; display: block; }
-.hero-shade { position: absolute; inset: 0; background: linear-gradient(180deg, transparent 50%, rgba(5,10,24,.55) 100%); }
+.hero-shade { position: absolute; inset: 0; }
 .hero-shade::after { content: ""; position: absolute; inset: 0; background: var(--night); opacity: calc(var(--p) * .92); }
-/* 글자는 페이지와 함께 자연스럽게 올라가고, 희미해지기만 한다 */
-.hero-inner { position: absolute; left: 0; right: 0; bottom: 0; max-width: 760px; margin: 0 auto; padding: 0 20px 40px; opacity: calc(1 - var(--p) * 1.6); }
-.hero-title { margin: 0 0 12px; font-size: clamp(38px, 8.5vw, 68px); line-height: 1.04; font-weight: 700; letter-spacing: -0.035em; }
-.hero-title .thin { font-weight: 300; }
+/* 제목: 기본(구형 브라우저)은 스크롤에 맞춰 희미해지기만 */
+.hero-inner { position: absolute; left: 0; right: 0; bottom: 0; max-width: 760px; margin: 0 auto; padding: 0 20px 40px; opacity: calc(1 - var(--p) * 1.6); transform-origin: left bottom; }
+.hero-title { margin: 0; font-size: clamp(36px, 8vw, 64px); line-height: 1.05; font-weight: 700; letter-spacing: -0.035em; }
+.hero-lat { margin: 6px 0 14px; font-size: clamp(17px, 3.4vw, 24px); font-weight: 400; color: inherit; opacity: .72; letter-spacing: 0; }
 .hero-meta { margin: 0; font-size: 14px; color: rgba(255,255,255,.82); }
+.hero-shade { z-index: 1; }
+.hero-inner { z-index: 2; }
+.aurora { z-index: 3; }
+.mini { z-index: 4; }
+/* 최신 브라우저: 스크롤에 직접 연결된 애니메이션 — 제목이 위로 떠오르며
+   흐려지고 오로라 빛깔로 물들어 오로라 속으로 녹아든다 (스크립트 없이 부드럽게) */
+@supports (animation-timeline: scroll()) {
+  .hero-inner {
+    opacity: 1;
+    animation: sink-into-aurora linear both;
+    animation-timeline: scroll(root block);
+    animation-range: 0px var(--cy, 400px);
+  }
+  /* 오로라는 스크롤을 거슬러 화면에 머물며 내려와, 떠오르는 제목을 감싼다 */
+  .aurora {
+    animation: aurora-follow linear both;
+    animation-timeline: scroll(root block);
+    animation-range: 0px var(--cy, 400px);
+  }
+}
+@keyframes aurora-follow {
+  0%   { transform: translate3d(0, 0, 0); opacity: 1; }
+  100% { transform: translate3d(0, calc(var(--cy, 400px) * .78), 0); opacity: .55; }
+}
+@keyframes sink-into-aurora {
+  0%   { transform: translate3d(0, 0, 0) scale(1); filter: blur(0); opacity: 1; color: #fff; text-shadow: 0 0 0 rgba(111,227,180,0); }
+  40%  { filter: blur(1px); opacity: 1; color: #e6fff3; text-shadow: 0 0 14px rgba(111,227,180,.45); }
+  75%  { filter: blur(4px); opacity: .7; color: #a8f2d2; text-shadow: 0 0 26px rgba(111,227,180,.8); }
+  100% { transform: translate3d(0, -56px, 0) scale(.9); filter: blur(12px); opacity: 0; color: #6fe3b4; text-shadow: 0 0 40px rgba(111,227,180,1); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-inner { animation: none !important; opacity: calc(1 - var(--p) * 1.6) !important; }
+}
 .mini { position: absolute; left: 0; right: 0; bottom: 0; height: 48px; max-width: 760px; margin: 0 auto; padding: 0 20px; display: flex; align-items: center; gap: 10px;
   color: #fff; text-decoration: none; opacity: calc((var(--p) - .65) * 3); pointer-events: none; }
 .top.collapsed .mini { pointer-events: auto; }
