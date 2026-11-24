@@ -614,30 +614,72 @@
     return VIEWS[id] ? id : "home";
   }
   /* ---------- 접히는 상단 ----------
-     FX(효과 방식)는 index.html 머리에서 기기를 보고 정한다.
-     - 단순 방식: 사진이 통째로 밀려 올라가고, 접히는 순간 작은 제목 줄이 페이드인 (스크롤 연동 애니메이션 없음)
-     - 효과 방식: 작은 제목 줄(48px)이 남고, 제목이 오로라 속으로 녹아드는 효과는 CSS 가 처리 */
-  var topEl = document.getElementById("top");
+     사진은 페이지와 함께 스크롤되고, 스크롤 위치(0 → 접히는 거리)에 맞춰 여기서 직접 그린다.
+     - 제목: 위로 떠오르며 작아지고, 흐려지면서 오로라 빛깔로 물들어 사라짐
+     - 사진은 점점 어두워지고, 오로라는 화면에 머물며 따라 내려옴
+     - 다 접히면 오로라 빛 작은 제목 줄 + 탭이 맨 위에 남음
+     흐림(blur)은 무거워서 아이패드·앱 안 브라우저·움직임 줄이기 설정에서는 뺀다 */
   var heroEl = document.getElementById("hero");
-  var FX = document.documentElement.classList.contains("fx");
+  var barEl = document.getElementById("topbar");
+  var H = {
+    inner: heroEl.querySelector(".hero-inner"),
+    glow: heroEl.querySelector(".hero-glow"),
+    shade: heroEl.querySelector(".hero-shade"),
+    aurora: heroEl.querySelector(".aurora"),
+    mini: barEl.querySelector(".mini")
+  };
   var MINI = 48;          // 접혔을 때 남는 작은 제목 줄
   var collapseY = 0;
   var ticking = false;
   var scrollTimer = null;
+  var lastP = -1;
+  var REDUCED = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var LITE = REDUCED || ENV_LITE();
+  function ENV_LITE() {
+    var ua = navigator.userAgent || "";
+    var ipad = /iPad/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
+    var inApp = /KAKAOTALK|NAVER\(inapp|Instagram|FBAN|FBAV|FB_IAB|Line\/|DaumApps|everytimeApp|; wv\)/i.test(ua);
+    return ipad || inApp;
+  }
+  // 구간별 직선 보간: stops = [[진행도, 값], ...]
+  function seg(p, stops) {
+    if (p <= stops[0][0]) return stops[0][1];
+    for (var i = 1; i < stops.length; i++) {
+      if (p <= stops[i][0]) {
+        var a = stops[i - 1], b = stops[i];
+        return a[1] + (b[1] - a[1]) * (p - a[0]) / (b[0] - a[0]);
+      }
+    }
+    return stops[stops.length - 1][1];
+  }
+  function paintHero(p) {
+    p = Math.round(p * 1000) / 1000;
+    if (p === lastP) return;
+    lastP = p;
+    var y = REDUCED ? 0 : -56 * p, sc = REDUCED ? 1 : 1 - 0.1 * p;
+    H.inner.style.transform = "translate3d(0," + y.toFixed(1) + "px,0) scale(" + sc.toFixed(3) + ")";
+    H.inner.style.opacity = seg(p, [[0.45, 1], [0.8, 0.7], [1, 0]]).toFixed(3);
+    if (!LITE) H.inner.style.filter = p > 0 ? "blur(" + seg(p, [[0, 0], [0.45, 0.5], [0.8, 3], [1, 7]]).toFixed(2) + "px)" : "";
+    H.glow.style.opacity = seg(p, [[0, 0], [0.4, 0.35], [0.75, 0.95], [1, 1]]).toFixed(3);
+    H.shade.style.opacity = (0.92 * p).toFixed(3);
+    H.aurora.style.transform = REDUCED ? "" : "translate3d(0," + (collapseY * 0.78 * p).toFixed(1) + "px,0)";
+    H.aurora.style.opacity = (1 - 0.45 * p).toFixed(3);
+    H.mini.style.opacity = seg(p, [[0.65, 0], [1, 1]]).toFixed(3);
+  }
   function layoutTop() {
     collapseY = Math.max(heroEl.offsetHeight - MINI, 0);
-    topEl.style.top = -collapseY + "px";   // sticky 가 이만큼 올라간 뒤 멈춘다
-    topEl.style.setProperty("--cy", collapseY + "px"); // 효과 방식의 애니메이션 구간
+    lastP = -1;
     onScroll();
   }
   function onScroll() {
     ticking = false;
-    // 단순 방식은 큰 제목의 날짜 줄이 걸치기 전에 조금 일찍 덮는다
-    var on = window.scrollY >= collapseY - (FX ? 2 : 90);
-    if (topEl.classList.contains("collapsed") !== on) topEl.classList.toggle("collapsed", on);
+    var y = window.scrollY;
+    paintHero(collapseY ? Math.min(Math.max(y / collapseY, 0), 1) : 1);
+    var on = y >= collapseY - 1;
+    if (barEl.classList.contains("stuck") !== on) barEl.classList.toggle("stuck", on);
   }
   window.addEventListener("scroll", function () {
-    // 스크롤하는 동안만 오로라를 멈춘다 (클래스는 스크롤 시작·끝에 한 번씩만 바뀜)
+    // 스크롤하는 동안만 오로라 흔들림을 멈춘다 (클래스는 스크롤 시작·끝에 한 번씩만 바뀜)
     if (!scrollTimer) document.documentElement.classList.add("scrolling");
     clearTimeout(scrollTimer);
     scrollTimer = setTimeout(function () { scrollTimer = null; document.documentElement.classList.remove("scrolling"); }, 180);
@@ -1204,7 +1246,7 @@
   });
 
   /* ---------- 진단 창: 맨 아래 "Tromsø 2026" 을 5번 연속 누르면 ---------- */
-  var APP_VERSION = "2026-11-24.d3";
+  var APP_VERSION = "2026-11-24.h1";
   var brandTaps = [];
   document.getElementById("footBrand").addEventListener("click", function () {
     var now = Date.now();
@@ -1216,9 +1258,8 @@
     var hi = getComputedStyle(document.querySelector(".hero-inner"));
     var info = {
       "버전": APP_VERSION,
-      "효과 방식(fx)": document.documentElement.classList.contains("fx"),
-      "스크롤 연동 CSS 지원": !!(window.CSS && CSS.supports && CSS.supports("animation-timeline: scroll()")),
-      "제목 애니메이션": (hi.animationName || "-") + " / " + (hi.animationTimeline || "지원 안 함"),
+      "상단 효과": "스크립트" + (LITE ? " (흐림 없음)" : " (흐림 포함)"),
+      "현재 제목 상태": "투명도 " + hi.opacity + " / " + (hi.filter || "-"),
       "화면 폭×높이": innerWidth + "×" + innerHeight + " (dpr " + (window.devicePixelRatio || 1) + ")",
       "폭 700 이하": matchMedia("(max-width: 700px)").matches,
       "홈 화면 앱": ENV.standalone,
@@ -1226,7 +1267,6 @@
       "앱 안 브라우저 판정": ENV.inApp,
       "아이폰/아이패드 판정": ENV.ios,
       "접히는 거리": collapseY + "px",
-      "효과 구간": (hi.animationRangeStart || "-") + " ~ " + (hi.animationRangeEnd || "-"),
       "오프라인 도우미": navigator.serviceWorker && navigator.serviceWorker.controller ? "작동 중" : "없음",
       "브라우저 정보": UA
     };

@@ -74,10 +74,9 @@ strong { font-weight: 650; }
 .muted-link { font-size: 13px; color: var(--muted); text-decoration: none; border-bottom: 1px solid var(--line); }
 .muted-link:hover { color: var(--ink); }
 
-/* ============ 접히는 상단 (사진 → 작은 제목 + 탭) ============ */
-/* 기본(단순 방식): 사진·제목이 페이지와 함께 올라가고 탭 바만 남는다 — 모든 기기에서 부드러움
-   html.fx (효과 방식): 확인된 휴대폰 브라우저에서만 제목이 오로라 속으로 녹아드는 효과 */
-.top { position: sticky; top: 0; z-index: 20; }
+/* ============ 접히는 상단 (사진 → 작은 제목 + 탭) ============
+   사진은 평범하게 페이지와 함께 스크롤된다. 접히는 효과(제목이 떠오르며 흐려져 오로라 속으로)는
+   app.js 가 스크롤 위치대로 transform·opacity·filter 를 직접 적는다 — 모든 브라우저에서 같은 방식. */
 .hero { position: relative; height: min(60vh, 560px); min-height: 340px; overflow: hidden; background: var(--night); color: #fff; }
 .hero-sky { position: absolute; inset: 0; background:
   radial-gradient(1px 1px at 12% 18%, rgba(255,255,255,.9) 50%, transparent 51%),
@@ -102,9 +101,8 @@ strong { font-weight: 650; }
 @keyframes sway2 { 0% { transform: translate3d(5%, 4%, 0) rotate(6deg) scaleX(1.1); opacity: .45; } 100% { transform: translate3d(-9%, -3%, 0) rotate(-7deg) scaleX(.9); opacity: .85; } }
 @keyframes sway3 { 0% { transform: translate3d(0, -4%, 0) rotate(-4deg); opacity: .35; } 100% { transform: translate3d(-12%, 6%, 0) rotate(8deg) scaleY(1.3); opacity: .7; } }
 @media (prefers-reduced-motion: reduce) { .aurora i { animation: none; } }
-.hero-shade { position: absolute; inset: 0; }
-.hero-shade::after { content: ""; position: absolute; inset: 0; background: var(--night); opacity: 0; }
-.hero-inner { position: absolute; left: 0; right: 0; bottom: 0; max-width: 760px; margin: 0 auto; padding: 0 20px 40px; transform-origin: left bottom; }
+.hero-shade { position: absolute; inset: 0; background: var(--night); opacity: 0; will-change: opacity; }
+.hero-inner { position: absolute; left: 0; right: 0; bottom: 0; max-width: 760px; margin: 0 auto; padding: 0 20px 40px; transform-origin: left bottom; will-change: transform, opacity; }
 .hero-title { position: relative; margin: 0; font-size: clamp(36px, 8vw, 64px); line-height: 1.05; font-weight: 700; letter-spacing: -0.035em; }
 /* 오로라 빛깔로 물든 제목 사본 — 투명도만 바꿔 겹쳐 보이게 (색·그림자 애니메이션보다 훨씬 가볍다) */
 .hero-glow { position: absolute; inset: 0; color: #8ef5cc; text-shadow: 0 0 18px rgba(111,227,180,.85), 0 0 42px rgba(111,227,180,.55); opacity: 0; pointer-events: none; will-change: opacity; }
@@ -113,59 +111,17 @@ strong { font-weight: 650; }
 .hero-shade { z-index: 1; }
 .hero-inner { z-index: 2; }
 .aurora { z-index: 3; }
-.mini { z-index: 4; }
-/* 최신 브라우저: 스크롤에 직접 연결된 애니메이션 — 제목이 위로 떠오르며
-   흐려지고 오로라 빛깔로 물들어 오로라 속으로 녹아든다 (스크립트 없이 부드럽게) */
-@supports (animation-timeline: scroll()) {
-  .fx .hero-inner {
-    animation: sink-into-aurora linear both;
-    animation-timeline: scroll(root block);
-    animation-range: 0px var(--cy, 400px);
-  }
-  .fx .hero-inner { will-change: transform, opacity, filter; }
-  .fx .hero-glow, .fx .mini, .fx .hero-shade::after {
-    animation-timing-function: linear; animation-fill-mode: both;
-    animation-timeline: scroll(root block); animation-range: 0px var(--cy, 400px);
-  }
-  .fx .hero-glow { animation-name: glow-in; }
-  .fx .mini { animation-name: mini-in; }
-  .fx .hero-shade::after { animation-name: shade-in; }
-  /* 오로라는 스크롤을 거슬러 화면에 머물며 내려와, 떠오르는 제목을 감싼다 */
-  .fx .aurora {
-    animation: aurora-follow linear both;
-    animation-timeline: scroll(root block);
-    animation-range: 0px var(--cy, 400px);
-  }
-}
-@keyframes aurora-follow {
-  0%   { transform: translate3d(0, 0, 0); opacity: 1; }
-  100% { transform: translate3d(0, calc(var(--cy, 400px) * .78), 0); opacity: .55; }
-}
-@keyframes sink-into-aurora {
-  0%   { transform: translate3d(0, 0, 0) scale(1); filter: blur(0); opacity: 1; }
-  45%  { filter: blur(.5px); opacity: 1; }
-  80%  { filter: blur(3px); opacity: .7; }
-  100% { transform: translate3d(0, -56px, 0) scale(.9); filter: blur(7px); opacity: 0; }
-}
-@keyframes glow-in { 0% { opacity: 0; } 40% { opacity: .35; } 75% { opacity: .95; } 100% { opacity: 1; } }
-@keyframes mini-in { 0%, 65% { opacity: 0; } 100% { opacity: 1; } }
-@keyframes shade-in { 0% { opacity: 0; } 100% { opacity: .92; } }
-@media (prefers-reduced-motion: reduce) {
-  .fx .hero-inner, .fx .aurora { animation: none !important; }
-}
-.mini { position: absolute; left: 0; right: 0; bottom: 0; height: 48px; max-width: 760px; margin: 0 auto; padding: 0 20px; display: none; align-items: center; gap: 10px;
-  color: #fff; text-decoration: none; opacity: 0; pointer-events: none; }
-.fx .mini { display: flex; }
-/* 단순 방식에서도 접히면 오로라 빛 깔린 작은 제목 줄이 남는다.
-   스크롤마다 계산하지 않고, 접히는 순간 클래스 한 번 → 0.25초 페이드 (GPU 처리) */
-html:not(.fx) .mini { display: flex; max-width: none; padding: 0 max(20px, calc(50% - 360px));
+
+/* 작은 제목 줄 + 탭: 사진 아래쪽 48px 에 겹쳐 있다가(투명) 맨 위에 붙으면 남는다 */
+.topbar { position: sticky; top: 0; z-index: 20; margin-top: -48px; pointer-events: none; }
+.topbar .tabs { pointer-events: auto; }
+.mini { display: flex; align-items: center; gap: 10px; height: 48px; padding: 0 max(20px, calc(50% - 360px));
+  color: #fff; text-decoration: none; opacity: 0; pointer-events: none; will-change: opacity;
   background:
     radial-gradient(60% 140% at 22% 0%, rgba(80,255,170,.30), transparent 70%),
     radial-gradient(45% 120% at 70% 10%, rgba(150,120,255,.22), transparent 70%),
-    linear-gradient(180deg, #0a1630, #0c1424);
-  opacity: 0; transition: opacity .25s ease; will-change: opacity; }
-html:not(.fx) .top.collapsed .mini { opacity: 1; }
-.top.collapsed .mini { pointer-events: auto; }
+    linear-gradient(180deg, #0a1630, #0c1424); }
+.topbar.stuck .mini { pointer-events: auto; }
 .mini-title { font-size: 18px; font-weight: 700; letter-spacing: -0.03em; }
 .mini-meta { font-size: 12.5px; color: rgba(255,255,255,.65); font-variant-numeric: tabular-nums; }
 
