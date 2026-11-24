@@ -455,6 +455,7 @@
   /* ---------- 접히는 상단: 사진 → 작은 제목 + 탭 ---------- */
   var topEl = document.getElementById("top");
   var heroEl = document.getElementById("hero");
+  var SCROLL_TL = !!(window.CSS && CSS.supports && CSS.supports("animation-timeline: scroll()"));
   var MINI = 48;          // 접혔을 때 남는 제목 줄 높이
   var collapseY = 0;
   var ticking = false;
@@ -467,7 +468,8 @@
   function onScroll() {
     ticking = false;
     var p = collapseY ? Math.min(Math.max(window.scrollY / collapseY, 0), 1) : 0;
-    topEl.style.setProperty("--p", p.toFixed(3));
+    // 스크롤 타임라인을 지원하면 CSS 가 직접 처리 → 매 프레임 스타일 재계산을 피한다
+    if (!SCROLL_TL) topEl.style.setProperty("--p", p.toFixed(3));
     topEl.classList.toggle("collapsed", p >= 0.99);
   }
   window.addEventListener("scroll", function () {

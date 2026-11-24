@@ -9,7 +9,8 @@ import { createHash } from "node:crypto";
 const PREFIX = "trip/v/";
 
 export function storageReady() {
-  return Boolean(process.env.STORE_DIR || process.env.BLOB_READ_WRITE_TOKEN);
+  // 읽기·쓰기 토큰, 또는 최신 Vercel 기본값인 OIDC 연결(BLOB_STORE_ID) 둘 다 인정
+  return Boolean(process.env.STORE_DIR || process.env.BLOB_READ_WRITE_TOKEN || process.env.BLOB_STORE_ID);
 }
 
 /* ---------- 로컬(파일) 백엔드 ---------- */
