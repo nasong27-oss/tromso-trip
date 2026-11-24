@@ -1131,6 +1131,73 @@
       .then(function () { clearTimeout(timer); });
   }
 
+  /* ---------- 홈 화면에 추가 (하단 버튼) ----------
+     안드로이드: 브라우저가 "설치 가능" 신호를 주면 휴대폰 설치 창
+     아이폰·아이패드: 순서 안내 · 카카오톡 등 앱 안 브라우저: 인터넷 앱으로 열기 안내 */
+  var UA = navigator.userAgent || "";
+  var ENV = {
+    kakao: /KAKAOTALK/i.test(UA),
+    inApp: /KAKAOTALK|NAVER\(inapp|Instagram|FBAN|FBAV|FB_IAB|Line\/|DaumApps|BAND\/|everytimeApp|; wv\)/i.test(UA),
+    ios: /iPhone|iPad|iPod/.test(UA) || (/Macintosh/.test(UA) && navigator.maxTouchPoints > 1),
+    android: /Android/i.test(UA),
+    standalone: (window.matchMedia && matchMedia("(display-mode: standalone)").matches) || window.navigator.standalone === true
+  };
+  var installEvt = null;
+  window.addEventListener("beforeinstallprompt", function (e) { e.preventDefault(); installEvt = e; });
+  window.addEventListener("appinstalled", function () { toast("홈 화면에 추가됐어요"); });
+  var a2hsBtn = document.getElementById("footA2hs");
+  if (ENV.standalone) a2hsBtn.hidden = true;
+
+  var IC_DOTS = '<svg width="28" height="28" viewBox="0 0 24 24" fill="#2f6fde"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>';
+  var IC_SHARE = '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#2f6fde" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M8 7l4-4 4 4"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></svg>';
+  var IC_ADD = '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#15171c" stroke-width="2" stroke-linecap="round"><rect x="4" y="4" width="16" height="16" rx="4"/><path d="M12 8v8M8 12h8"/></svg>';
+  var IC_VDOTS = '<svg width="28" height="28" viewBox="0 0 24 24" fill="#15171c"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg>';
+  function step(n, html, icon) {
+    return '<div class="a2-step"><span class="a2-no">' + n + '</span><span class="a2-txt">' + html + '</span><span class="a2-ic">' + icon + "</span></div>";
+  }
+  var SWITCH = '<p class="a2-switch">다른 휴대폰 안내 보기: <button type="button" data-a2="ios">아이폰</button> · <button type="button" data-a2="android">안드로이드</button></p>';
+  function a2Content(kind) {
+    if (kind === "inapp") {
+      var url = "kakaotalk://web/openExternal?url=" + encodeURIComponent(location.origin + "/");
+      return "<h3>" + (ENV.kakao ? "카카오톡" : "이 앱") + "에서는 추가할 수 없어요</h3><p class=\"a2-sub\">먼저 인터넷 앱으로 열어 주세요</p>" +
+        (ENV.kakao ? '<a class="a2-big" href="' + url + '">인터넷 앱으로 열기</a><p class="a2-note">아이폰은 Safari, 안드로이드는 평소 쓰는 인터넷 앱(Chrome·삼성 인터넷)으로 열려요</p>' : "") +
+        '<p class="a2-small">' + (ENV.kakao ? "버튼이 안 되면: " : "") + "오른쪽 위 <b>⋮</b> (또는 아래 <b>⋯</b>) → <b>다른 브라우저로 열기</b>를 눌러 주세요. 열린 뒤 맨 아래 <b>📲 홈 화면에 추가</b>를 다시 누르면 돼요.</p>";
+    }
+    if (kind === "android") {
+      return "<h3>홈 화면에 추가하는 방법</h3><p class=\"a2-sub\">안드로이드 (Chrome · 삼성 인터넷)</p>" +
+        step(1, "오른쪽 위(삼성 인터넷은 아래) <b>⋮ 또는 ≡ 메뉴</b>를 눌러요", IC_VDOTS) +
+        step(2, "<b>홈 화면에 추가</b> 또는 <b>앱 설치</b>를 눌러요", IC_ADD) +
+        step(3, "<b>추가(설치)</b>를 누르면 끝!<br>홈 화면에 오로라 아이콘이 생겨요", IC_ADD) + SWITCH;
+    }
+    return "<h3>홈 화면에 추가하는 방법</h3><p class=\"a2-sub\">아이폰 · 아이패드 (Safari)</p>" +
+      step(1, "화면 아래쪽(또는 위쪽)의 <b>⋯ 버튼</b>이나 <b>공유 버튼</b>을 눌러요", IC_DOTS) +
+      step(2, "<b>공유</b>를 누르고, 목록을 내려 <b>홈 화면에 추가</b>를 눌러요", IC_SHARE) +
+      step(3, "오른쪽 위 <b>추가</b>를 누르면 끝!<br>홈 화면에 오로라 아이콘이 생겨요", IC_ADD) + SWITCH;
+  }
+  function openA2Sheet(kind) {
+    var old = document.querySelector(".a2-wrap"); if (old) old.remove();
+    var wrap = document.createElement("div");
+    wrap.className = "a2-wrap";
+    wrap.innerHTML = '<div class="a2-bg"></div><div class="a2-sheet" role="dialog" aria-modal="true"><div class="a2-grab"></div>' +
+      a2Content(kind) + '<button type="button" class="a2-close">' + (kind === "inapp" ? "닫기" : "알겠어요") + "</button></div>";
+    document.body.appendChild(wrap);
+    wrap.addEventListener("click", function (e) {
+      if (e.target.classList.contains("a2-bg") || e.target.classList.contains("a2-close")) return wrap.remove();
+      var sw = e.target.closest("[data-a2]");
+      if (sw) openA2Sheet(sw.getAttribute("data-a2"));
+    });
+  }
+  a2hsBtn.addEventListener("click", function () {
+    if (ENV.inApp) return openA2Sheet("inapp");
+    if (installEvt) {
+      var evt = installEvt; installEvt = null;
+      evt.prompt();
+      if (evt.userChoice) evt.userChoice.then(function (c) { if (c.outcome !== "accepted") installEvt = null; });
+      return;
+    }
+    openA2Sheet(ENV.ios ? "ios" : "android");
+  });
+
   /* ---------- 오프라인 지원 ---------- */
   function setOffline(on) {
     var el = document.getElementById("offlineBar");
