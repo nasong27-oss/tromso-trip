@@ -673,19 +673,16 @@
     p = Math.round(p * 1000) / 1000;
     if (p === lastP) return;
     lastP = p;
-    var y = REDUCED ? 0 : -56 * p, sc = REDUCED ? 1 : 1 - 0.1 * p;
-    var tf = "translate3d(0," + y.toFixed(1) + "px,0) scale(" + sc.toFixed(3) + ")";
-    H.inner.style.transform = tf;
+    // 위치·크기는 건드리지 않는다: 스크립트는 스크롤보다 한 박자 늦어서 움직임을 넣으면 덕덕 끊겨 보인다.
+    // 움직임은 스크롤 그대로(브라우저가 부드럽게 처리), 여기서는 투명도만 바꾼다.
     if (H.ghost) {
       H.inner.style.opacity = seg(p, [[0.25, 1], [0.75, 0]]).toFixed(3);
-      H.ghost.style.transform = tf;
       H.ghost.style.opacity = seg(p, [[0.2, 0], [0.6, 0.85], [0.8, 0.7], [1, 0]]).toFixed(3);
     } else {
       H.inner.style.opacity = seg(p, [[0.45, 1], [0.8, 0.7], [1, 0]]).toFixed(3);
     }
     H.glow.style.opacity = seg(p, [[0, 0], [0.4, 0.35], [0.75, 0.95], [1, 1]]).toFixed(3);
     H.shade.style.opacity = (0.92 * p).toFixed(3);
-    H.aurora.style.transform = REDUCED ? "" : "translate3d(0," + (collapseY * 0.78 * p).toFixed(1) + "px,0)";
     H.aurora.style.opacity = (1 - 0.45 * p).toFixed(3);
     H.mini.style.opacity = seg(p, [[0.65, 0], [1, 1]]).toFixed(3);
   }
@@ -1270,7 +1267,7 @@
   });
 
   /* ---------- 진단 창: 맨 아래 "Tromsø 2026" 을 5번 연속 누르면 ---------- */
-  var APP_VERSION = "2026-11-24.h2";
+  var APP_VERSION = "2026-11-24.h3";
   var brandTaps = [];
   document.getElementById("footBrand").addEventListener("click", function () {
     var now = Date.now();
