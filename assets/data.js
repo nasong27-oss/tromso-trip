@@ -11,6 +11,7 @@ window.TRIP = {
 
   /* ---------- 마감·주의 일정 (홈 상단에 자동 정렬) ---------- */
   deadlines: [
+    { at: "2026-12-16T12:00:00+09:00", title: "Airbnb 숙박비 결제 예정", tab: "stay1", dateOnly: true },
     { at: "2026-12-24T17:00:00+01:00", title: "Airbnb 무료 취소 마감", tab: "stay1" },
     { at: "2026-12-25T16:30:00+01:00", title: "오로라 투어 무료 취소 마감 (25시간 전)", tab: "aurora" },
     { at: "2026-12-25T17:30:00+01:00", title: "오로라 투어 eWaiver 전원 작성", tab: "aurora", urgent: true },
@@ -21,7 +22,7 @@ window.TRIP = {
 
   /* ---------- 숙소 요약 (홈 카드) ---------- */
   stays: [
-    { tab: "stay1", dates: "12/25 – 12/28", nights: 3, name: "전망 좋은 모던 아파트", area: "트롬쇠 시내 · Dramsvegen", label: "AIRBNB" },
+    { tab: "stay1", dates: "12/25 – 12/28", nights: 3, name: "Tromsø 시내에서 약간 떨어진 주택", area: "트롬쇠 시내 · Dramsvegen", label: "AIRBNB" },
     { tab: "stay2", dates: "12/28 – 12/30", nights: 2, name: "Lauklines Kystferie 캐빈", area: "Kvaløya 섬 해안", label: "CABIN" },
     { tab: "stay3", dates: "12/30 – 1/1", nights: 2, name: "MOXY Tromsø", area: "트롬쇠 공항 옆", label: "HOTEL" }
   ],
@@ -90,30 +91,30 @@ window.TRIP = {
     { id: "towel", text: "Airbnb용 수건 · 세면도구 · 화장지 챙기기 (제공 안 됨)" },
     { id: "deposit", text: "Lauklines 보증용 신용카드 (Visa / Mastercard)" },
     { id: "insurance", text: "여행자 보험 가입" },
-    { id: "moxy", text: "MOXY 예약 정보(예약번호·비용) 페이지에 추가" }
+    { id: "moxy", text: "MOXY 각자 개별 예약 확인" }
   ],
 
   /* ---------- 비용 (엑셀 「비용 정리」) ---------- */
   cost: {
     items: [
-      { name: "12/25–28 숙소", sub: "Airbnb", krw: 2237654, nok: null, status: "", tab: "stay1" },
+      { name: "12/25–28 숙소", sub: "Airbnb", krw: 2237654, nok: null, status: "due", due: "12/16", tab: "stay1" },
       { name: "12/28–30 숙소", sub: "Lauklines", krw: 1038413, nok: 7438, status: "paid", tab: "stay2" },
       { name: "오로라 투어", sub: "Wandering Owl", krw: 1026127, nok: 7350, status: "paid", tab: "aurora" },
       { name: "렌터카", sub: "Hertz", krw: 1229677, nok: 8808.75, status: "onsite", tab: "car" },
-      { name: "12/30–1/1 숙소", sub: "MOXY", krw: null, nok: null, status: "tbd", tab: "stay3" }
+      { name: "12/30–1/1 숙소", sub: "MOXY", krw: null, nok: null, status: "self", tab: "stay3" }
     ]
   },
 
   /* ---------- 숙소 1 ---------- */
   stay1: {
     eyebrow: "STAY 01 · 12/25 – 12/28 · 3박",
-    title: "전망 좋은 모던 아파트",
+    title: "Tromsø 시내에서 약간 떨어진 주택",
     original: "Moderne leilighet med fin utsikt og bilparkering",
     facts: [
       { k: "체크인", v: "12/25 (금) 17:00", s: "셀프 체크인 · 열쇠 보관함" },
       { k: "체크아웃", v: "12/28 (월) 11:00", s: "3박" },
       { k: "예약 코드", v: "HMH3CT2TN2", copy: true },
-      { k: "총 비용", v: "₩2,237,654", s: "1인 ₩745,885" }
+      { k: "총 비용", v: "₩2,237,654", s: "1인 ₩745,885 · 12/16 결제 예정" }
     ],
     address: "Dramsvegen 167 Leilighet, 9010 Tromsø, 노르웨이",
     mapQ: "Dramsvegen 167, 9010 Tromsø",
@@ -167,11 +168,6 @@ window.TRIP = {
     ],
     address: "Vasstrandvegen 578, Tromsø (Lauklines Kystferie)",
     mapQ: "Lauklines Kystferie, Vasstrandvegen 578, Tromsø",
-    warn: { title: "체크인 준비물", items: [
-      "파손 보증(가승인)용 **신용카드 지참 필수** — Visa / Mastercard / Eurocard",
-      "퇴실 시 이상 없으면 가승인 해제",
-      "첫날 **22:00 전 도착** 및 리셉션 연락 필요"
-    ]},
     cancelBands: { checkin: "2026-12-28T15:00:00+01:00", bands: [
       { minDays: 60, text: "60일 전까지 — 수수료 495 NOK만 공제" },
       { minDays: 31, text: "59 ~ 31일 전 — 25% 위약금" },
@@ -179,6 +175,10 @@ window.TRIP = {
       { minDays: -999, text: "14일 이내 — 환불 불가" }
     ], note: "취소는 반드시 서면으로" },
     sections: [
+      { h: "체크인 안내", list: [
+        "파손 보증(가승인)용 **신용카드 지참** — Visa / Mastercard / Eurocard (퇴실 시 이상 없으면 해제)",
+        "첫날 **22:00 전 도착** 및 리셉션 연락"
+      ]},
       { h: "결제 내역", list: [
         "**총액 7,438 NOK (≈ ₩1,038,413) · 완납**",
         "공급가 6,641 NOK + VAT 12% 797 NOK (1박 3,719 NOK)",
@@ -215,14 +215,13 @@ window.TRIP = {
     facts: [
       { k: "체크인", v: "12/30 (수)", s: "24시간 체크인" },
       { k: "체크아웃", v: "1/1 (금)", s: "2박" },
-      { k: "예약 번호", v: "추가 예정", muted: true },
-      { k: "총 비용", v: "추가 예정", muted: true }
+      { k: "예약", v: "개별 예약", s: "각자 예약 · 각자 결제" },
+      { k: "총 비용", v: "각자 결제", muted: true, s: "공동 비용 합계에서 제외" }
     ],
     address: "Huldervegen 2, 9016 Tromsø",
     mapQ: "Moxy Tromso, Huldervegen 2, 9016 Tromsø",
-    warn: { title: "예약 확정", tone: "info", items: [
-      "3번째 숙소는 **MOXY로 확정**",
-      "예약번호 · 비용 · 체크인/아웃 시간은 확인되는 대로 이 탭에 추가",
+    warn: { title: "개별 예약", tone: "info", items: [
+      "3번째 숙소는 **MOXY로 확정 · 각자 개별 예약**",
       "공항 바로 옆이라 12/30 렌터카 반납 후 이동, 1/1 출국이 편해요"
     ]},
     sections: [],

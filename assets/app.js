@@ -69,6 +69,10 @@
     if (isNaN(p.y)) return "날짜 확인";
     return p.mo + "/" + p.d + " (" + WEEK[p.w] + ") " + pad(p.h) + ":" + pad(p.mi);
   }
+  function fmtDate(iso) { // 날짜만 (한국 날짜 기준)
+    var d = new Date(new Date(iso).getTime() + 9 * 3600000);
+    return (d.getUTCMonth() + 1) + "/" + d.getUTCDate() + " (" + WEEK[d.getUTCDay()] + ")";
+  }
   function isoToInput(iso) {
     var p = osloParts(iso);
     return isNaN(p.y) ? "" : p.y + "-" + pad(p.mo) + "-" + pad(p.d) + " " + pad(p.h) + ":" + pad(p.mi);
@@ -317,7 +321,7 @@
         rows.map(function (r) {
           var p = "deadlines." + r.i, rel = relLabel(r.x.at);
           return '<li class="' + (r.x.urgent ? "urgent" : "") + '">' + A("#" + r.x.tab,
-            '<span class="dl-when">' + (editing ? E(p + ".at", { kind: "dt", ph: "2026-12-25 17:30" }) : fmtLocal(r.x.at)) + "</span>" +
+            '<span class="dl-when">' + (editing ? E(p + ".at", { kind: "dt", ph: "2026-12-25 17:30" }) : (r.x.dateOnly ? fmtDate(r.x.at) : fmtLocal(r.x.at))) + "</span>" +
             '<span class="dl-what">' + E(p + ".title", { plain: true }) + "</span>" +
             '<span class="dl-rel ' + rel.cls + '">' + (editing ? del(p) : rel.t) + "</span>") + "</li>";
         }).join("") + "</ol>" + add("deadlines", "deadline", "시간 추가") +
@@ -332,10 +336,10 @@
     var items = T.cost.items;
     var known = items.filter(function (i) { return i.krw; });
     var total = known.reduce(function (s, i) { return s + Number(i.krw); }, 0);
-    var STATUS = { paid: ["결제 완료", "ok"], onsite: ["현지 결제", "pend"], tbd: ["추가 예정", "tbd"], "": ["상태 미기재", "none"] };
+    var STATUS = { paid: ["결제 완료", "ok"], due: ["결제 예정", "pend"], onsite: ["현지 결제", "pend"], self: ["개별 예약", "tbd"], tbd: ["추가 예정", "tbd"], "": ["상태 미기재", "none"] };
     var n = Number(T.travelers) || 1;
 
-    var h = staticHead("COST", "비용 상세", "엑셀 「비용 정리」 기준 · " + n + "명 균등 분담");
+    var h = staticHead("COST", "비용 상세", "환율 변경에 따라 약간 변동 가능");
     h += '<div class="total per-person"><div><span class="total-k">1인당 (확정분)</span><span class="total-v serif">' + krw(total / n) + "</span></div>" +
       '<div><span class="total-k">총 비용 · ' + n + '명</span><span class="total-v small">' + krw(total) + "</span></div></div>";
 
@@ -345,7 +349,7 @@
         ? '<select class="ed-select" data-p="' + p + '.status">' + Object.keys(STATUS).map(function (k) {
             return '<option value="' + k + '"' + (it.status === k ? " selected" : "") + ">" + STATUS[k][0] + "</option>";
           }).join("") + "</select>"
-        : '<span class="badge ' + st[1] + '">' + st[0] + "</span>";
+        : '<span class="badge ' + st[1] + '">' + (it.status === "due" && it.due ? esc(it.due) + " " : "") + st[0] + "</span>";
       var inner = del(p) +
         '<div class="cost-top"><span class="cost-name">' + E(p + ".name", { plain: true }) + " <em>" + E(p + ".sub", { plain: true, ph: "업체" }) + "</em></span>" + badge + "</div>" +
         '<div class="cost-rows">' +
@@ -355,7 +359,7 @@
         (editing ? "<em>" + E(p + ".nok", { kind: "num", plain: true, ph: "NOK" }) + " NOK</em>" : (it.nok ? "<em>" + nok(it.nok) + "</em>" : "")) + "</div></div>";
       return "<li>" + A("#" + it.tab, inner) + "</li>";
     }).join("") + "</ul>" + add("cost.items", "cost", "비용 항목 추가");
-    h += '<p class="note">' + (editing ? "금액은 숫자만 입력 (쉼표는 자동 처리). 합계는 저장 후 다시 계산돼요." : "MOXY 숙박비는 확정되면 합계에 더해집니다. 렌터카는 픽업 시 현지에서 결제해요.") + "</p>";
+    h += '<p class="note">' + (editing ? "금액은 숫자만 입력 (쉼표는 자동 처리). 합계는 저장 후 다시 계산돼요." : "MOXY는 각자 개별 예약이라 합계에서 빠져 있어요. 렌터카는 픽업 시 현지에서 결제해요.") + "</p>";
     return h;
   }
 
@@ -812,13 +816,55 @@
   /* =========================================================
      시작: 서버에 저장된 최신 내용 불러오기
      ========================================================= */
+  /* ---------- 이미 저장된 내용에 코드 쪽 문구 변경 반영 ----------
+     편집으로 바꾼 값은 건드리지 않고, 원래 문구 그대로인 곳만 바꾼다. */
+  var PATCHES = [{ id: "2026-11-24-content", ops: [
+    { p: "stays.0.name", from: "전망 좋은 모던 아파트", to: "Tromsø 시내에서 약간 떨어진 주택" },
+    { p: "stay1.title", from: "전망 좋은 모던 아파트", to: "Tromsø 시내에서 약간 떨어진 주택" },
+    { p: "stay1.facts.3.s", from: "1인 ₩745,885", to: "1인 ₩745,885 · 12/16 결제 예정" },
+    { p: "cost.items.0.status", from: "", to: "due" },
+    { p: "cost.items.0.due", from: undefined, to: "12/16" },
+    { p: "cost.items.4.status", from: "tbd", to: "self" },
+    { p: "checklist.6.text", from: "MOXY 예약 정보(예약번호·비용) 페이지에 추가", to: "MOXY 각자 개별 예약 확인" },
+    { p: "stay3.facts.2", fromK: "추가 예정", to: { k: "예약", v: "개별 예약", s: "각자 예약 · 각자 결제" } },
+    { p: "stay3.facts.3", fromK: "추가 예정", to: { k: "총 비용", v: "각자 결제", muted: true, s: "공동 비용 합계에서 제외" } },
+    { p: "stay3.warn", fromTitle: "예약 확정", to: { title: "개별 예약", tone: "info", items: ["3번째 숙소는 **MOXY로 확정 · 각자 개별 예약**", "공항 바로 옆이라 12/30 렌터카 반납 후 이동, 1/1 출국이 편해요"] } },
+    { p: "stay2.warn", fromTitle: "체크인 준비물", to: null, moveToSection: { h: "체크인 안내", list: ["파손 보증(가승인)용 **신용카드 지참** — Visa / Mastercard / Eurocard (퇴실 시 이상 없으면 해제)", "첫날 **22:00 전 도착** 및 리셉션 연락"] } },
+    { addDeadline: { at: "2026-12-16T12:00:00+09:00", title: "Airbnb 숙박비 결제 예정", tab: "stay1", dateOnly: true } }
+  ]}];
+  function migrate(doc) {
+    doc._patches = doc._patches || [];
+    PATCHES.forEach(function (patch) {
+      if (doc._patches.indexOf(patch.id) >= 0) return;
+      patch.ops.forEach(function (op) {
+        try {
+          if (op.addDeadline) {
+            if (!doc.deadlines.some(function (d) { return d.title === op.addDeadline.title; })) doc.deadlines.unshift(clone(op.addDeadline));
+            return;
+          }
+          var cur = getPath(doc, op.p);
+          var match = ("from" in op && cur === op.from) ||
+            (op.fromK && cur && cur.v === op.fromK) ||
+            (op.fromTitle && cur && cur.title === op.fromTitle);
+          if (!match) return;
+          setPath(doc, op.p, op.to == null ? undefined : clone(op.to));
+          if (op.moveToSection && doc.stay2 && doc.stay2.sections) doc.stay2.sections.unshift(clone(op.moveToSection));
+        } catch (e) { /* 구조가 바뀐 곳은 건너뜀 */ }
+      });
+      doc._patches.push(patch.id);
+    });
+    return doc;
+  }
+  DEFAULT._patches = PATCHES.map(function (x) { return x.id; });
+  DOC._patches = DEFAULT._patches.slice();
+
   function loadLatest() {
     var ctrl = window.AbortController ? new AbortController() : null;
     var timer = setTimeout(function () { if (ctrl) ctrl.abort(); }, 4000);
     return fetch("/api/data", { cache: "no-store", credentials: "same-origin", signal: ctrl ? ctrl.signal : undefined })
       .then(function (r) { return r.ok ? r.json() : null; })
       .then(function (j) {
-        if (j && j.doc) { DOC = j.doc; VERSION = j.version; }
+        if (j && j.doc) { DOC = migrate(j.doc); VERSION = j.version; }
         else if (j && j.storage && !j.doc) { VERSION = null; }
       })
       .catch(function () { /* 서버 없으면 data.js 그대로 */ })
