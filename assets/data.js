@@ -135,7 +135,8 @@ window.TRIP = {
         "숙소 평점 **5.0** — 2026년 4월 후기 2건 모두 별점 5점"
       ]}
     ],
-    links: [{ label: "Airbnb 숙소 페이지", href: "https://www.airbnb.co.kr/rooms/1623739938268623685" }]
+    refs: [{ k: "예약처", v: "Airbnb 숙소 페이지", href: "https://www.airbnb.co.kr/rooms/1623739938268623685" }],
+    contacts: []
   },
 
   /* ---------- 숙소 2 ---------- */
@@ -164,17 +165,15 @@ window.TRIP = {
     ], note: "취소는 반드시 서면으로" },
     sections: [
       { h: "결제 내역", list: [
+        "**총액 7,438 NOK (≈ ₩1,038,413) · 완납**",
         "공급가 6,641 NOK + VAT 12% 797 NOK (1박 3,719 NOK)",
         "2026-07-23 Visa 1,512 NOK · 2026-11-15 Visa 5,927 NOK — **잔액 0 NOK**",
         "확인 메일: nasong27@gmail.com"
       ]},
       { h: "포함 사항", chips: ["침대 시트(린넨)", "수건", "퇴실 청소", "냉동고", "전기", "난방", "와이파이", "온수 · 냉수"] },
-      { h: "분리수거", recycle: [
-        { color: "#8b5cf6", label: "보라", what: "플라스틱" },
-        { color: "#22a06b", label: "초록", what: "음식물" },
-        { color: "#2f6fde", label: "파랑", what: "종이팩 · 잡지 · 종이" },
-        { color: "#d9d6cf", label: "흰색", what: "일반 쓰레기" }
-      ], note: "쓰레기통 4개 · 색상별 봉투 구비" },
+      { h: "분리수거", list: [
+        "보라 플라스틱 · 초록 음식물 · 파랑 종이팩·잡지·종이 · 흰색 일반 쓰레기 (쓰레기통 4개 · 색상별 봉투 구비)"
+      ]},
       { h: "주방 가전 · 소모품", chips: ["토스터", "전기포트", "커피메이커 · 필터", "전자레인지", "소금 · 후추", "행주 · 핸드타월", "오븐장갑 2", "식기세척기 세제", "주방세제 · 솔", "키친롤"] },
       { h: "주방 식기 · 조리도구", details: [
         "접시 · 깊은 접시 · 작은 접시 · 수프볼 · 찻잔 · 커피잔 각 8 / 유리잔 16 · 와인잔 8 · 에그컵 6",
@@ -189,10 +188,8 @@ window.TRIP = {
         "캐빈 최대 정원 5+1명 · 싱글 침대 구성"
       ]}
     ],
-    links: [
-      { label: "Lauklines 홈페이지", href: "https://lauklines.no" },
-      { label: "post@lauklines.no", href: "mailto:post@lauklines.no" }
-    ]
+    refs: [{ k: "예약처", v: "Lauklines Kystferie", href: "https://lauklines.no" }],
+    contacts: ["post@lauklines.no"]
   },
 
   /* ---------- 숙소 3 ---------- */
@@ -213,19 +210,16 @@ window.TRIP = {
       "예약번호 · 비용 · 체크인/아웃 시간은 확인되는 대로 이 탭에 추가",
       "공항 바로 옆이라 12/30 렌터카 반납 후 이동, 1/1 출국이 편해요"
     ]},
-    sections: [
-      { h: "연락처", list: ["+47 902 27 061"] }
-    ],
-    links: [{ label: "Marriott 호텔 페이지", href: "https://www.marriott.com/en-us/hotels/tosox-moxy-tromso/overview/" }]
+    sections: [],
+    refs: [{ k: "호텔", v: "MOXY Tromsø (Marriott)", href: "https://www.marriott.com/en-us/hotels/tosox-moxy-tromso/overview/" }],
+    contacts: ["+47 902 27 061"]
   },
 
   /* ---------- 오로라 투어 ---------- */
   aurora: {
     eyebrow: "AURORA · 12/26 (토) 17:30",
     title: "Adults Only Aurora Hunt",
-    original: "Wandering Owl AS · PUDGSF · 성인 전용",
-    image: "https://commons.wikimedia.org/wiki/Special:FilePath/Nordlicht-hilles%C3%B8ya.jpg?width=1600",
-    imageCredit: { text: "Nordlicht-hillesøya · M.Buschmann · CC BY-SA 3.0", href: "https://commons.wikimedia.org/wiki/File:Nordlicht-hilles%C3%B8ya.jpg" },
+    original: "투어 코드 PUDGSF · 성인 전용 · 약 6시간",
     facts: [
       { k: "집합", v: "17:20", s: "5~10분 전 밖에서 대기 · 지각 시 환불 불가" },
       { k: "투어 시작", v: "12/26 (토) 17:30", s: "약 6시간" },
@@ -254,11 +248,11 @@ window.TRIP = {
       ]},
       { h: "예약자", list: ["Seungmin Na · nas627@naver.com"] }
     ],
-    links: [
-      { label: "예약 확인서", href: "https://wanderingowlnordic.rezdy.com/print/OWL038504?hash=1005df2a4dee0f640406df78095d0be2&hsa=d2FuZGVyaW5nb3dsbm9yZGlj" },
-      { label: "info@wanderingowl.com", href: "mailto:info@wanderingowl.com" },
-      { label: "+47 484 60 081", href: "tel:+4748460081" }
-    ]
+    refs: [
+      { k: "여행사", v: "Wandering Owl AS", href: "https://www.wanderingowl.com" },
+      { k: "예약 확인서", v: "OWL038504", href: "https://wanderingowlnordic.rezdy.com/print/OWL038504?hash=1005df2a4dee0f640406df78095d0be2&hsa=d2FuZGVyaW5nb3dsbm9yZGlj" }
+    ],
+    contacts: ["info@wanderingowl.com", "+47 484 60 081"]
   },
 
   /* ---------- 렌터카 ---------- */
@@ -266,13 +260,15 @@ window.TRIP = {
     eyebrow: "RENTAL CAR · 12/25 – 12/30",
     title: "Hertz · Peugeot e-3008",
     original: "Midsize Wagon · 자동 변속 · 에어컨 · 전기차 · 무제한 주행",
+    refs: [{ k: "렌터카", v: "Hertz Norway", href: "https://www.hertz.no" }],
+    contacts: ["+47 4826 2000 (트롬쇠 공항 지점)"],
     facts: [
       { k: "픽업", v: "12/25 (금) 10:00", s: "트롬쇠 공항 셀프 키오스크" },
       { k: "반납", v: "12/30 (수) 17:00", s: "같은 지점" },
       { k: "예약 번호", v: "L662EC702E2", copy: true },
       { k: "총 비용", v: "8,808.75 NOK", s: "≈ ₩1,229,677 · 현지 결제" }
     ],
-    address: "Tromsø Lufthavn Langnes, NO 9016 · +47 4826 2000",
+    address: "Tromsø Lufthavn Langnes, NO 9016 (공항 셀프서비스 키오스크)",
     mapQ: "Tromsø Airport Langnes",
     warn: { title: "필수 지참물", items: [
       "국내 운전면허증 + **국제운전면허증(IDP)**",

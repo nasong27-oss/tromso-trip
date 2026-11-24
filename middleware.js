@@ -76,8 +76,6 @@ function loginPage(failed) {
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow"><meta name="theme-color" content="#0c1424">
 <title>Tromsø 2026</title>
-<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
 <style>
 *{box-sizing:border-box}
@@ -86,7 +84,7 @@ font-family:"Pretendard Variable",Pretendard,-apple-system,"Apple SD Gothic Neo"
 background:#0c1424 radial-gradient(120% 70% at 20% 0%,rgba(95,211,168,.28),transparent 60%),radial-gradient(90% 60% at 100% 20%,rgba(130,110,230,.22),transparent 60%)}
 .box{width:100%;max-width:340px;text-align:center}
 .eb{font-size:11px;letter-spacing:.18em;font-weight:600;color:rgba(255,255,255,.6);margin:0}
-h1{margin:8px 0 6px;font:italic 400 64px/1 "Instrument Serif",serif}
+h1{margin:8px 0 6px;font-size:56px;line-height:1;font-weight:300;letter-spacing:-.04em}
 p.sub{margin:0 0 32px;font-size:14px;color:rgba(255,255,255,.7)}
 input{width:100%;padding:16px;font-size:28px;letter-spacing:.6em;text-align:center;border-radius:14px;border:1px solid rgba(255,255,255,.2);
 background:rgba(255,255,255,.06);color:#fff;outline:none;font-family:inherit;text-indent:.6em}

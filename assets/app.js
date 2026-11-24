@@ -127,7 +127,8 @@
     pick: function () { return { name: "새 장소", desc: "설명", time: "" }; },
     extra: function () { return { k: "항목", v: "내용" }; },
     bd: function () { return { k: "항목", v: 0 }; },
-    stay: function () { return { tab: "home", dates: "날짜", nights: 1, name: "숙소 이름", area: "위치", label: "STAY" }; }
+    stay: function () { return { tab: "home", dates: "날짜", nights: 1, name: "숙소 이름", area: "위치", label: "STAY" }; },
+    ref: function () { return { k: "링크", v: "이름", href: "https://" }; }
   };
 
   /* ---------- 지도 ---------- */
@@ -158,14 +159,42 @@
   /* =========================================================
      공통 블록
      ========================================================= */
+  var BACK = '<a class="back" href="#home">← 일정으로</a>';
   function head(p) {
-    return '<header class="sec-head"><p class="eyebrow">' + E(p + ".eyebrow", { plain: true }) + "</p>" +
+    return BACK + '<header class="sec-head"><p class="eyebrow">' + E(p + ".eyebrow", { plain: true }) + "</p>" +
       '<h2 class="sec-title">' + E(p + ".title", { plain: true }) + "</h2>" +
-      '<p class="sec-sub">' + E(p + ".original", { plain: true, ph: "부제" }) + "</p></header>";
+      '<p class="sec-sub">' + E(p + ".original", { plain: true, ph: "부제" }) + "</p>" + refs(p + ".refs") + "</header>";
   }
   function staticHead(eyebrow, title, sub) {
-    return '<header class="sec-head"><p class="eyebrow">' + esc(eyebrow) + '</p><h2 class="sec-title">' + esc(title) + "</h2>" +
+    return BACK + '<header class="sec-head"><p class="eyebrow">' + esc(eyebrow) + '</p><h2 class="sec-title">' + esc(title) + "</h2>" +
       (sub ? '<p class="sec-sub">' + esc(sub) + "</p>" : "") + "</header>";
+  }
+  // 제목 아래 한 줄 링크: "여행사  Wandering Owl AS ↗"
+  function refs(p) {
+    var arr = getPath(D(), p) || [];
+    if (!arr.length && !editing) return "";
+    return '<div class="refs">' + arr.map(function (r, i) {
+      var rp = p + "." + i;
+      if (editing) {
+        return '<div class="ref"><span class="ref-k">' + E(rp + ".k", { plain: true }) + "</span><span>" + E(rp + ".v", { plain: true }) +
+          ' <span class="ref-h">' + E(rp + ".href", { plain: true, ph: "https://" }) + "</span></span>" + del(rp) + "</div>";
+      }
+      return '<div class="ref"><span class="ref-k">' + esc(r.k) + '</span><a href="' + esc(r.href) + '" target="_blank" rel="noopener">' + esc(r.v) + " ↗</a></div>";
+    }).join("") + add(p, "ref", "링크 추가") + "</div>";
+  }
+  function contactHref(s) {
+    if (/@/.test(s)) return "mailto:" + s.trim().split(/\s/)[0];
+    var num = s.replace(/\(.*?\)/g, "").replace(/[^\d+]/g, "");
+    return num.length >= 7 ? "tel:" + num : null;
+  }
+  function contacts(p) {
+    var arr = getPath(D(), p) || [];
+    if (!arr.length && !editing) return "";
+    if (editing) return '<section class="block"><h3 class="block-h">연락처</h3>' + strList(p) + "</section>";
+    return '<section class="block"><h3 class="block-h">연락처</h3><ul class="contacts">' + arr.map(function (c) {
+      var h = contactHref(c);
+      return "<li>" + (h ? '<a href="' + esc(h) + '">' + esc(c) + "</a>" : esc(c)) + "</li>";
+    }).join("") + "</ul></section>";
   }
   function facts(p) {
     var list = getPath(D(), p) || [];
@@ -208,19 +237,6 @@
     if (s.details) body += '<details class="more"' + (editing ? " open" : "") + "><summary>전체 목록 보기</summary>" + strList(p + ".details") + "</details>";
     return '<section class="block">' + del(p) + '<h3 class="block-h">' + E(p + ".h", { plain: true }) + "</h3>" + body + "</section>";
   }
-  function links(p) {
-    var arr = getPath(D(), p) || [];
-    if (!arr.length && !editing) return "";
-    return '<div class="links">' + arr.map(function (l, i) {
-      var lp = p + "." + i;
-      if (editing) {
-        return '<div class="ed-link">' + del(lp) + '<span class="ed-link-l">' + E(lp + ".label", { plain: true }) + "</span>" +
-          '<span class="ed-link-h">' + E(lp + ".href", { plain: true, ph: "https://" }) + "</span></div>";
-      }
-      var ext = /^https?:/.test(l.href);
-      return '<a class="link-pill" href="' + esc(l.href) + '"' + (ext ? ' target="_blank" rel="noopener"' : "") + ">" + esc(l.label) + (ext ? " ↗" : "") + "</a>";
-    }).join("") + add(p, "link", "링크 추가") + "</div>";
-  }
   function addressBlock(p) {
     var d = getPath(D(), p);
     return '<section class="block"><h3 class="block-h">위치</h3><p class="addr">' + E(p + ".address", { plain: true }) + "</p>" +
@@ -243,22 +259,6 @@
       '<div class="stat"><span class="stat-v serif">' + T.stays.length + '</span><span class="stat-k">숙소</span></div>' +
       '<div class="stat"><span class="stat-v serif">' + esc(T.travelers) + '</span><span class="stat-k">여행자</span></div>' +
       "</div></section>";
-
-    // 마감 일정: 보기 모드에선 지나간 것 빼고 시간순, 편집 모드에선 전체
-    var rows = T.deadlines.map(function (x, i) { return { x: x, i: i }; });
-    if (!editing) rows = rows.filter(function (r) { return new Date(r.x.at) > new Date(); })
-      .sort(function (a, b) { return new Date(a.x.at) - new Date(b.x.at); });
-    if (rows.length || editing) {
-      h += '<section class="block"><p class="eyebrow">KEY DATES</p><h3 class="block-h big">놓치면 안 되는 시간</h3><ol class="deadlines">' +
-        rows.map(function (r) {
-          var p = "deadlines." + r.i, rel = relLabel(r.x.at);
-          return '<li class="' + (r.x.urgent ? "urgent" : "") + '">' + A("#" + r.x.tab,
-            '<span class="dl-when">' + (editing ? E(p + ".at", { kind: "dt", ph: "2026-12-25 17:30" }) : fmtLocal(r.x.at)) + "</span>" +
-            '<span class="dl-what">' + E(p + ".title", { plain: true }) + "</span>" +
-            '<span class="dl-rel ' + rel.cls + '">' + (editing ? del(p) : rel.t) + "</span>") + "</li>";
-        }).join("") + "</ol>" + add("deadlines", "deadline", "시간 추가") +
-        '<p class="note">시간은 모두 노르웨이 현지 기준 (한국보다 8시간 늦음)' + (editing ? " · 형식: 2026-12-25 17:30" : "") + "</p></section>";
-    }
 
     h += '<section class="block"><p class="eyebrow">STAY</p><h3 class="block-h big">숙소 ' + T.stays.length + '곳</h3><div class="stay-cards">' +
       T.stays.map(function (s, i) {
@@ -300,6 +300,23 @@
           "<span>" + esc(c.text) + (c.link ? ' <a href="' + esc(c.link) + '" target="_blank" rel="noopener">링크 ↗</a>' : "") + "</span></label></li>";
       }).join("") + "</ul>" + add("checklist", "check", "할 일 추가") +
       '<p class="note">체크 표시는 이 기기에만 저장돼요.</p></section>';
+
+    // 마감 일정: 보기 모드에선 지나간 것 빼고 시간순, 편집 모드에선 전체
+    var rows = T.deadlines.map(function (x, i) { return { x: x, i: i }; });
+    if (!editing) rows = rows.filter(function (r) { return new Date(r.x.at) > new Date(); })
+      .sort(function (a, b) { return new Date(a.x.at) - new Date(b.x.at); });
+    if (rows.length || editing) {
+      h += '<section class="block"><p class="eyebrow">KEY DATES</p><h3 class="block-h big">놓치면 안 되는 시간</h3><ol class="deadlines">' +
+        rows.map(function (r) {
+          var p = "deadlines." + r.i, rel = relLabel(r.x.at);
+          return '<li class="' + (r.x.urgent ? "urgent" : "") + '">' + A("#" + r.x.tab,
+            '<span class="dl-when">' + (editing ? E(p + ".at", { kind: "dt", ph: "2026-12-25 17:30" }) : fmtLocal(r.x.at)) + "</span>" +
+            '<span class="dl-what">' + E(p + ".title", { plain: true }) + "</span>" +
+            '<span class="dl-rel ' + rel.cls + '">' + (editing ? del(p) : rel.t) + "</span>") + "</li>";
+        }).join("") + "</ol>" + add("deadlines", "deadline", "시간 추가") +
+        '<p class="note">시간은 모두 노르웨이 현지 기준 (한국보다 8시간 늦음)' + (editing ? " · 형식: 2026-12-25 17:30" : "") + "</p></section>";
+    }
+
     return h;
   }
 
@@ -308,18 +325,12 @@
     var items = T.cost.items;
     var known = items.filter(function (i) { return i.krw; });
     var total = known.reduce(function (s, i) { return s + Number(i.krw); }, 0);
-    var paid = known.filter(function (i) { return i.status === "paid"; }).reduce(function (s, i) { return s + Number(i.krw); }, 0);
-    var onsite = known.filter(function (i) { return i.status === "onsite"; }).reduce(function (s, i) { return s + Number(i.krw); }, 0);
-    var other = total - paid - onsite;
-    var max = Math.max.apply(null, known.map(function (i) { return Number(i.krw); }).concat([1]));
     var STATUS = { paid: ["결제 완료", "ok"], onsite: ["현지 결제", "pend"], tbd: ["추가 예정", "tbd"], "": ["상태 미기재", "none"] };
     var n = Number(T.travelers) || 1;
 
     var h = staticHead("COST", "비용 상세", "엑셀 「비용 정리」 기준 · " + n + "명 균등 분담");
     h += '<div class="total"><div><span class="total-k">총 비용 (확정분)</span><span class="total-v serif">' + krw(total) + "</span></div>" +
       '<div><span class="total-k">1인당</span><span class="total-v serif">' + krw(total / n) + "</span></div></div>";
-    h += '<div class="split" role="img" aria-label="결제 상태 비율"><i class="ok" style="flex:' + paid + '"></i><i class="pend" style="flex:' + onsite + '"></i><i class="none" style="flex:' + other + '"></i></div>' +
-      '<div class="split-legend"><span><i class="ok"></i>결제 완료 ' + krw(paid) + '</span><span><i class="pend"></i>현지 결제 예정 ' + krw(onsite) + '</span><span><i class="none"></i>상태 미기재 ' + krw(other) + "</span></div>";
 
     h += '<ul class="cost-list">' + items.map(function (it, i) {
       var p = "cost.items." + i, st = STATUS[it.status] || STATUS[""];
@@ -330,11 +341,11 @@
         : '<span class="badge ' + st[1] + '">' + st[0] + "</span>";
       var inner = del(p) +
         '<div class="cost-top"><span class="cost-name">' + E(p + ".name", { plain: true }) + " <em>" + E(p + ".sub", { plain: true, ph: "업체" }) + "</em></span>" + badge + "</div>" +
-        (it.krw && !editing ? '<div class="bar"><i style="width:' + (it.krw / max * 100).toFixed(1) + '%"></i></div>' : "") +
-        '<div class="cost-nums">' +
-        '<span class="cost-krw">' + (editing ? "₩ " + E(p + ".krw", { kind: "num", plain: true, ph: "원화" }) : (it.krw ? krw(it.krw) : "—")) + "</span>" +
-        "<span>" + (editing ? E(p + ".nok", { kind: "num", plain: true, ph: "NOK" }) + " NOK" : (it.nok ? nok(it.nok) : "")) + "</span>" +
-        "<span>" + (it.krw ? "1인 " + krw(it.krw / n) : "") + "</span></div>";
+        '<div class="cost-rows">' +
+        '<div class="cost-cell"><span>총액</span><b>' + (editing ? "₩ " + E(p + ".krw", { kind: "num", plain: true, ph: "원화" }) : (it.krw ? krw(it.krw) : "—")) + "</b>" +
+        (editing ? "<em>" + E(p + ".nok", { kind: "num", plain: true, ph: "NOK" }) + " NOK</em>" : (it.nok ? "<em>" + nok(it.nok) + "</em>" : "")) + "</div>" +
+        '<div class="cost-cell"><span>1인 (' + n + '명)</span><b>' + (it.krw ? krw(it.krw / n) : "—") + "</b>" +
+        (it.nok ? "<em>" + nok(Math.round(it.nok / n * 100) / 100) + "</em>" : "") + "</div></div>";
       return "<li>" + A("#" + it.tab, inner) + "</li>";
     }).join("") + "</ul>" + add("cost.items", "cost", "비용 항목 추가");
     h += '<p class="note">' + (editing ? "금액은 숫자만 입력 (쉼표는 자동 처리). 합계는 저장 후 다시 계산돼요." : "MOXY 숙박비는 확정되면 합계에 더해집니다. 렌터카는 픽업 시 현지에서 결제해요.") + "</p>";
@@ -344,17 +355,13 @@
   function viewDetail(key, extra) {
     var d = D()[key];
     var h = head(key);
-    if (d.image) {
-      h += '<figure class="detail-img"><img src="' + esc(d.image) + '" alt="" loading="lazy">' +
-        (d.imageCredit ? '<figcaption><a href="' + esc(d.imageCredit.href) + '" target="_blank" rel="noopener">' + esc(d.imageCredit.text) + "</a></figcaption>" : "") + "</figure>";
-    }
     h += facts(key + ".facts");
     h += callout(key + ".warn");
     if (extra) h += extra;
     h += addressBlock(key);
+    h += contacts(key + ".contacts");
     (d.sections || []).forEach(function (_, i) { h += section(key + ".sections." + i); });
     if (editing) h += '<div class="ed-row">' + add(key + ".sections", "section", "섹션 추가") + "</div>";
-    h += links(key + ".links");
     return h;
   }
 
@@ -438,6 +445,29 @@
     var id = (location.hash || "#home").slice(1);
     return VIEWS[id] ? id : "home";
   }
+  /* ---------- 접히는 상단: 사진 → 작은 제목 + 탭 ---------- */
+  var topEl = document.getElementById("top");
+  var heroEl = document.getElementById("hero");
+  var MINI = 48;          // 접혔을 때 남는 제목 줄 높이
+  var collapseY = 0;
+  var ticking = false;
+  function layoutTop() {
+    collapseY = Math.max(heroEl.offsetHeight - MINI, 0);
+    topEl.style.top = -collapseY + "px";   // sticky 가 이만큼 올라간 뒤 멈춘다
+    onScroll();
+  }
+  function onScroll() {
+    ticking = false;
+    var p = collapseY ? Math.min(Math.max(window.scrollY / collapseY, 0), 1) : 0;
+    topEl.style.setProperty("--p", p.toFixed(3));
+    topEl.classList.toggle("collapsed", p >= 0.99);
+  }
+  window.addEventListener("scroll", function () {
+    if (!ticking) { ticking = true; requestAnimationFrame(onScroll); }
+  }, { passive: true });
+  window.addEventListener("resize", layoutTop);
+  layoutTop();
+
   function renderHero() {
     var T = D();
     var meta = document.getElementById("heroMeta");
@@ -461,8 +491,8 @@
     wireMaps(app);
     renderBar();
     if (scroll) {
-      var y = document.getElementById("tabs").offsetTop;
-      if (window.scrollY > y) window.scrollTo(0, y);
+      // 탭을 바꾸면 그 탭의 맨 위(접힌 상단 바로 아래)에서 시작
+      if (window.scrollY > collapseY) window.scrollTo(0, collapseY);
     }
   }
   window.addEventListener("hashchange", function () { render(true); });
