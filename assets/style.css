@@ -156,6 +156,15 @@ strong { font-weight: 650; }
 .mini { position: absolute; left: 0; right: 0; bottom: 0; height: 48px; max-width: 760px; margin: 0 auto; padding: 0 20px; display: none; align-items: center; gap: 10px;
   color: #fff; text-decoration: none; opacity: 0; pointer-events: none; }
 .fx .mini { display: flex; }
+/* 단순 방식에서도 접히면 오로라 빛 깔린 작은 제목 줄이 남는다.
+   스크롤마다 계산하지 않고, 접히는 순간 클래스 한 번 → 0.25초 페이드 (GPU 처리) */
+html:not(.fx) .mini { display: flex; max-width: none; padding: 0 max(20px, calc(50% - 360px));
+  background:
+    radial-gradient(60% 140% at 22% 0%, rgba(80,255,170,.30), transparent 70%),
+    radial-gradient(45% 120% at 70% 10%, rgba(150,120,255,.22), transparent 70%),
+    linear-gradient(180deg, #0a1630, #0c1424);
+  opacity: 0; transition: opacity .25s ease; will-change: opacity; }
+html:not(.fx) .top.collapsed .mini { opacity: 1; }
 .top.collapsed .mini { pointer-events: auto; }
 .mini-title { font-size: 18px; font-weight: 700; letter-spacing: -0.03em; }
 .mini-meta { font-size: 12.5px; color: rgba(255,255,255,.65); font-variant-numeric: tabular-nums; }

@@ -458,12 +458,12 @@
   }
   /* ---------- 접히는 상단 ----------
      FX(효과 방식)는 index.html 머리에서 기기를 보고 정한다.
-     - 단순 방식: 사진이 통째로 밀려 올라가고 탭 바만 남는다 (스크롤에 연결된 계산 없음)
+     - 단순 방식: 사진이 통째로 밀려 올라가고, 접히는 순간 작은 제목 줄이 페이드인 (스크롤 연동 애니메이션 없음)
      - 효과 방식: 작은 제목 줄(48px)이 남고, 제목이 오로라 속으로 녹아드는 효과는 CSS 가 처리 */
   var topEl = document.getElementById("top");
   var heroEl = document.getElementById("hero");
   var FX = document.documentElement.classList.contains("fx");
-  var MINI = FX ? 48 : 0;
+  var MINI = 48;          // 접혔을 때 남는 작은 제목 줄
   var collapseY = 0;
   var ticking = false;
   var scrollTimer = null;
@@ -475,14 +475,16 @@
   }
   function onScroll() {
     ticking = false;
-    if (FX) topEl.classList.toggle("collapsed", window.scrollY >= collapseY - 2);
+    // 단순 방식은 큰 제목의 날짜 줄이 걸치기 전에 조금 일찍 덮는다
+    var on = window.scrollY >= collapseY - (FX ? 2 : 90);
+    if (topEl.classList.contains("collapsed") !== on) topEl.classList.toggle("collapsed", on);
   }
   window.addEventListener("scroll", function () {
     // 스크롤하는 동안만 오로라를 멈춘다 (클래스는 스크롤 시작·끝에 한 번씩만 바뀜)
     if (!scrollTimer) document.documentElement.classList.add("scrolling");
     clearTimeout(scrollTimer);
     scrollTimer = setTimeout(function () { scrollTimer = null; document.documentElement.classList.remove("scrolling"); }, 180);
-    if (FX && !ticking) { ticking = true; requestAnimationFrame(onScroll); }
+    if (!ticking) { ticking = true; requestAnimationFrame(onScroll); }
   }, { passive: true });
   window.addEventListener("resize", layoutTop);
   layoutTop();
