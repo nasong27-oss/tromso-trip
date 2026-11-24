@@ -86,7 +86,7 @@ font-family:"Pretendard Variable",Pretendard,-apple-system,"Apple SD Gothic Neo"
 background:radial-gradient(120% 70% at 20% 0%,rgba(95,211,168,.28),transparent 60%),radial-gradient(90% 60% at 100% 20%,rgba(130,110,230,.22),transparent 60%),#0c1424}
 .box{width:100%;max-width:340px;text-align:center}
 h1{margin:0;font-size:38px;line-height:1.05;font-weight:700;letter-spacing:-.035em;white-space:nowrap}
-.lat{margin:6px 0 12px;font-size:19px;color:rgba(255,255,255,.72)}
+.lat{margin:6px 0 36px;font-size:19px;color:rgba(255,255,255,.72)}
 p.sub{margin:0 0 36px;font-size:14px;color:rgba(255,255,255,.7)}
 .label{margin:0 0 12px;font-size:14px;font-weight:600;color:rgba(255,255,255,.9)}
 .pin{position:relative;display:flex;justify-content:center;gap:12px}
@@ -103,7 +103,6 @@ p.sub{margin:0 0 36px;font-size:14px;color:rgba(255,255,255,.7)}
 <form class="box" method="post" action="/__login" id="f">
 <h1>Tromsø, Norway</h1>
 <p class="lat">69° N</p>
-<p class="sub">2026. 12. 24 (목) – 2027. 1. 1 (금)</p>
 <p class="label">비밀번호 ${n}자리</p>
 <div class="pin${failed ? " shake" : ""}" id="pin">${boxes}
 <input id="pw" name="pw" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="${n}" autocomplete="off" aria-label="비밀번호 ${n}자리" autofocus required>
