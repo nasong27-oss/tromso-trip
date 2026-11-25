@@ -1235,11 +1235,18 @@
   DEFAULT._patches = PATCHES.map(function (x) { return x.id; });
   DOC._patches = DEFAULT._patches.slice();
 
+  var BUILD = null, NEW_BUILD = false;
   function loadLatest(fresh) {
     var ctrl = window.AbortController ? new AbortController() : null;
     var timer = setTimeout(function () { if (ctrl) ctrl.abort(); }, 4000);
     return fetch("/api/data" + (fresh ? "?fresh=1" : ""), { cache: "no-store", credentials: "same-origin", signal: ctrl ? ctrl.signal : undefined })
-      .then(function (r) { setOffline(!!r.headers.get("x-tt-offline")); return r.ok ? r.json() : null; })
+      .then(function (r) {
+        var off = !!r.headers.get("x-tt-offline");
+        setOffline(off);
+        var bld = r.headers.get("x-tt-build");
+        if (bld && !off) { if (BUILD && BUILD !== bld) NEW_BUILD = true; BUILD = BUILD || bld; }
+        return r.ok ? r.json() : null;
+      })
       .then(function (j) {
         if (j && j.doc) { DOC = migrate(j.doc); VERSION = j.version; }
         else if (j && j.storage && !j.doc) { VERSION = null; }
@@ -1274,6 +1281,11 @@
   }
   var SWITCH = '<p class="a2-switch">다른 휴대폰 안내 보기: <button type="button" data-a2="ios">아이폰</button> · <button type="button" data-a2="android">안드로이드</button></p>';
   function a2Content(kind) {
+    if (kind === "printpwa") {
+      return "<h3>홈 화면 앱에서는 인쇄가 안 돼요</h3><p class=\"a2-sub\">Safari에서 열어 맨 아래 <b>🖨️ PDF·인쇄</b>를 눌러 주세요</p>" +
+        '<a class="a2-big" href="x-safari-https://' + location.host + '/#home">Safari에서 열기</a>' +
+        '<p class="a2-small">Safari에서는 비밀번호를 한 번 다시 넣어야 해요. 버튼이 안 되면 Safari를 열고 <b>' + esc(location.host) + "</b> 를 입력해 주세요.</p>";
+    }
     if (kind === "printapp") {
       var url2 = "kakaotalk://web/openExternal?url=" + encodeURIComponent(location.origin + "/");
       return "<h3>" + (ENV.kakao ? "카카오톡" : "이 앱") + "에서는 PDF 저장이 안 돼요</h3><p class=\"a2-sub\">인터넷 앱으로 열어서 다시 눌러 주세요</p>" +
@@ -1302,7 +1314,7 @@
     var wrap = document.createElement("div");
     wrap.className = "a2-wrap";
     wrap.innerHTML = '<div class="a2-bg"></div><div class="a2-sheet" role="dialog" aria-modal="true"><div class="a2-grab"></div>' +
-      a2Content(kind) + '<button type="button" class="a2-close">' + (kind === "inapp" || kind === "printapp" ? "닫기" : "알겠어요") + "</button></div>";
+      a2Content(kind) + '<button type="button" class="a2-close">' + (kind === "inapp" || kind === "printapp" || kind === "printpwa" ? "닫기" : "알겠어요") + "</button></div>";
     document.body.appendChild(wrap);
     wrap.addEventListener("click", function (e) {
       if (e.target.classList.contains("a2-bg") || e.target.classList.contains("a2-close")) return wrap.remove();
@@ -1351,13 +1363,14 @@
   document.getElementById("footPrint").addEventListener("click", function () {
     if (editing) return toast("편집을 저장하거나 취소한 뒤에 눌러 주세요");
     if (ENV.inApp || typeof window.print !== "function") return openA2Sheet("printapp");
+    if (ENV.ios && ENV.standalone) return openA2Sheet("printpwa"); // 아이폰 홈 화면 앱은 인쇄 기능이 막혀 있다
     // Safari 는 누른 그 순간에 바로 부른 인쇄만 허용한다 → 기다리지 않고 곧바로
     buildPrint();
     window.print();
   });
 
   /* ---------- 진단 창: 맨 아래 "Tromsø 2026" 을 5번 연속 누르면 ---------- */
-  var APP_VERSION = "2026-11-26.w1";
+  var APP_VERSION = "2026-11-26.s1";
   var brandTaps = [];
   document.getElementById("footBrand").addEventListener("click", function () {
     var now = Date.now();
@@ -1411,4 +1424,23 @@
   // 저장된 최신 내용을 받아서 그린다 (서버가 느리면 최대 4초 뒤 data.js 로)
   app.innerHTML = '<p class="loading">불러오는 중…</p>';
   loadLatest().then(function () { render(false); });
+
+  /* ---------- 다시 열 때 최신으로 ----------
+     아이폰 홈 화면 앱은 껐다 켜도 멈춰 있던 화면을 그대로 보여 준다.
+     화면에 다시 나타날 때마다 최신 내용을 받고, 새 배포가 있으면 한 번 새로고침한다. 편집 중엔 하지 않음 */
+  var lastSync = Date.now();
+  function resync() {
+    if (editing || document.visibilityState === "hidden") return;
+    if (Date.now() - lastSync < 10000) return;
+    lastSync = Date.now();
+    var before = VERSION;
+    loadLatest().then(function () {
+      if (editing) return;
+      if (NEW_BUILD) { location.reload(); return; }
+      if (VERSION !== before) render(false);
+    });
+  }
+  document.addEventListener("visibilitychange", resync);
+  window.addEventListener("pageshow", function (e) { if (e.persisted) resync(); });
+  window.addEventListener("focus", resync);
 })();

@@ -142,6 +142,9 @@ export function send(res, status, body) {
   res.statusCode = status;
   res.setHeader("Content-Type", "application/json; charset=utf-8");
   res.setHeader("Cache-Control", "no-store");
+  // 배포 버전: 홈 화면 앱이 다시 열릴 때 새 배포가 있으면 스스로 새로고침하도록
+  const build = process.env.VERCEL_DEPLOYMENT_ID || process.env.VERCEL_GIT_COMMIT_SHA || "";
+  if (build) res.setHeader("X-TT-Build", build);
   res.end(JSON.stringify(body));
 }
 

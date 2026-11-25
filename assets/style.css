@@ -313,7 +313,7 @@ details.more[open] summary { margin-bottom: 8px; }
 .foot code { font-size: 11.5px; }
 
 /* ============ responsive ============ */
-@media (max-width: 640px) {
+@media screen and (max-width: 640px) {
   .wrap { padding: 0 16px; }
   .hero-inner { padding: 0 16px 32px; }
   .hero { height: 52vh; min-height: 300px; }
@@ -402,7 +402,7 @@ body.editing .deadlines li > div { display: grid; grid-template-columns: 150px 1
 .history .restore { font: inherit; font-size: 12.5px; font-weight: 600; padding: 6px 10px; border-radius: 8px; border: 1px solid var(--line); background: transparent; color: var(--ink); cursor: pointer; white-space: nowrap; }
 .toast { position: fixed; left: 50%; bottom: calc(90px + env(safe-area-inset-bottom)); transform: translateX(-50%); z-index: 70; background: var(--ink); color: var(--paper); padding: 10px 16px; border-radius: 99px; font-size: 13.5px; box-shadow: 0 8px 24px rgba(0,0,0,.2); transition: opacity .4s; max-width: calc(100vw - 32px); text-align: center; }
 .toast.out { opacity: 0; }
-@media (max-width: 640px) {
+@media screen and (max-width: 640px) {
   body.editing .deadlines li > div { grid-template-columns: 1fr auto; }
   body.editing .deadlines .dl-what { grid-column: 1 / -1; grid-row: 2; }
   body.editing .cost-list li > div > .ed-del { left: auto; right: 0; top: 46px; }
@@ -479,7 +479,7 @@ body.editing .view { animation: none; }
 .leaflet-popup-content { font-family: var(--sans); font-size: 13.5px; line-height: 1.5; }
 .pop-links { display: flex; gap: 12px; margin-top: 6px; }
 .pop-links a { font-weight: 650; }
-@media (max-width: 640px) { .legend { grid-template-columns: 1fr; } }
+@media screen and (max-width: 640px) { .legend { grid-template-columns: 1fr; } }
 
 /* 현지 정보: 작성 중 표시 */
 .tab-badge { display: inline-block; margin-left: 5px; padding: 1px 6px; border-radius: 99px; font-size: 10.5px; font-weight: 700; color: var(--warn); background: var(--warn-soft); vertical-align: 1px; }
@@ -515,7 +515,7 @@ body.editing .view { animation: none; }
 .foot-actions .muted-link { color: var(--muted); font-weight: 500; border-bottom: 0; }
 .foot-edit:hover, .foot-actions .muted-link:hover { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
 .foot-edit[hidden] { display: none; }
-@media (max-width: 640px) {
+@media screen and (max-width: 640px) {
   .foot { flex-direction: column; align-items: flex-start; gap: 2px; }
   .foot-actions { justify-content: flex-start; }
 }
@@ -525,7 +525,7 @@ body.editing .view { animation: none; }
 
 /* 하단 여백: 안드로이드 제스처 바 · 카카오톡 하단 도구막대에 가리지 않게 넉넉히 */
 .foot { padding-bottom: calc(72px + env(safe-area-inset-bottom)); }
-@media (max-width: 640px) { .foot { padding-bottom: calc(96px + env(safe-area-inset-bottom)); } }
+@media screen and (max-width: 640px) { .foot { padding-bottom: calc(96px + env(safe-area-inset-bottom)); } }
 
 /* 진단 창 */
 .diag { margin: 0; padding: 12px; border-radius: 10px; background: var(--line-2); font-size: 12px; line-height: 1.6; white-space: pre-wrap; word-break: break-all; font-family: ui-monospace, Menlo, monospace; }
@@ -593,7 +593,7 @@ html.hv-d .hero { height: 300px; min-height: 0; background: var(--paper); color:
     --r: 8px; color-scheme: light;
   }
   @page { size: A4; margin: 11mm 11mm 12mm; }
-  html, body { background: #fff !important; }
+  html, body { background: #fff !important; -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
   body { -webkit-print-color-adjust: exact; print-color-adjust: exact; font-size: 10.5pt; line-height: 1.45; }
   body > *:not(.print-doc) { display: none !important; }
   .print-doc { display: block !important; color: var(--ink); }
