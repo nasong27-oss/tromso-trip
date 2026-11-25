@@ -1,21 +1,21 @@
 /* ============ tokens ============ */
 :root {
-  --paper: #f6f4ef;
-  --card: #ffffff;
-  --ink: #15171c;
-  --ink-2: #3c4049;
-  --muted: #777b84;
-  --line: #e3dfd6;
-  --line-2: #efece5;
+  --paper: #ffffff;
+  --card: #f5f6f7;
+  --ink: #111318;
+  --ink-2: #3a3d44;
+  --muted: #72767e;
+  --line: #e8e9eb;
+  --line-2: #f1f2f4;
   --night: #0c1424;
   --aurora: #1f8a6d;
-  --aurora-soft: #e3f3ec;
+  --aurora-soft: #e5f6ef;
   --warn: #b4540f;
-  --warn-soft: #fbf0e4;
+  --warn-soft: #fdf1e5;
   --urgent: #c2352b;
-  --urgent-soft: #fcebe9;
+  --urgent-soft: #fdeceb;
   --info: #2f5fb3;
-  --info-soft: #e9f0fb;
+  --info-soft: #ebf2fd;
   --t-blue: #2f5fb3;
   --t-violet: #6d4ad1;
   --t-green: #1f8a6d;
@@ -587,7 +587,7 @@ html.hv-d .hero { height: 300px; min-height: 0; background: var(--paper); color:
 .print-doc, .map-print { display: none; }
 @media print {
   :root {
-    --paper: #fff; --card: #fff; --ink: #15171c; --ink-2: #3c4049; --muted: #6b6f78; --line: #dedad1; --line-2: #efece5;
+    --paper: #fff; --card: #f5f6f7; --ink: #111318; --ink-2: #3a3d44; --muted: #6b6f78; --line: #e3e4e6; --line-2: #f1f2f4;
     --aurora: #1f8a6d; --aurora-soft: #e3f3ec; --warn: #b4540f; --warn-soft: #fbf0e4; --urgent: #c2352b; --urgent-soft: #fcebe9;
     --info: #2f5fb3; --info-soft: #e9f0fb; --t-blue: #2f5fb3; --t-violet: #6d4ad1; --t-green: #1f8a6d; --t-amber: #b4540f; --t-rose: #c2356b;
     --r: 8px; color-scheme: light;
@@ -668,4 +668,9 @@ html.hv-d .hero { height: 300px; min-height: 0; background: var(--paper); color:
   /* 쪽 나눔: 작은 덩어리는 쪼개지 않음 */
   .print-doc .stat, .print-doc .pick, .print-doc .row, .print-doc .callout, .print-doc .total, .print-doc .stay-cards > *, .print-doc .day, .print-doc .facts, .print-doc .map-print { break-inside: avoid; }
   .print-doc h2, .print-doc h3, .print-doc .block-h, .print-doc .p-tab, .print-doc .sec-head { break-after: avoid; }
+}
+
+/* 화이트톤: 회색 면으로 구분하는 상자는 테두리 없이 (다크 모드는 기존 테두리 유지) */
+@media (prefers-color-scheme: light) {
+  .stay-card, details.map, .chips span { border-color: transparent; }
 }
