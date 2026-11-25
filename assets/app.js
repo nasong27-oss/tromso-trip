@@ -161,7 +161,11 @@
     return '<details class="map"' + (open ? " open" : "") + ">" +
       '<summary><span class="map-ic" aria-hidden="true"></span>' + esc(m.label || "지도") + '<span class="map-toggle">지도</span></summary>' + route +
       '<div class="map-frame"><iframe loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="' + esc(m.label || "지도") + '" data-src="' + esc(mapSrc(m)) + '"></iframe></div>' +
-      '<a class="map-open" href="' + esc(mapOpenHref(m)) + '" target="_blank" rel="noopener">' + esc(m.openLabel || "구글맵에서 열기") + " ↗</a></details>";
+      '<a class="map-open" href="' + esc(mapOpenHref(m)) + '" target="_blank" rel="noopener">' + esc(m.openLabel || "구글맵에서 열기") + " ↗</a></details>" +
+      // 인쇄·PDF 에서는 지도 대신 글자로: 이름 · 경로(또는 장소) · 구글맵 링크
+      '<p class="map-print">📍 <b>' + esc(m.label || "지도") + "</b> — " +
+      esc(m.stops ? m.stops.map(function (s) { return s.name; }).join(" → ") : (m.from ? m.from + " → " + m.to : m.q)) +
+      ' · <a href="' + esc(mapOpenHref(m)) + '">구글맵에서 열기</a></p>';
   }
   function wireMaps(root) {
     root.querySelectorAll("details.map").forEach(function (d) {
@@ -1234,6 +1238,12 @@
   }
   var SWITCH = '<p class="a2-switch">다른 휴대폰 안내 보기: <button type="button" data-a2="ios">아이폰</button> · <button type="button" data-a2="android">안드로이드</button></p>';
   function a2Content(kind) {
+    if (kind === "printapp") {
+      var url2 = "kakaotalk://web/openExternal?url=" + encodeURIComponent(location.origin + "/");
+      return "<h3>" + (ENV.kakao ? "카카오톡" : "이 앱") + "에서는 PDF 저장이 안 돼요</h3><p class=\"a2-sub\">인터넷 앱으로 열어서 다시 눌러 주세요</p>" +
+        (ENV.kakao ? '<a class="a2-big" href="' + url2 + '">인터넷 앱으로 열기</a>' : "") +
+        '<p class="a2-small">' + (ENV.kakao ? "버튼이 안 되면: " : "") + "오른쪽 위 <b>⋮</b> (또는 아래 <b>⋯</b>) → <b>다른 브라우저로 열기</b>. 열린 뒤 맨 아래 <b>🖨️ PDF·인쇄</b>를 누르면 돼요.</p>";
+    }
     if (kind === "inapp") {
       var url = "kakaotalk://web/openExternal?url=" + encodeURIComponent(location.origin + "/");
       return "<h3>" + (ENV.kakao ? "카카오톡" : "이 앱") + "에서는 추가할 수 없어요</h3><p class=\"a2-sub\">먼저 인터넷 앱으로 열어 주세요</p>" +
@@ -1256,7 +1266,7 @@
     var wrap = document.createElement("div");
     wrap.className = "a2-wrap";
     wrap.innerHTML = '<div class="a2-bg"></div><div class="a2-sheet" role="dialog" aria-modal="true"><div class="a2-grab"></div>' +
-      a2Content(kind) + '<button type="button" class="a2-close">' + (kind === "inapp" ? "닫기" : "알겠어요") + "</button></div>";
+      a2Content(kind) + '<button type="button" class="a2-close">' + (kind === "inapp" || kind === "printapp" ? "닫기" : "알겠어요") + "</button></div>";
     document.body.appendChild(wrap);
     wrap.addEventListener("click", function (e) {
       if (e.target.classList.contains("a2-bg") || e.target.classList.contains("a2-close")) return wrap.remove();
@@ -1275,8 +1285,51 @@
     openA2Sheet(ENV.ios ? "ios" : "android");
   });
 
+  /* ---------- PDF·인쇄 (하단 버튼) ----------
+     모든 탭(지도 탭 제외)을 한 문서로 이어 붙여 인쇄 창을 연다.
+     아이폰: 인쇄 창 → 공유 → 파일에 저장 / 안드로이드·PC: 프린터에서 "PDF로 저장"
+     브라우저 메뉴로 직접 인쇄해도(beforeprint) 같은 문서가 나온다 */
+  var printDoc = document.getElementById("printDoc");
+  function buildPrint() {
+    var now = new Date();
+    var stamp = now.getFullYear() + ". " + (now.getMonth() + 1) + ". " + now.getDate() + " 기준";
+    var period = (document.getElementById("heroMeta") || {}).textContent || "";
+    var html = '<section class="p-cover"><h1>Tromsø, Norway</h1><p class="p-lat">69° N</p><p class="p-period">' + esc(period) +
+      '</p><p class="p-stamp">' + esc(stamp) + " · 최신 내용은 사이트에서 확인</p></section>";
+    var wasEditing = editing; editing = false; // 편집 칸 표시 없이
+    TABS.forEach(function (t) {
+      if (t.id === "map") return;
+      var body = "";
+      try { body = VIEWS[t.id](); } catch (e) { body = "<p>(이 부분은 불러오지 못했어요)</p>"; }
+      html += '<section class="p-sec"><p class="p-tab">' + esc(t.label) + '</p><div class="view view-' + t.id + '">' + body + "</div></section>";
+    });
+    editing = wasEditing;
+    printDoc.innerHTML = html;
+    printDoc.querySelectorAll("details").forEach(function (d) { d.open = true; });
+    printDoc.querySelectorAll("iframe, .leaflet-container, .back, .ed-add, .ed-del").forEach(function (el) { el.remove(); });
+    printDoc.querySelectorAll("[id]").forEach(function (el) { el.removeAttribute("id"); });
+    printDoc.querySelectorAll("img").forEach(function (im) { im.removeAttribute("loading"); im.loading = "eager"; });
+  }
+  // 사진이 다 받아질 때까지(최대 3초) 기다렸다가 인쇄 창을 연다
+  function imagesReady(ms) {
+    var imgs = [].slice.call(printDoc.querySelectorAll("img")).filter(function (im) { return !im.complete; });
+    if (!imgs.length) return Promise.resolve();
+    return Promise.race([
+      Promise.all(imgs.map(function (im) { return new Promise(function (r) { im.onload = im.onerror = r; }); })),
+      new Promise(function (r) { setTimeout(r, ms); })
+    ]);
+  }
+  window.addEventListener("beforeprint", buildPrint);
+  document.getElementById("footPrint").addEventListener("click", function () {
+    if (editing) return toast("편집을 저장하거나 취소한 뒤에 눌러 주세요");
+    if (ENV.inApp || typeof window.print !== "function") return openA2Sheet("printapp");
+    buildPrint();
+    var btn = this; btn.disabled = true;
+    imagesReady(3000).then(function () { btn.disabled = false; window.print(); });
+  });
+
   /* ---------- 진단 창: 맨 아래 "Tromsø 2026" 을 5번 연속 누르면 ---------- */
-  var APP_VERSION = "2026-11-24.h4";
+  var APP_VERSION = "2026-11-25.p1";
   var brandTaps = [];
   document.getElementById("footBrand").addEventListener("click", function () {
     var now = Date.now();

@@ -581,3 +581,36 @@ html.hv-d .hero { height: 300px; min-height: 0; background: var(--paper); color:
 @keyframes aurora-line { to { background-position: 300% 0; } }
 .hv-d .mini { background: var(--paper); color: var(--ink); }
 .hv-d .mini-meta { color: var(--muted); }
+
+/* ============ PDF·인쇄 ============ */
+.print-doc, .map-print { display: none; }
+@media print {
+  :root {
+    --paper: #fff; --card: #fff; --ink: #15171c; --ink-2: #3c4049; --muted: #6b6f78; --line: #dedad1; --line-2: #efece5;
+    --aurora: #1f8a6d; --aurora-soft: #e3f3ec; --warn: #b4540f; --warn-soft: #fbf0e4; --urgent: #c2352b; --urgent-soft: #fcebe9;
+    --info: #2f5fb3; --info-soft: #e9f0fb; --t-blue: #2f5fb3; --t-violet: #6d4ad1; --t-green: #1f8a6d; --t-amber: #b4540f; --t-rose: #c2356b;
+    color-scheme: light;
+  }
+  @page { size: A4; margin: 14mm 12mm; }
+  html, body { background: #fff !important; }
+  body { -webkit-print-color-adjust: exact; print-color-adjust: exact; font-size: 12.5px; }
+  body > *:not(.print-doc) { display: none !important; }
+  .print-doc { display: block !important; color: var(--ink); }
+  .print-doc .view { animation: none !important; padding: 0 !important; }
+  .print-doc details.map { display: none !important; }
+  .print-doc .map-print { display: block; margin: 8px 0 12px; font-size: 12px; color: var(--ink-2); }
+  .print-doc a { color: inherit; }
+  .print-doc .map-print a, .print-doc .refs a, .print-doc .ref a { color: var(--info); text-decoration: underline; }
+  .p-cover { padding: 40mm 0 0; break-after: page; }
+  .p-cover h1 { margin: 0; font-size: 44px; font-weight: 700; letter-spacing: -0.035em; }
+  .p-cover::after { content: ""; display: block; width: 70px; height: 4px; margin-top: 22px; border-radius: 4px; background: linear-gradient(90deg, #3ee0a0, #8a7bff); }
+  .p-lat { margin: 6px 0 14px; font-size: 20px; color: var(--muted); }
+  .p-period { margin: 0; font-size: 15px; }
+  .p-stamp { margin: 40px 0 0; font-size: 11px; color: var(--muted); }
+  .p-sec { break-before: page; }
+  .p-sec:first-of-type { break-before: auto; }
+  .p-tab { margin: 0 0 6px; font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+  .print-doc .ed-row button, .print-doc .ed-add, .print-doc .ed-del, .print-doc button { display: none !important; }
+  .print-doc section, .print-doc .block, .print-doc .stat, .print-doc .pick, .print-doc .row, .print-doc li, .print-doc .callout, .print-doc .total, .print-doc .stay-cards > * { break-inside: avoid; }
+  .print-doc h2, .print-doc h3, .print-doc .block-h { break-after: avoid; }
+}

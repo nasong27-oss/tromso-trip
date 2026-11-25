@@ -44,11 +44,14 @@
 
   <div class="offline-bar" id="offlineBar" hidden>오프라인 · 마지막으로 받은 내용을 보여주고 있어요</div>
   <main id="app" class="wrap" tabindex="-1"></main>
+  <!-- PDF·인쇄용: 인쇄할 때만 보이는 전체 문서 (모든 탭을 이어 붙임) -->
+  <div id="printDoc" class="print-doc"></div>
 
   <footer class="foot wrap">
     <p id="footBrand">Tromsø 2026</p>
     <div class="foot-actions">
       <button type="button" class="foot-edit" id="footA2hs">📲 홈 화면에 추가</button>
+      <button type="button" class="foot-edit" id="footPrint">🖨️ PDF·인쇄</button>
       <button type="button" class="foot-edit" id="footEdit">✏️ 편집</button>
       <a href="/__logout" class="muted-link" id="logout">로그아웃</a>
     </div>
