@@ -582,35 +582,90 @@ html.hv-d .hero { height: 300px; min-height: 0; background: var(--paper); color:
 .hv-d .mini { background: var(--paper); color: var(--ink); }
 .hv-d .mini-meta { color: var(--muted); }
 
-/* ============ PDF·인쇄 ============ */
+/* ============ PDF·인쇄 ============
+   촘촘한 인쇄용 배치: 탭마다 새 장 없이 이어 붙이고, 글자·여백을 줄이고, 사진은 뺀다 */
 .print-doc, .map-print { display: none; }
 @media print {
   :root {
     --paper: #fff; --card: #fff; --ink: #15171c; --ink-2: #3c4049; --muted: #6b6f78; --line: #dedad1; --line-2: #efece5;
     --aurora: #1f8a6d; --aurora-soft: #e3f3ec; --warn: #b4540f; --warn-soft: #fbf0e4; --urgent: #c2352b; --urgent-soft: #fcebe9;
     --info: #2f5fb3; --info-soft: #e9f0fb; --t-blue: #2f5fb3; --t-violet: #6d4ad1; --t-green: #1f8a6d; --t-amber: #b4540f; --t-rose: #c2356b;
-    color-scheme: light;
+    --r: 8px; color-scheme: light;
   }
-  @page { size: A4; margin: 14mm 12mm; }
+  @page { size: A4; margin: 11mm 11mm 12mm; }
   html, body { background: #fff !important; }
-  body { -webkit-print-color-adjust: exact; print-color-adjust: exact; font-size: 12.5px; }
+  body { -webkit-print-color-adjust: exact; print-color-adjust: exact; font-size: 10.5pt; line-height: 1.45; }
   body > *:not(.print-doc) { display: none !important; }
   .print-doc { display: block !important; color: var(--ink); }
-  .print-doc .view { animation: none !important; padding: 0 !important; }
-  .print-doc details.map { display: none !important; }
-  .print-doc .map-print { display: block; margin: 8px 0 12px; font-size: 12px; color: var(--ink-2); }
+  .print-doc * { animation: none !important; transition: none !important; }
+  .print-doc .view { padding: 0 !important; }
   .print-doc a { color: inherit; }
+  .print-doc button, .print-doc .ed-add, .print-doc .ed-del, .print-doc details.map, .print-doc .back { display: none !important; }
+  .print-doc .map-print { display: block; margin: 4px 0 6px; font-size: 9pt; color: var(--ink-2); }
   .print-doc .map-print a, .print-doc .refs a, .print-doc .ref a { color: var(--info); text-decoration: underline; }
-  .p-cover { padding: 40mm 0 0; break-after: page; }
-  .p-cover h1 { margin: 0; font-size: 44px; font-weight: 700; letter-spacing: -0.035em; }
-  .p-cover::after { content: ""; display: block; width: 70px; height: 4px; margin-top: 22px; border-radius: 4px; background: linear-gradient(90deg, #3ee0a0, #8a7bff); }
-  .p-lat { margin: 6px 0 14px; font-size: 20px; color: var(--muted); }
-  .p-period { margin: 0; font-size: 15px; }
-  .p-stamp { margin: 40px 0 0; font-size: 11px; color: var(--muted); }
-  .p-sec { break-before: page; }
-  .p-sec:first-of-type { break-before: auto; }
-  .p-tab { margin: 0 0 6px; font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
-  .print-doc .ed-row button, .print-doc .ed-add, .print-doc .ed-del, .print-doc button { display: none !important; }
-  .print-doc section, .print-doc .block, .print-doc .stat, .print-doc .pick, .print-doc .row, .print-doc li, .print-doc .callout, .print-doc .total, .print-doc .stay-cards > * { break-inside: avoid; }
-  .print-doc h2, .print-doc h3, .print-doc .block-h { break-after: avoid; }
+
+  /* 첫머리: 제목 한 줄 */
+  .p-cover { padding: 0 0 6px; border-bottom: 2px solid var(--ink); margin-bottom: 4px; }
+  .p-cover h1 { margin: 0; font-size: 20pt; font-weight: 700; letter-spacing: -0.03em; }
+  .p-cover h1 span { font-size: 12pt; font-weight: 500; color: var(--muted); margin-left: 6px; }
+  .p-cover p { margin: 2px 0 0; font-size: 9pt; color: var(--muted); }
+
+  /* 탭 구분: 새 장 대신 얇은 줄 */
+  .p-sec { margin-top: 14px; padding-top: 8px; border-top: 1.5px solid var(--ink); }
+  .p-tab { margin: 0 0 2px; font-size: 8pt; letter-spacing: .14em; color: var(--muted); }
+  .print-doc .sec-head { padding: 0 0 6px !important; margin: 0 !important; border: 0 !important; }
+  .print-doc .sec-title { font-size: 15pt !important; }
+  .print-doc .sec-sub, .print-doc .eyebrow { font-size: 8.5pt !important; margin: 2px 0 0 !important; }
+  .print-doc .refs { margin-top: 4px !important; font-size: 9pt; }
+
+  /* 블록 · 제목 */
+  .print-doc .block { padding: 8px 0 !important; }
+  .print-doc .block-h, .print-doc h3 { font-size: 11pt !important; margin: 0 0 4px !important; }
+  .print-doc .block-h.big { font-size: 12pt !important; }
+  .print-doc p, .print-doc li { margin-top: 0; margin-bottom: 2px; }
+  .print-doc ul { margin: 0; padding-left: 16px; }
+  .print-doc .callout { padding: 6px 10px !important; margin: 6px 0 !important; }
+  .print-doc .note, .print-doc .muted { font-size: 8.5pt !important; }
+
+  /* 요약 숫자 · 숙소 카드 */
+  .print-doc .stats { grid-template-columns: repeat(4, 1fr) !important; }
+  .print-doc .stat { padding: 4px 8px !important; }
+  .print-doc .stat-v { font-size: 13pt !important; }
+  .print-doc .stay-cards { grid-template-columns: repeat(3, 1fr) !important; gap: 6px !important; }
+  .print-doc .stay-cards > * { padding: 6px 8px !important; }
+  .print-doc .stay-no { font-size: 12pt !important; }
+
+  /* 일자별 일정 */
+  .print-doc .day { grid-template-columns: 44px 1fr !important; gap: 8px !important; padding: 6px 0 !important; }
+  .print-doc .day-num { font-size: 18pt !important; line-height: 1 !important; }
+  .print-doc .day-mon { font-size: 7pt !important; }
+  .print-doc .day-body > * { margin-top: 1px !important; margin-bottom: 1px !important; }
+
+  /* 체크리스트 · 마감 */
+  .print-doc .checks label { padding: 2px 0 !important; font-size: 10pt; gap: 8px; }
+  .print-doc .checks input { flex-basis: 12px; width: 12px; height: 12px; border-radius: 3px; }
+  .print-doc .deadlines li, .print-doc .deadlines > * { padding-top: 3px !important; padding-bottom: 3px !important; }
+  .print-doc .dl-what { font-size: 10pt; }
+
+  /* 숙소·투어·렌터카 정보 상자: 4칸 한 줄 */
+  .print-doc .facts { grid-template-columns: repeat(4, 1fr) !important; margin-bottom: 6px !important; }
+  .print-doc .fact { padding: 5px 7px !important; gap: 1px !important; }
+  .print-doc .fact-k { font-size: 7pt !important; }
+  .print-doc .fact-v { font-size: 10.5pt !important; }
+  .print-doc .fact-s { font-size: 7.5pt !important; }
+
+  /* 비용 */
+  .print-doc .cost-list li { padding-top: 4px !important; padding-bottom: 4px !important; }
+  .print-doc .total { padding: 6px 10px !important; }
+  .print-doc .total-v { font-size: 15pt !important; }
+  .print-doc .cost-cell.main .total-v, .print-doc .cost-cell .total-v { font-size: 12pt !important; }
+  .print-doc .breakdown > *, .print-doc .bands > * { padding-top: 2px !important; padding-bottom: 2px !important; }
+
+  /* 추천 */
+  .print-doc .pick { padding: 4px 0 !important; }
+  .print-doc .tag, .print-doc .badge { font-size: 7.5pt !important; padding: 1px 6px !important; }
+
+  /* 쪽 나눔: 작은 덩어리는 쪼개지 않음 */
+  .print-doc .stat, .print-doc .pick, .print-doc .row, .print-doc .callout, .print-doc .total, .print-doc .stay-cards > *, .print-doc .day, .print-doc .facts, .print-doc .map-print { break-inside: avoid; }
+  .print-doc h2, .print-doc h3, .print-doc .block-h, .print-doc .p-tab, .print-doc .sec-head { break-after: avoid; }
 }

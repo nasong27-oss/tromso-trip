@@ -1294,8 +1294,8 @@
     var now = new Date();
     var stamp = now.getFullYear() + ". " + (now.getMonth() + 1) + ". " + now.getDate() + " 기준";
     var period = (document.getElementById("heroMeta") || {}).textContent || "";
-    var html = '<section class="p-cover"><h1>Tromsø, Norway</h1><p class="p-lat">69° N</p><p class="p-period">' + esc(period) +
-      '</p><p class="p-stamp">' + esc(stamp) + " · 최신 내용은 사이트에서 확인</p></section>";
+    var html = '<header class="p-cover"><h1>Tromsø, Norway <span>69° N</span></h1><p>' + esc(period) +
+      ' · ' + esc(stamp) + " · 최신 내용은 사이트에서 확인</p></header>";
     var wasEditing = editing; editing = false; // 편집 칸 표시 없이
     TABS.forEach(function (t) {
       if (t.id === "map") return;
@@ -1308,28 +1308,20 @@
     printDoc.querySelectorAll("details").forEach(function (d) { d.open = true; });
     printDoc.querySelectorAll("iframe, .leaflet-container, .back, .ed-add, .ed-del").forEach(function (el) { el.remove(); });
     printDoc.querySelectorAll("[id]").forEach(function (el) { el.removeAttribute("id"); });
-    printDoc.querySelectorAll("img").forEach(function (im) { im.removeAttribute("loading"); im.loading = "eager"; });
-  }
-  // 사진이 다 받아질 때까지(최대 3초) 기다렸다가 인쇄 창을 연다
-  function imagesReady(ms) {
-    var imgs = [].slice.call(printDoc.querySelectorAll("img")).filter(function (im) { return !im.complete; });
-    if (!imgs.length) return Promise.resolve();
-    return Promise.race([
-      Promise.all(imgs.map(function (im) { return new Promise(function (r) { im.onload = im.onerror = r; }); })),
-      new Promise(function (r) { setTimeout(r, ms); })
-    ]);
+    // 인쇄본에는 사진을 넣지 않는다 (쪽수 절약 + 사진을 기다리지 않고 바로 인쇄 창)
+    printDoc.querySelectorAll(".pick-imgs, img").forEach(function (el) { el.remove(); });
   }
   window.addEventListener("beforeprint", buildPrint);
   document.getElementById("footPrint").addEventListener("click", function () {
     if (editing) return toast("편집을 저장하거나 취소한 뒤에 눌러 주세요");
     if (ENV.inApp || typeof window.print !== "function") return openA2Sheet("printapp");
+    // Safari 는 누른 그 순간에 바로 부른 인쇄만 허용한다 → 기다리지 않고 곧바로
     buildPrint();
-    var btn = this; btn.disabled = true;
-    imagesReady(3000).then(function () { btn.disabled = false; window.print(); });
+    window.print();
   });
 
   /* ---------- 진단 창: 맨 아래 "Tromsø 2026" 을 5번 연속 누르면 ---------- */
-  var APP_VERSION = "2026-11-25.p1";
+  var APP_VERSION = "2026-11-25.p2";
   var brandTaps = [];
   document.getElementById("footBrand").addEventListener("click", function () {
     var now = Date.now();
