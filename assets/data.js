@@ -121,15 +121,11 @@ window.TRIP = {
     address: "Dramsvegen 167 Leilighet, 9010 Tromsø, 노르웨이",
     mapQ: "Dramsvegen 167, 9010 Tromsø",
     mapOpen: "https://maps.app.goo.gl/sdqMFhLAw8rqRB2V6?g_st=ic",
-    warn: { title: "알아 둘 것", items: [
-      "건조기 · 에어컨 없음",
-      "일산화탄소 경보기 설치 여부 정보 없음 (화재경보기 · 구급상자는 있음)"
-    ]},
-    sections: [
-      { h: "호스트 확인 (11/25)", list: [
+    warn: { title: "호스트 확인 (11/25)", tone: "info", items: [
         "수건 · 비누 · 휴지 · 차 · 커피 등 **기본 물품 모두 있음** — 숙소 페이지에 잘못 적혀 있었다고 호스트가 확인",
         "체크인 **15:00로 앞당기기 요청** — 해 보겠다고 함, 최종 확인은 날짜가 다가오면 호스트가 회신 (그즈음 다시 연락)"
-      ]},
+    ]},
+    sections: [
       { h: "숙소 구성", list: [
         "임대 호실 전체 — 단층 · 계단 없음 · 전용 출입구",
         "침실 2 · 침대 2 · 욕실 2",
