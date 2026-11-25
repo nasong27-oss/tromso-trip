@@ -35,7 +35,7 @@ window.TRIP = {
     { date: "2026-12-25", tag: "도착", tone: "blue", items: [
       { time: "10:00", text: "트롬쇠 공항 Hertz 키오스크에서 **렌터카 픽업** (Peugeot e-3008 전기차)", tab: "car" },
       { text: "식사 · 짧은 드라이브" },
-      { time: "17:00", text: "**Airbnb 셀프 체크인** (열쇠 보관함) · Dramsvegen 167", tab: "stay1" }
+      { time: "17:00", text: "**Airbnb 셀프 체크인** (열쇠 보관함) · Dramsvegen 167 · 15:00로 앞당기기 요청 중", tab: "stay1" }
     ], maps: [{ label: "숙소 위치", q: "Dramsvegen 167, 9010 Tromsø", open: "https://maps.app.goo.gl/sdqMFhLAw8rqRB2V6?g_st=ic" }]},
     { date: "2026-12-26", tag: "오로라", tone: "violet", items: [
       { text: "트롬쇠 시내 관광 · 경우에 따라 드라이브" },
@@ -90,7 +90,7 @@ window.TRIP = {
     { id: "ewaiver", text: "오로라 투어 eWaiver 3명 모두 작성 (12/25 17:30까지)", link: "https://forms.office.com/r/Xrt2DEEeBF" },
     { id: "idp", text: "국제운전면허증 · 국내 면허증 · 여권 · 본인 명의 신용카드 (렌터카)" },
     { id: "flight", text: "Hertz 예약에 항공편명 입력" },
-    { id: "towel", text: "Airbnb용 수건 · 세면도구 · 화장지 챙기기 (제공 안 됨)" },
+    { id: "earlycheckin", text: "Airbnb 15:00 조기 체크인 최종 확인 (날짜 다가오면 호스트 회신)" },
     { id: "deposit", text: "Lauklines 보증용 신용카드 (Visa / Mastercard)" },
     { id: "insurance", text: "여행자 보험 가입" },
     { id: "moxy", text: "MOXY 각자 개별 예약 확인" }
@@ -113,7 +113,7 @@ window.TRIP = {
     title: "Tromsø 시내에서 약간 떨어진 주택",
     original: "Moderne leilighet med fin utsikt og bilparkering",
     facts: [
-      { k: "체크인", v: "12/25 (금) 17:00", s: "셀프 체크인 · 열쇠 보관함" },
+      { k: "체크인", v: "12/25 (금) 17:00", s: "셀프 체크인 · 열쇠 보관함 · 15:00로 앞당기기 요청 중" },
       { k: "체크아웃", v: "12/28 (월) 11:00", s: "3박" },
       { k: "예약 코드", v: "HMH3CT2TN2", copy: true },
       { k: "총 비용", v: "₩2,237,654", s: "1인 ₩745,885 · 12/16 결제 예정" }
@@ -121,12 +121,15 @@ window.TRIP = {
     address: "Dramsvegen 167 Leilighet, 9010 Tromsø, 노르웨이",
     mapQ: "Dramsvegen 167, 9010 Tromsø",
     mapOpen: "https://maps.app.goo.gl/sdqMFhLAw8rqRB2V6?g_st=ic",
-    warn: { title: "챙겨야 할 것", items: [
-      "수건 · 시트 · 비누 · 화장지 등 **필수용품 제공 안 됨**",
+    warn: { title: "알아 둘 것", items: [
       "건조기 · 에어컨 없음",
       "일산화탄소 경보기 설치 여부 정보 없음 (화재경보기 · 구급상자는 있음)"
     ]},
     sections: [
+      { h: "호스트 확인 (11/25)", list: [
+        "수건 · 비누 · 휴지 · 차 · 커피 등 **기본 물품 모두 있음** — 숙소 페이지에 잘못 적혀 있었다고 호스트가 확인",
+        "체크인 **15:00로 앞당기기 요청** — 해 보겠다고 함, 최종 확인은 날짜가 다가오면 호스트가 회신 (그즈음 다시 연락)"
+      ]},
       { h: "숙소 구성", list: [
         "임대 호실 전체 — 단층 · 계단 없음 · 전용 출입구",
         "침실 2 · 침대 2 · 욕실 2",

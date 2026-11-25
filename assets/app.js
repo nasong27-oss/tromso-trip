@@ -1171,6 +1171,12 @@
     { p: "info.draft", from: true, to: false },
     { p: "info.title", from: "현지 정보", to: "추가 정보" },
     { p: "info.notice", from: undefined, to: "확인하면서 계속 업데이트 합니다" }
+  ]}, { id: "2026-11-25-stay1-host", ops: [
+    { p: "stay1.facts.0.s", from: "셀프 체크인 · 열쇠 보관함", to: "셀프 체크인 · 열쇠 보관함 · 15:00로 앞당기기 요청 중" },
+    { p: "stay1.warn", fromTitle: "챙겨야 할 것", to: {"title": "알아 둘 것", "items": ["건조기 · 에어컨 없음", "일산화탄소 경보기 설치 여부 정보 없음 (화재경보기 · 구급상자는 있음)"]} },
+    { addSection: { p: "stay1.sections", item: {"h": "호스트 확인 (11/25)", "list": ["수건 · 비누 · 휴지 · 차 · 커피 등 **기본 물품 모두 있음** — 숙소 페이지에 잘못 적혀 있었다고 호스트가 확인", "체크인 **15:00로 앞당기기 요청** — 해 보겠다고 함, 최종 확인은 날짜가 다가오면 호스트가 회신 (그즈음 다시 연락)"]} } },
+    { p: "checklist.3", fromText: "Airbnb용 수건 · 세면도구 · 화장지 챙기기 (제공 안 됨)", to: {"id": "earlycheckin", "text": "Airbnb 15:00 조기 체크인 최종 확인 (날짜 다가오면 호스트 회신)"} },
+    { editDayItem: { date: "2026-12-25", from: "**Airbnb 셀프 체크인** (열쇠 보관함) · Dramsvegen 167", to: "**Airbnb 셀프 체크인** (열쇠 보관함) · Dramsvegen 167 · 15:00로 앞당기기 요청 중" } }
   ]}, { id: "2026-11-25-daylight", ops: [
     { addDayItem: { date: "2026-12-28", after: "Airbnb 체크아웃", item: {"text": "☀️ 밝은 시간 약 09:30–14:00 · 경치를 보려면 **10시 전후 출발** (체크아웃을 앞당기는 것도 방법)"} } },
     { addDayItem: { date: "2026-12-29", item: {"text": "☀️ 밝은 시간 약 09:30–14:00 · 밝을 때 경치를 보려면 **10시 전후 출발**"} } }
@@ -1190,6 +1196,18 @@
             if (!doc.deadlines.some(function (d) { return d.title === op.addDeadline.title; })) doc.deadlines.unshift(clone(op.addDeadline));
             return;
           }
+          if (op.addSection) {
+            var list = getPath(doc, op.addSection.p);
+            if (list && !list.some(function (x) { return x && x.h === op.addSection.item.h; })) list.unshift(clone(op.addSection.item));
+            return;
+          }
+          if (op.editDayItem) {
+            var ed = op.editDayItem;
+            (doc.days || []).forEach(function (x) {
+              if (x.date === ed.date) (x.items || []).forEach(function (it) { if (it.text === ed.from) it.text = ed.to; });
+            });
+            return;
+          }
           if (op.addDayItem) {
             var a = op.addDayItem;
             var day = (doc.days || []).filter(function (x) { return x.date === a.date; })[0];
@@ -1203,7 +1221,8 @@
           var match = ("from" in op && cur === op.from) ||
             (op.fromK && cur && cur.v === op.fromK) ||
             (op.fromTitle && cur && cur.title === op.fromTitle) ||
-            (op.fromH && cur && cur.h === op.fromH);
+            (op.fromH && cur && cur.h === op.fromH) ||
+            (op.fromText && cur && cur.text === op.fromText);
           if (!match) return;
           setPath(doc, op.p, op.to == null ? undefined : clone(op.to));
           if (op.moveToSection && doc.stay2 && doc.stay2.sections) doc.stay2.sections.unshift(clone(op.moveToSection));
@@ -1338,7 +1357,7 @@
   });
 
   /* ---------- 진단 창: 맨 아래 "Tromsø 2026" 을 5번 연속 누르면 ---------- */
-  var APP_VERSION = "2026-11-25.p4";
+  var APP_VERSION = "2026-11-25.p5";
   var brandTaps = [];
   document.getElementById("footBrand").addEventListener("click", function () {
     var now = Date.now();
