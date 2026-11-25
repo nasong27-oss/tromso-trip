@@ -1171,6 +1171,9 @@
     { p: "info.draft", from: true, to: false },
     { p: "info.title", from: "현지 정보", to: "추가 정보" },
     { p: "info.notice", from: undefined, to: "확인하면서 계속 업데이트 합니다" }
+  ]}, { id: "2026-11-25-daylight", ops: [
+    { addDayItem: { date: "2026-12-28", after: "Airbnb 체크아웃", item: {"text": "☀️ 밝은 시간 약 09:30–14:00 · 경치를 보려면 **10시 전후 출발** (체크아웃을 앞당기는 것도 방법)"} } },
+    { addDayItem: { date: "2026-12-29", item: {"text": "☀️ 밝은 시간 약 09:30–14:00 · 밝을 때 경치를 보려면 **10시 전후 출발**"} } }
   ]}, { id: "2026-11-25-shops", ops: [
     { p: "info.sections.0", fromH: "첫날 먹을거리", to: {"h": "첫날 먹을거리 · 연휴 마트", "list": ["아래 영업시간은 **2025년 공식 사이트 정보 기준** — 2026년 시간은 출발 전 다시 확인", "**12/25(금) 문 여는 마트는 사실상 Joker Storgatbakken 1곳** · Storgata 132 (시내 북쪽 끝) · 12/25·12/26 **10:00–23:00**", "숙소 옆 **Joker Dramsveien** (Dramsvegen 153) · 12/24 09:00–15:00 · **12/25 휴무** · 12/26(토) 10:00부터 다시 영업", "물·커피·샌드위치 정도는 공항→숙소 길목 **Circle K Breivika** (Terminalgata 24, 주유소 편의점) · 평소 24시간, 연휴 시간은 따로 안내 없음 (+47 77 67 58 80)", "**12/25(금) ~ 12/27(일) 마트 맥주 판매 불가** (공휴일·일요일) · 주류점(Vinmonopolet)도 휴무 → 현지 주류 구매는 **12/28(월)부터**, 필요하면 출국 전 면세점에서", "12/25 저녁은 문 연 식당이 적으니 미리 확인하거나, 첫 끼 간단한 먹을거리를 챙겨가는 걸 추천"], "maps": [{"label": "Joker Storgatbakken · 12/25 영업", "q": "Joker Storgatbakken, Storgata 132, 9008 Tromsø", "open": "https://maps.google.com/?cid=18336980429892421008"}, {"label": "Joker Dramsveien · 숙소 옆", "q": "Joker Dramsveien, Dramsvegen 153, 9010 Tromsø"}, {"label": "Circle K Breivika · 24시간", "q": "Circle K Breivika, Terminalgata 24, 9019 Tromsø", "open": "https://maps.google.com/?cid=11121943950085116745"}]} },
     { p: "info.warn.items.3", from: "공휴일에는 마트에서 맥주도 팔지 않아요 · 상점은 대부분 **12/28(월)**부터 정상 영업", to: "**12/25 ~ 12/27**(공휴일·일요일)에는 마트에서 맥주도 팔지 않아요 · 상점은 대부분 **12/28(월)**부터 정상 영업" }
@@ -1185,6 +1188,15 @@
         try {
           if (op.addDeadline) {
             if (!doc.deadlines.some(function (d) { return d.title === op.addDeadline.title; })) doc.deadlines.unshift(clone(op.addDeadline));
+            return;
+          }
+          if (op.addDayItem) {
+            var a = op.addDayItem;
+            var day = (doc.days || []).filter(function (x) { return x.date === a.date; })[0];
+            if (!day || !day.items || day.items.some(function (it) { return it.text === a.item.text; })) return;
+            var idx = day.items.length;
+            if (a.after) day.items.forEach(function (it, i) { if (it.text === a.after) idx = i + 1; });
+            day.items.splice(idx, 0, clone(a.item));
             return;
           }
           var cur = getPath(doc, op.p);
@@ -1326,7 +1338,7 @@
   });
 
   /* ---------- 진단 창: 맨 아래 "Tromsø 2026" 을 5번 연속 누르면 ---------- */
-  var APP_VERSION = "2026-11-25.p3";
+  var APP_VERSION = "2026-11-25.p4";
   var brandTaps = [];
   document.getElementById("footBrand").addEventListener("click", function () {
     var now = Date.now();
