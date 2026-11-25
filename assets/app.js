@@ -1186,6 +1186,8 @@
   ]}, { id: "2026-11-26-stay1-box", ops: [
     { p: "stay1.warn", fromTitle: "알아 둘 것", to: {"title": "호스트 확인 (11/25)", "tone": "info", "items": ["수건 · 비누 · 휴지 · 차 · 커피 등 **기본 물품 모두 있음** — 숙소 페이지에 잘못 적혀 있었다고 호스트가 확인", "체크인 **15:00로 앞당기기 요청** — 해 보겠다고 함, 최종 확인은 날짜가 다가오면 호스트가 회신 (그즈음 다시 연락)"]} },
     { removeSection: { p: "stay1.sections", h: "호스트 확인 (11/25)" } }
+  ]}, { id: "2026-11-26-host-msg", ops: [
+    { addItems: { p: "stay1.warn", title: "호스트 확인 (11/25)", items: ["💬 **Asbjørn 답장 (원문)** — Hei, det skal vi prøve å få til! Vi kan avtale mer når det nærmer seg, da vi vet flere detaljer om når leiligheten blir klargjort for dere.", "💬 **번역** — 안녕하세요, 그렇게 되도록 해 볼게요! 날짜가 가까워져서 숙소를 언제 준비해 둘 수 있을지 더 자세히 알게 되면 그때 다시 이야기해요."] } }
   ]}];
   function migrate(doc) {
     // 새로 생긴 큰 항목(예: 현지 정보)은 저장본에 없으면 기본값을 붙인다
@@ -1197,6 +1199,11 @@
         try {
           if (op.addDeadline) {
             if (!doc.deadlines.some(function (d) { return d.title === op.addDeadline.title; })) doc.deadlines.unshift(clone(op.addDeadline));
+            return;
+          }
+          if (op.addItems) {
+            var box = getPath(doc, op.addItems.p);
+            if (box && box.title === op.addItems.title && box.items) op.addItems.items.forEach(function (t) { if (box.items.indexOf(t) < 0) box.items.push(t); });
             return;
           }
           if (op.removeSection) {
@@ -1378,7 +1385,7 @@
   });
 
   /* ---------- 진단 창: 맨 아래 "Tromsø 2026" 을 5번 연속 누르면 ---------- */
-  var APP_VERSION = "2026-11-26.s3";
+  var APP_VERSION = "2026-11-26.s4";
   var brandTaps = [];
   document.getElementById("footBrand").addEventListener("click", function () {
     var now = Date.now();
