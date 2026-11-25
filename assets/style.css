@@ -666,7 +666,14 @@ html.hv-d .hero { height: 300px; min-height: 0; background: var(--paper); color:
   .print-doc .tag, .print-doc .badge { font-size: 7.5pt !important; padding: 1px 6px !important; }
 
   /* 쪽 나눔: 작은 덩어리는 쪼개지 않음 */
-  .print-doc .stat, .print-doc .pick, .print-doc .row, .print-doc .callout, .print-doc .total, .print-doc .stay-cards > *, .print-doc .day, .print-doc .facts, .print-doc .map-print { break-inside: avoid; }
+  /* 큰 덩어리(날짜 묶음·섹션·안내 상자)는 페이지 중간에서 나뉘어도 되게 — Safari 는 안 나뉘는 덩어리를 통째로 넘겨 빈 공간이 생긴다.
+     바둑판(grid)·가로 배치(flex)도 Safari 는 나누지 못해 통째로 넘기므로 인쇄에선 일반 블록으로 */
+  .print-doc .day { display: block !important; position: relative; padding-left: 52px !important; }
+  .print-doc .day-date { position: absolute; left: 0; top: 7px; width: 44px; }
+  .print-doc .picks { display: block !important; }
+  .print-doc .pick { margin-bottom: 8px; }
+  /* 잘리면 안 되는 작은 단위만 */
+  .print-doc li, .print-doc .stat, .print-doc .pick, .print-doc .row, .print-doc .total, .print-doc .stay-cards > *, .print-doc .facts, .print-doc .map-print, .print-doc .day-body .tag { break-inside: avoid; }
   .print-doc h2, .print-doc h3, .print-doc .block-h, .print-doc .p-tab, .print-doc .sec-head { break-after: avoid; }
 }
 
