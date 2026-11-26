@@ -467,7 +467,7 @@
     { name: "12/28 해안 드라이브 → 캐빈", color: "#d97706", pts: [[69.6715376, 18.9654358], [69.6942065, 18.6203726], [69.7774907, 18.5398493], [69.7795494, 18.3999063], [69.6209136, 18.285743]] },
     { name: "12/29 캐빈 → Sommarøy", color: "#db2777", pts: [[69.6209136, 18.285743], [69.635942, 18.004582]] },
     { name: "12/30 캐빈 → 공항 (렌터카 반납)", color: "#7c3aed", pts: [[69.6209136, 18.285743], [69.683333, 18.918919]] },
-    { name: "후보 · 숙소 1 ↔ Breivikeidet 선착장 (12/26 또는 12/27)", color: "#0d9488", candidate: true, pts: [[69.6715376, 18.9654358], [69.6699174, 19.6500408]] }
+    { name: "후보 · 숙소 1 ↔ Breivikeidet 선착장 (12/26 또는 12/27)", color: "#0f766e", candidate: true, pts: [[69.6715376, 18.9654358], [69.6699174, 19.6500408]] }
   ];
 
   function viewMap() {
@@ -546,7 +546,14 @@
           if (!bigMap) return;
           bigMap.removeLayer(dashed);
           // 후보 경로는 확정 경로와 구분되게 끊긴 선
-          mapLayers.routes[i] = L.polyline(line, r.candidate ? { color: r.color, weight: 4, opacity: .8, dashArray: "1 9", lineCap: "round" } : { color: r.color, weight: 4, opacity: .85 }).addTo(bigMap).bindTooltip(r.name);
+          if (r.candidate) {
+            // 후보 경로: 흰 테두리 위에 굵은 끊긴 선 — 지도 색과 섞이지 않게
+            var halo = L.polyline(line, { color: "#fff", weight: 9, opacity: .9, lineCap: "round", lineJoin: "round" });
+            var dash = L.polyline(line, { color: r.color, weight: 5, opacity: 1, dashArray: "10 8", lineCap: "butt", lineJoin: "round" });
+            mapLayers.routes[i] = L.featureGroup([halo, dash]).addTo(bigMap).bindTooltip(r.name);
+          } else {
+            mapLayers.routes[i] = L.polyline(line, { color: r.color, weight: 4, opacity: .85 }).addTo(bigMap).bindTooltip(r.name);
+          }
         }).catch(function () { dashed.bindTooltip(r.name + " (대략적인 선)"); });
       });
       Promise.all(MAP_POINTS.map(geocode)).then(function () {
@@ -1419,7 +1426,7 @@
   });
 
   /* ---------- 진단 창: 맨 아래 "Tromsø 2026" 을 5번 연속 누르면 ---------- */
-  var APP_VERSION = "2026-11-26.s8";
+  var APP_VERSION = "2026-11-26.s9";
   var brandTaps = [];
   document.getElementById("footBrand").addEventListener("click", function () {
     var now = Date.now();
