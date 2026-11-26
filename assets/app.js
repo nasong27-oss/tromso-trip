@@ -1189,6 +1189,11 @@
     { removeSection: { p: "stay1.sections", h: "호스트 확인 (11/25)" } }
   ]}, { id: "2026-11-26-host-msg", ops: [
     { addItems: { p: "stay1.warn", title: "호스트 확인 (11/25)", items: ["💬 **Asbjørn 답장 (원문)** — Hei, det skal vi prøve å få til! Vi kan avtale mer når det nærmer seg, da vi vet flere detaljer om når leiligheten blir klargjort for dere.", "💬 **번역** — 안녕하세요, 그렇게 되도록 해 볼게요! 날짜가 가까워져서 숙소를 언제 준비해 둘 수 있을지 더 자세히 알게 되면 그때 다시 이야기해요."] } }
+  ]}, { id: "2026-11-26-breivikeidet", ops: [
+    { addDayItem: { date: "2026-12-26", item: {"text": "🚗 드라이브 후보 (12/26 또는 12/27) — Breivikeidet 페리 선착장 왕복"} } },
+    { addDayItem: { date: "2026-12-27", item: {"text": "🚗 드라이브 후보 (12/26 또는 12/27) — Breivikeidet 페리 선착장 왕복"} } },
+    { addDayMap: { date: "2026-12-26", map: {"label": "드라이브 후보 · 숙소 → Breivikeidet 선착장 왕복", "stops": [{"name": "Dramsvegen 167 (숙소)", "at": "69.6715376,18.9654357"}, {"name": "Breivikeidet 페리 선착장", "at": "69.6699174,19.6500408"}, {"name": "Dramsvegen 167 (숙소)", "at": "69.6715376,18.9654357"}], "open": "https://www.google.com/maps/dir/Dramsvegen+167,+9010+Tromsø,+노르웨이/Breivikeidet+ferjekai,+Breivikeidveien,+9027+Ramfjordbotn,+노르웨이/Dramsvegen+167,+9010+Tromsø,+노르웨이/@69.6654682,18.6754026,9.6z/data=!4m20!4m19!1m5!1m1!1s0x45c4c442ec7852d3:0x9c383e720ebb8eb4!2m2!1d18.9654357!2d69.6715376!1m5!1m1!1s0x45c5207d619351b3:0x3d68ada88728004a!2m2!1d19.6500408!2d69.6699174!1m5!1m1!1s0x45c4c442ec7852d3:0x9c383e720ebb8eb4!2m2!1d18.9654357!2d69.6715376!3e0?entry=ttu&g_ep=EgoyMDI2MTEyMy4wIKXMDSoASAFQAw%3D%3D", "openLabel": "구글맵에서 이 경로 열기"} } },
+    { addDayMap: { date: "2026-12-27", map: {"label": "드라이브 후보 · 숙소 → Breivikeidet 선착장 왕복", "stops": [{"name": "Dramsvegen 167 (숙소)", "at": "69.6715376,18.9654357"}, {"name": "Breivikeidet 페리 선착장", "at": "69.6699174,19.6500408"}, {"name": "Dramsvegen 167 (숙소)", "at": "69.6715376,18.9654357"}], "open": "https://www.google.com/maps/dir/Dramsvegen+167,+9010+Tromsø,+노르웨이/Breivikeidet+ferjekai,+Breivikeidveien,+9027+Ramfjordbotn,+노르웨이/Dramsvegen+167,+9010+Tromsø,+노르웨이/@69.6654682,18.6754026,9.6z/data=!4m20!4m19!1m5!1m1!1s0x45c4c442ec7852d3:0x9c383e720ebb8eb4!2m2!1d18.9654357!2d69.6715376!1m5!1m1!1s0x45c5207d619351b3:0x3d68ada88728004a!2m2!1d19.6500408!2d69.6699174!1m5!1m1!1s0x45c4c442ec7852d3:0x9c383e720ebb8eb4!2m2!1d18.9654357!2d69.6715376!3e0?entry=ttu&g_ep=EgoyMDI2MTEyMy4wIKXMDSoASAFQAw%3D%3D", "openLabel": "구글맵에서 이 경로 열기"} } }
   ]}];
   function migrate(doc) {
     // 새로 생긴 큰 항목(예: 현지 정보)은 저장본에 없으면 기본값을 붙인다
@@ -1200,6 +1205,13 @@
         try {
           if (op.addDeadline) {
             if (!doc.deadlines.some(function (d) { return d.title === op.addDeadline.title; })) doc.deadlines.unshift(clone(op.addDeadline));
+            return;
+          }
+          if (op.addDayMap) {
+            var dm = (doc.days || []).filter(function (x) { return x.date === op.addDayMap.date; })[0];
+            if (!dm) return;
+            dm.maps = dm.maps || [];
+            if (!dm.maps.some(function (m) { return m && m.label === op.addDayMap.map.label; })) dm.maps.push(clone(op.addDayMap.map));
             return;
           }
           if (op.addItems) {
@@ -1386,7 +1398,7 @@
   });
 
   /* ---------- 진단 창: 맨 아래 "Tromsø 2026" 을 5번 연속 누르면 ---------- */
-  var APP_VERSION = "2026-11-26.s5";
+  var APP_VERSION = "2026-11-26.s6";
   var brandTaps = [];
   document.getElementById("footBrand").addEventListener("click", function () {
     var now = Date.now();
