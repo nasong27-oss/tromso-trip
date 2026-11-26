@@ -238,6 +238,9 @@ details.map[open] .map-toggle::after { content: " ▴"; }
 .callout { border-radius: var(--r); padding: 16px 18px; margin: 0 0 8px; background: var(--warn-soft); --cc: var(--warn); }
 .callout.urgent { background: var(--urgent-soft); --cc: var(--urgent); }
 .callout.info { background: var(--info-soft); --cc: var(--info); }
+.day-opt { list-style: none; padding: 4px 0 16px; }
+.day-opt .callout { margin: 0; }
+.day-opt details.map { margin-top: 10px; background: var(--paper); }
 .callout-h { margin: 0 0 6px; font-size: 13px; font-weight: 700; color: var(--cc); letter-spacing: .02em; }
 .callout ul { margin: 0; padding-left: 18px; }
 .callout li { margin: 3px 0; font-size: 14.5px; color: var(--ink-2); }

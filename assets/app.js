@@ -309,6 +309,13 @@
         (d.maps && !editing ? d.maps.map(function (m) { return mapBlock(m, false); }).join("") : "") +
         (d.quote != null ? '<blockquote class="quote">' + E(dp + ".quote", { plain: true, ph: "메모" }) + "</blockquote>" : "") +
         "</div></li>";
+      // 일정 사이 후보 박스 (예: 12/26 또는 12/27 드라이브 후보)
+      (T.options || []).forEach(function (o, oi) {
+        if (o.after !== d.date) return;
+        var box = callout("options." + oi, "info");
+        if (o.maps && !editing) box = box.replace(/<\/aside>$/, o.maps.map(function (m) { return mapBlock(m, false); }).join("") + "</aside>");
+        h += '<li class="day-opt">' + box + "</li>";
+      });
     });
     h += "</ol></section>";
 
@@ -1194,6 +1201,8 @@
     { addDayItem: { date: "2026-12-27", item: {"text": "🚗 드라이브 후보 (12/26 또는 12/27) — Breivikeidet 페리 선착장 왕복"} } },
     { addDayMap: { date: "2026-12-26", map: {"label": "드라이브 후보 · 숙소 → Breivikeidet 선착장 왕복", "stops": [{"name": "Dramsvegen 167 (숙소)", "at": "69.6715376,18.9654357"}, {"name": "Breivikeidet 페리 선착장", "at": "69.6699174,19.6500408"}, {"name": "Dramsvegen 167 (숙소)", "at": "69.6715376,18.9654357"}], "open": "https://www.google.com/maps/dir/Dramsvegen+167,+9010+Tromsø,+노르웨이/Breivikeidet+ferjekai,+Breivikeidveien,+9027+Ramfjordbotn,+노르웨이/Dramsvegen+167,+9010+Tromsø,+노르웨이/@69.6654682,18.6754026,9.6z/data=!4m20!4m19!1m5!1m1!1s0x45c4c442ec7852d3:0x9c383e720ebb8eb4!2m2!1d18.9654357!2d69.6715376!1m5!1m1!1s0x45c5207d619351b3:0x3d68ada88728004a!2m2!1d19.6500408!2d69.6699174!1m5!1m1!1s0x45c4c442ec7852d3:0x9c383e720ebb8eb4!2m2!1d18.9654357!2d69.6715376!3e0?entry=ttu&g_ep=EgoyMDI2MTEyMy4wIKXMDSoASAFQAw%3D%3D", "openLabel": "구글맵에서 이 경로 열기"} } },
     { addDayMap: { date: "2026-12-27", map: {"label": "드라이브 후보 · 숙소 → Breivikeidet 선착장 왕복", "stops": [{"name": "Dramsvegen 167 (숙소)", "at": "69.6715376,18.9654357"}, {"name": "Breivikeidet 페리 선착장", "at": "69.6699174,19.6500408"}, {"name": "Dramsvegen 167 (숙소)", "at": "69.6715376,18.9654357"}], "open": "https://www.google.com/maps/dir/Dramsvegen+167,+9010+Tromsø,+노르웨이/Breivikeidet+ferjekai,+Breivikeidveien,+9027+Ramfjordbotn,+노르웨이/Dramsvegen+167,+9010+Tromsø,+노르웨이/@69.6654682,18.6754026,9.6z/data=!4m20!4m19!1m5!1m1!1s0x45c4c442ec7852d3:0x9c383e720ebb8eb4!2m2!1d18.9654357!2d69.6715376!1m5!1m1!1s0x45c5207d619351b3:0x3d68ada88728004a!2m2!1d19.6500408!2d69.6699174!1m5!1m1!1s0x45c4c442ec7852d3:0x9c383e720ebb8eb4!2m2!1d18.9654357!2d69.6715376!3e0?entry=ttu&g_ep=EgoyMDI2MTEyMy4wIKXMDSoASAFQAw%3D%3D", "openLabel": "구글맵에서 이 경로 열기"} } }
+  ]}, { id: "2026-11-26-drive-box", ops: [
+    { removeDayStuff: { dates: ["2026-12-26", "2026-12-27"], itemText: "🚗 드라이브 후보 (12/26 또는 12/27) — Breivikeidet 페리 선착장 왕복", mapLabel: "드라이브 후보 · 숙소 → Breivikeidet 선착장 왕복" } }
   ]}];
   function migrate(doc) {
     // 새로 생긴 큰 항목(예: 현지 정보)은 저장본에 없으면 기본값을 붙인다
@@ -1205,6 +1214,15 @@
         try {
           if (op.addDeadline) {
             if (!doc.deadlines.some(function (d) { return d.title === op.addDeadline.title; })) doc.deadlines.unshift(clone(op.addDeadline));
+            return;
+          }
+          if (op.removeDayStuff) {
+            var rs = op.removeDayStuff;
+            (doc.days || []).forEach(function (x) {
+              if (rs.dates.indexOf(x.date) < 0) return;
+              if (x.items) x.items = x.items.filter(function (it) { return it.text !== rs.itemText; });
+              if (x.maps) { x.maps = x.maps.filter(function (m) { return m && m.label !== rs.mapLabel; }); if (!x.maps.length) delete x.maps; }
+            });
             return;
           }
           if (op.addDayMap) {
@@ -1398,7 +1416,7 @@
   });
 
   /* ---------- 진단 창: 맨 아래 "Tromsø 2026" 을 5번 연속 누르면 ---------- */
-  var APP_VERSION = "2026-11-26.s6";
+  var APP_VERSION = "2026-11-26.s7";
   var brandTaps = [];
   document.getElementById("footBrand").addEventListener("click", function () {
     var now = Date.now();
