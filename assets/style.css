@@ -687,4 +687,3 @@ html.hv-d .hero { height: 300px; min-height: 0; background: var(--paper); color:
   .stay-card, details.map, .chips span { border-color: transparent; }
 }
 
-.route-sw.cand { background: repeating-linear-gradient(90deg, var(--rc) 0 4px, transparent 4px 8px) !important; }
