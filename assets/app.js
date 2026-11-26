@@ -1216,6 +1216,8 @@
     { removeDayStuff: { dates: ["2026-12-26", "2026-12-27"], itemText: "🚗 드라이브 후보 (12/26 또는 12/27) — Breivikeidet 페리 선착장 왕복", mapLabel: "드라이브 후보 · 숙소 → Breivikeidet 선착장 왕복" } }
   ]}, { id: "2026-11-26-stay1-img", ops: [
     { p: "stay1.images", from: undefined, to: [{"h": "호스트 안내", "src": "/assets/img/stay1-welcome.jpg", "alt": "호스트가 보낸 트롬쇠 안내 이미지 (버스 24번, 옷차림, 예약, 추천 장소, 약도)", "list": ["**버스 24번** 공항 ⇄ 숙소 ⇄ 시내 — 숙소가 노선 중간이라 공항·시내 오가기 가장 쉬움", "날씨가 빨리 바뀌니 **따뜻한 옷을 여러 겹**", "성수기엔 식당·일부 명소가 꽉 차요 — **2~5일 전 예약** 권장", "자연·오로라: Sydspissen · Prestvannet · Ersfjordbotn · Skulsvik / 문화: 북극 대성당(Ishavskatedralen) · 극지 박물관 · Polaria"]}] }
+  ]}, { id: "2026-11-26-stay1-recs", ops: [
+    { replaceListItem: { p: "stay1.images.0.list", from: "자연·오로라: Sydspissen · Prestvannet · Ersfjordbotn · Skulsvik / 문화: 북극 대성당(Ishavskatedralen) · 극지 박물관 · Polaria", to: ["**오로라·자연** Sydspissen — 트롬쇠 섬 남쪽 끝 바닷가, 시내 불빛에서 벗어나 섬 안에서 오로라 보기 좋은 곳", "**오로라·자연** Prestvannet — 섬 언덕 위 호수, 숙소에서 가까워 투어 없는 밤에 들르기 좋음", "**오로라·자연** Ersfjordbotn — 서쪽 섬 Kvaløya의 피오르 끝 마을 · 12/28 해안 드라이브 경로", "**오로라·자연** Skulsvik — 위치 확인 필요", "**문화** 북극 대성당 (Ishavskatedralen) — 다리 건너 삼각형 하얀 교회, 트롬쇠 대표 건물 · 12/27 시내 관광 후보", "**문화** 극지 박물관 (Polar Museum) — 북극 탐험·사냥의 역사", "**문화** Polaria — 북극 수족관 겸 체험관 · 물범, 얼음 조각이 쓰러진 듯한 건물"] } }
   ]}];
   function migrate(doc) {
     // 새로 생긴 큰 항목(예: 현지 정보)은 저장본에 없으면 기본값을 붙인다
@@ -1227,6 +1229,13 @@
         try {
           if (op.addDeadline) {
             if (!doc.deadlines.some(function (d) { return d.title === op.addDeadline.title; })) doc.deadlines.unshift(clone(op.addDeadline));
+            return;
+          }
+          if (op.replaceListItem) {
+            var rli = op.replaceListItem, arr = getPath(doc, rli.p);
+            if (!arr) return;
+            var k = arr.indexOf(rli.from);
+            if (k >= 0) Array.prototype.splice.apply(arr, [k, 1].concat(clone(rli.to)));
             return;
           }
           if (op.removeDayStuff) {
@@ -1429,7 +1438,7 @@
   });
 
   /* ---------- 진단 창: 맨 아래 "Tromsø 2026" 을 5번 연속 누르면 ---------- */
-  var APP_VERSION = "2026-11-26.s12";
+  var APP_VERSION = "2026-11-26.s13";
   var brandTaps = [];
   document.getElementById("footBrand").addEventListener("click", function () {
     var now = Date.now();
