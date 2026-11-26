@@ -158,7 +158,8 @@ window.TRIP = {
       ]}
     ],
     refs: [{ k: "예약처", v: "Airbnb 숙소 페이지", href: "https://www.airbnb.co.kr/rooms/1623739938268623685" }],
-    contacts: []
+    contacts: [],
+    images: [{"h": "호스트 안내", "src": "/assets/img/stay1-welcome.jpg", "alt": "호스트가 보낸 트롬쇠 안내 이미지 (버스 24번, 옷차림, 예약, 추천 장소, 약도)", "list": ["**버스 24번** 공항 ⇄ 숙소 ⇄ 시내 — 숙소가 노선 중간이라 공항·시내 오가기 가장 쉬움", "날씨가 빨리 바뀌니 **따뜻한 옷을 여러 겹**", "성수기엔 식당·일부 명소가 꽉 차요 — **2~5일 전 예약** 권장", "자연·오로라: Sydspissen · Prestvannet · Ersfjordbotn · Skulsvik / 문화: 북극 대성당(Ishavskatedralen) · 극지 박물관 · Polaria"]}]
   },
 
   /* ---------- 숙소 2 ---------- */

@@ -390,6 +390,13 @@
     h += contacts(key + ".contacts");
     (d.sections || []).forEach(function (_, i) { h += section(key + ".sections." + i); });
     if (editing) h += '<div class="ed-row">' + add(key + ".sections", "section", "섹션 추가") + "</div>";
+    // 맨 아래: 받은 안내 이미지 (누르면 크게)
+    (d.images || []).forEach(function (im, i) {
+      var p = key + ".images." + i;
+      h += '<section class="block guide"><h3 class="block-h">' + E(p + ".h", { plain: true }) + "</h3>" +
+        '<a class="guide-img" href="' + esc(im.src) + '" target="_blank" rel="noopener"><img src="' + esc(im.src) + '" alt="' + esc(im.alt || "") + '" loading="lazy"></a>' +
+        (im.list ? "<ul>" + im.list.map(function (_, j) { return "<li>" + E(p + ".list." + j) + "</li>"; }).join("") + "</ul>" : "") + "</section>";
+    });
     return h;
   }
 
@@ -1205,6 +1212,8 @@
     { addDayMap: { date: "2026-12-27", map: {"label": "드라이브 후보 · 숙소 → Breivikeidet 선착장 왕복", "stops": [{"name": "Dramsvegen 167 (숙소)", "at": "69.6715376,18.9654357"}, {"name": "Breivikeidet 페리 선착장", "at": "69.6699174,19.6500408"}, {"name": "Dramsvegen 167 (숙소)", "at": "69.6715376,18.9654357"}], "open": "https://www.google.com/maps/dir/Dramsvegen+167,+9010+Tromsø,+노르웨이/Breivikeidet+ferjekai,+Breivikeidveien,+9027+Ramfjordbotn,+노르웨이/Dramsvegen+167,+9010+Tromsø,+노르웨이/@69.6654682,18.6754026,9.6z/data=!4m20!4m19!1m5!1m1!1s0x45c4c442ec7852d3:0x9c383e720ebb8eb4!2m2!1d18.9654357!2d69.6715376!1m5!1m1!1s0x45c5207d619351b3:0x3d68ada88728004a!2m2!1d19.6500408!2d69.6699174!1m5!1m1!1s0x45c4c442ec7852d3:0x9c383e720ebb8eb4!2m2!1d18.9654357!2d69.6715376!3e0?entry=ttu&g_ep=EgoyMDI2MTEyMy4wIKXMDSoASAFQAw%3D%3D", "openLabel": "구글맵에서 이 경로 열기"} } }
   ]}, { id: "2026-11-26-drive-box", ops: [
     { removeDayStuff: { dates: ["2026-12-26", "2026-12-27"], itemText: "🚗 드라이브 후보 (12/26 또는 12/27) — Breivikeidet 페리 선착장 왕복", mapLabel: "드라이브 후보 · 숙소 → Breivikeidet 선착장 왕복" } }
+  ]}, { id: "2026-11-26-stay1-img", ops: [
+    { p: "stay1.images", from: undefined, to: [{"h": "호스트 안내", "src": "/assets/img/stay1-welcome.jpg", "alt": "호스트가 보낸 트롬쇠 안내 이미지 (버스 24번, 옷차림, 예약, 추천 장소, 약도)", "list": ["**버스 24번** 공항 ⇄ 숙소 ⇄ 시내 — 숙소가 노선 중간이라 공항·시내 오가기 가장 쉬움", "날씨가 빨리 바뀌니 **따뜻한 옷을 여러 겹**", "성수기엔 식당·일부 명소가 꽉 차요 — **2~5일 전 예약** 권장", "자연·오로라: Sydspissen · Prestvannet · Ersfjordbotn · Skulsvik / 문화: 북극 대성당(Ishavskatedralen) · 극지 박물관 · Polaria"]}] }
   ]}];
   function migrate(doc) {
     // 새로 생긴 큰 항목(예: 현지 정보)은 저장본에 없으면 기본값을 붙인다
@@ -1418,7 +1427,7 @@
   });
 
   /* ---------- 진단 창: 맨 아래 "Tromsø 2026" 을 5번 연속 누르면 ---------- */
-  var APP_VERSION = "2026-11-26.s10";
+  var APP_VERSION = "2026-11-26.s11";
   var brandTaps = [];
   document.getElementById("footBrand").addEventListener("click", function () {
     var now = Date.now();
