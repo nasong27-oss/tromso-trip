@@ -459,13 +459,15 @@
     { id: "stay3", kind: "stay", n: "3", name: "숙소 3 · 12/30–1/1", sub: "MOXY Tromsø (공항 옆)", q: "Huldervegen 2, 9016 Tromsø, Norway", near: [69.6812, 18.9225], tab: "stay3" },
     { id: "airport", kind: "place", n: "✈", name: "트롬쇠 공항", sub: "렌터카 픽업 12/25 · 반납 12/30", at: [69.683333, 18.918919], tab: "car" },
     { id: "aurora", kind: "place", n: "★", name: "오로라 투어 집결지", sub: "Scandic Ishavshotel 앞 · 12/26 17:20", at: [69.649595612, 18.961887359], tab: "aurora" },
-    { id: "sommaroy", kind: "place", n: "◆", name: "Sommarøy", sub: "12/29 드라이브", at: [69.635942, 18.004582] }
+    { id: "sommaroy", kind: "place", n: "◆", name: "Sommarøy", sub: "12/29 드라이브", at: [69.635942, 18.004582] },
+    { id: "breivikeidet", kind: "place", n: "⛴", name: "Breivikeidet 페리 선착장", sub: "드라이브 후보 · 12/26 또는 12/27 · Lyngen 알프스 전망", at: [69.6699174, 19.6500408] }
   ];
   var MAP_ROUTES = [
     { name: "12/25 공항 → 숙소 1", color: "#2f6fde", pts: [[69.683333, 18.918919], [69.6715376, 18.9654358]] },
     { name: "12/28 해안 드라이브 → 캐빈", color: "#d97706", pts: [[69.6715376, 18.9654358], [69.6942065, 18.6203726], [69.7774907, 18.5398493], [69.7795494, 18.3999063], [69.6209136, 18.285743]] },
     { name: "12/29 캐빈 → Sommarøy", color: "#db2777", pts: [[69.6209136, 18.285743], [69.635942, 18.004582]] },
-    { name: "12/30 캐빈 → 공항 (렌터카 반납)", color: "#7c3aed", pts: [[69.6209136, 18.285743], [69.683333, 18.918919]] }
+    { name: "12/30 캐빈 → 공항 (렌터카 반납)", color: "#7c3aed", pts: [[69.6209136, 18.285743], [69.683333, 18.918919]] },
+    { name: "후보 · 숙소 1 ↔ Breivikeidet 선착장 (12/26 또는 12/27)", color: "#0d9488", candidate: true, pts: [[69.6715376, 18.9654358], [69.6699174, 19.6500408]] }
   ];
 
   function viewMap() {
@@ -476,7 +478,7 @@
         '<span class="legend-txt"><b>' + esc(pt.name) + "</b><small>" + esc(pt.sub) + "</small></span></button></li>";
     }).join("") + "</ul></section>";
     h += '<section class="block"><h3 class="block-h">이동 경로</h3><ul class="legend">' + MAP_ROUTES.map(function (r, i) {
-      return '<li><button type="button" class="legend-item" data-route="' + i + '"><span class="route-sw" style="background:' + r.color + '"></span>' +
+      return '<li><button type="button" class="legend-item" data-route="' + i + '"><span class="route-sw' + (r.candidate ? " cand" : "") + '" style="--rc:' + r.color + ";background:" + r.color + '"></span>' +
         '<span class="legend-txt"><b>' + esc(r.name) + "</b></span></button></li>";
     }).join("") + '</ul><p class="note">지도는 OpenStreetMap · 경로는 OSRM 계산 결과예요. 계산이 안 되면 점선으로 표시돼요. 지도는 인터넷이 연결돼 있어야 보여요.</p></section>';
     setTimeout(initBigMap, 0);
@@ -543,7 +545,8 @@
         routeGeometry(r).then(function (line) {
           if (!bigMap) return;
           bigMap.removeLayer(dashed);
-          mapLayers.routes[i] = L.polyline(line, { color: r.color, weight: 4, opacity: .85 }).addTo(bigMap).bindTooltip(r.name);
+          // 후보 경로는 확정 경로와 구분되게 끊긴 선
+          mapLayers.routes[i] = L.polyline(line, r.candidate ? { color: r.color, weight: 4, opacity: .8, dashArray: "1 9", lineCap: "round" } : { color: r.color, weight: 4, opacity: .85 }).addTo(bigMap).bindTooltip(r.name);
         }).catch(function () { dashed.bindTooltip(r.name + " (대략적인 선)"); });
       });
       Promise.all(MAP_POINTS.map(geocode)).then(function () {
@@ -1416,7 +1419,7 @@
   });
 
   /* ---------- 진단 창: 맨 아래 "Tromsø 2026" 을 5번 연속 누르면 ---------- */
-  var APP_VERSION = "2026-11-26.s7";
+  var APP_VERSION = "2026-11-26.s8";
   var brandTaps = [];
   document.getElementById("footBrand").addEventListener("click", function () {
     var now = Date.now();
