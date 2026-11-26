@@ -394,8 +394,10 @@
     (d.images || []).forEach(function (im, i) {
       var p = key + ".images." + i;
       h += '<section class="block guide"><h3 class="block-h">' + E(p + ".h", { plain: true }) + "</h3>" +
-        '<a class="guide-img" href="' + esc(im.src) + '" target="_blank" rel="noopener"><img src="' + esc(im.src) + '" alt="' + esc(im.alt || "") + '" loading="lazy"></a>' +
-        (im.list ? "<ul>" + im.list.map(function (_, j) { return "<li>" + E(p + ".list." + j) + "</li>"; }).join("") + "</ul>" : "") + "</section>";
+        (im.list ? "<ul>" + im.list.map(function (_, j) { return "<li>" + E(p + ".list." + j) + "</li>"; }).join("") + "</ul>" : "") +
+        // 이미지는 커서 접어 두고, 펼치면 보이게
+        '<details class="more guide-more"><summary>안내 이미지 보기</summary>' +
+        '<a class="guide-img" href="' + esc(im.src) + '" target="_blank" rel="noopener"><img src="' + esc(im.src) + '" alt="' + esc(im.alt || "") + '" loading="lazy"></a></details></section>';
     });
     return h;
   }
@@ -1427,7 +1429,7 @@
   });
 
   /* ---------- 진단 창: 맨 아래 "Tromsø 2026" 을 5번 연속 누르면 ---------- */
-  var APP_VERSION = "2026-11-26.s11";
+  var APP_VERSION = "2026-11-26.s12";
   var brandTaps = [];
   document.getElementById("footBrand").addEventListener("click", function () {
     var now = Date.now();
