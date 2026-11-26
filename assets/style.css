@@ -241,6 +241,8 @@ details.map[open] .map-toggle::after { content: " ▴"; }
 .callout-h { margin: 0 0 6px; font-size: 13px; font-weight: 700; color: var(--cc); letter-spacing: .02em; }
 .callout ul { margin: 0; padding-left: 18px; }
 .callout li { margin: 3px 0; font-size: 14.5px; color: var(--ink-2); }
+.callout li.sub { list-style: none; margin: 2px 0 2px 2px; padding-left: 10px; border-left: 2px solid color-mix(in srgb, var(--cc) 30%, transparent); font-size: 13px; line-height: 1.5; color: var(--muted); }
+.callout li.sub + li:not(.sub) { margin-top: 6px; }
 .callout p:not(.callout-h) { margin: 0; font-size: 14.5px; color: var(--ink-2); }
 .btn { display: inline-block; margin-top: 12px; padding: 9px 16px; border-radius: 99px; background: var(--cc); color: #fff; font-size: 14px; font-weight: 600; text-decoration: none; }
 @media (prefers-color-scheme: dark) { .btn { color: #111; } }

@@ -231,7 +231,8 @@
     var w = getPath(D(), p);
     if (!w) return "";
     return '<aside class="callout ' + (w.tone || tone || "warn") + '"><p class="callout-h">' + E(p + ".title", { plain: true }) + "</p><ul>" +
-      w.items.map(function (_, i) { return "<li>" + E(p + ".items." + i) + del(p + ".items." + i) + "</li>"; }).join("") + "</ul>" +
+      // "💬" 로 시작하는 줄은 바로 위 줄에 딸린 내용(원문·번역 등)으로 한 단계 들여서 작게
+      w.items.map(function (t, i) { return "<li" + (/^\s*💬/.test(t || "") ? ' class="sub"' : "") + ">" + E(p + ".items." + i) + del(p + ".items." + i) + "</li>"; }).join("") + "</ul>" +
       add(p + ".items", "str", "줄 추가") +
       (w.cta && !editing ? '<a class="btn" href="' + esc(w.cta.href) + '" target="_blank" rel="noopener">' + esc(w.cta.label) + " ↗</a>" : "") +
       "</aside>";
@@ -1385,7 +1386,7 @@
   });
 
   /* ---------- 진단 창: 맨 아래 "Tromsø 2026" 을 5번 연속 누르면 ---------- */
-  var APP_VERSION = "2026-11-26.s4";
+  var APP_VERSION = "2026-11-26.s5";
   var brandTaps = [];
   document.getElementById("footBrand").addEventListener("click", function () {
     var now = Date.now();
