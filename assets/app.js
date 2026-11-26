@@ -380,6 +380,19 @@
     return h;
   }
 
+  // 추천 장소 표: 분류별로 묶고, 장소 이름 | 설명
+  function placesTable(p, im) {
+    if (!im.places || !im.places.length) return "";
+    var h = '<p class="places-h">' + E(p + ".placesTitle", { plain: true }) + '</p><table class="places"><tbody>';
+    var last = null;
+    im.places.forEach(function (pl, i) {
+      var q = p + ".places." + i;
+      if (pl.cat !== last) { h += '<tr class="places-cat"><th colspan="2">' + E(q + ".cat", { plain: true }) + "</th></tr>"; last = pl.cat; }
+      h += '<tr><td class="pl-name"><b>' + E(q + ".name", { plain: true }) + "</b>" + (pl.sub ? "<small>" + E(q + ".sub", { plain: true }) + "</small>" : "") + "</td>" +
+        '<td class="pl-desc">' + E(q + ".desc", { plain: true }) + "</td></tr>";
+    });
+    return h + "</tbody></table>";
+  }
   function viewDetail(key, extra) {
     var d = D()[key];
     var h = head(key);
@@ -395,6 +408,7 @@
       var p = key + ".images." + i;
       h += '<section class="block guide"><h3 class="block-h">' + E(p + ".h", { plain: true }) + "</h3>" +
         (im.list ? "<ul>" + im.list.map(function (_, j) { return "<li>" + E(p + ".list." + j) + "</li>"; }).join("") + "</ul>" : "") +
+        placesTable(p, im) +
         // 이미지는 커서 접어 두고, 펼치면 보이게
         '<details class="more guide-more"><summary>안내 이미지 보기</summary>' +
         '<a class="guide-img" href="' + esc(im.src) + '" target="_blank" rel="noopener"><img src="' + esc(im.src) + '" alt="' + esc(im.alt || "") + '" loading="lazy"></a></details></section>';
@@ -1218,6 +1232,8 @@
     { p: "stay1.images", from: undefined, to: [{"h": "호스트 안내", "src": "/assets/img/stay1-welcome.jpg", "alt": "호스트가 보낸 트롬쇠 안내 이미지 (버스 24번, 옷차림, 예약, 추천 장소, 약도)", "list": ["**버스 24번** 공항 ⇄ 숙소 ⇄ 시내 — 숙소가 노선 중간이라 공항·시내 오가기 가장 쉬움", "날씨가 빨리 바뀌니 **따뜻한 옷을 여러 겹**", "성수기엔 식당·일부 명소가 꽉 차요 — **2~5일 전 예약** 권장", "자연·오로라: Sydspissen · Prestvannet · Ersfjordbotn · Skulsvik / 문화: 북극 대성당(Ishavskatedralen) · 극지 박물관 · Polaria"]}] }
   ]}, { id: "2026-11-26-stay1-recs", ops: [
     { replaceListItem: { p: "stay1.images.0.list", from: "자연·오로라: Sydspissen · Prestvannet · Ersfjordbotn · Skulsvik / 문화: 북극 대성당(Ishavskatedralen) · 극지 박물관 · Polaria", to: ["**오로라·자연** Sydspissen — 트롬쇠 섬 남쪽 끝 바닷가, 시내 불빛에서 벗어나 섬 안에서 오로라 보기 좋은 곳", "**오로라·자연** Prestvannet — 섬 언덕 위 호수, 숙소에서 가까워 투어 없는 밤에 들르기 좋음", "**오로라·자연** Ersfjordbotn — 서쪽 섬 Kvaløya의 피오르 끝 마을 · 12/28 해안 드라이브 경로", "**오로라·자연** Skulsvik — 위치 확인 필요", "**문화** 북극 대성당 (Ishavskatedralen) — 다리 건너 삼각형 하얀 교회, 트롬쇠 대표 건물 · 12/27 시내 관광 후보", "**문화** 극지 박물관 (Polar Museum) — 북극 탐험·사냥의 역사", "**문화** Polaria — 북극 수족관 겸 체험관 · 물범, 얼음 조각이 쓰러진 듯한 건물"] } }
+  ]}, { id: "2026-11-26-stay1-places", ops: [
+    { recsToTable: { p: "stay1.images.0", remove: ["**오로라·자연** Sydspissen — 트롬쇠 섬 남쪽 끝 바닷가, 시내 불빛에서 벗어나 섬 안에서 오로라 보기 좋은 곳", "**오로라·자연** Prestvannet — 섬 언덕 위 호수, 숙소에서 가까워 투어 없는 밤에 들르기 좋음", "**오로라·자연** Ersfjordbotn — 서쪽 섬 Kvaløya의 피오르 끝 마을 · 12/28 해안 드라이브 경로", "**오로라·자연** Skulsvik — 위치 확인 필요", "**문화** 북극 대성당 (Ishavskatedralen) — 다리 건너 삼각형 하얀 교회, 트롬쇠 대표 건물 · 12/27 시내 관광 후보", "**문화** 극지 박물관 (Polar Museum) — 북극 탐험·사냥의 역사", "**문화** Polaria — 북극 수족관 겸 체험관 · 물범, 얼음 조각이 쓰러진 듯한 건물"], title: "현지 추천 장소", places: [{"cat": "오로라·자연", "name": "Sydspissen", "desc": "트롬쇠 섬 남쪽 끝 바닷가 · 시내 불빛에서 벗어나 섬 안에서 오로라 보기 좋은 곳"}, {"cat": "오로라·자연", "name": "Prestvannet", "desc": "섬 언덕 위 호수 · 숙소에서 가까워 투어 없는 밤에 들르기 좋음"}, {"cat": "오로라·자연", "name": "Ersfjordbotn", "desc": "서쪽 섬 Kvaløya의 피오르 끝 마을 · 12/28 해안 드라이브 경로"}, {"cat": "오로라·자연", "name": "Skulsvik", "desc": "위치 확인 필요"}, {"cat": "문화", "name": "북극 대성당", "sub": "Ishavskatedralen", "desc": "다리 건너 삼각형 하얀 교회, 트롬쇠 대표 건물 · 12/27 시내 관광 후보"}, {"cat": "문화", "name": "극지 박물관", "sub": "Polar Museum", "desc": "북극 탐험·사냥의 역사"}, {"cat": "문화", "name": "Polaria", "desc": "북극 수족관 겸 체험관 · 물범, 얼음 조각이 쓰러진 듯한 건물"}] } }
   ]}];
   function migrate(doc) {
     // 새로 생긴 큰 항목(예: 현지 정보)은 저장본에 없으면 기본값을 붙인다
@@ -1229,6 +1245,13 @@
         try {
           if (op.addDeadline) {
             if (!doc.deadlines.some(function (d) { return d.title === op.addDeadline.title; })) doc.deadlines.unshift(clone(op.addDeadline));
+            return;
+          }
+          if (op.recsToTable) {
+            var rt = op.recsToTable, g = getPath(doc, rt.p);
+            if (!g || g.places) return;
+            if (g.list) g.list = g.list.filter(function (t) { return rt.remove.indexOf(t) < 0; });
+            g.placesTitle = rt.title; g.places = clone(rt.places);
             return;
           }
           if (op.replaceListItem) {
@@ -1438,7 +1461,7 @@
   });
 
   /* ---------- 진단 창: 맨 아래 "Tromsø 2026" 을 5번 연속 누르면 ---------- */
-  var APP_VERSION = "2026-11-26.s13";
+  var APP_VERSION = "2026-11-26.s14";
   var brandTaps = [];
   document.getElementById("footBrand").addEventListener("click", function () {
     var now = Date.now();
