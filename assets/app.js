@@ -888,19 +888,18 @@
     if (!el || !WX_LAST) return;
     body = WX_LAST.body; place = WX_LAST.place; at = WX_LAST.at;
     var now = Date.now(), w = body.wx, k = body.kp, h = "";
+    // 한눈에: 기온 · 하늘 / 오로라 가능성 / 밝은 시간 — 숫자(Kp · 구름)는 눌러서 보는 상세 화면으로
     if (w) {
       var s = symInfo(w.symbol);
-      h += '<a class="wxn-l" href="' + place.yr + '" target="_blank" rel="noopener"><b>' + s.ic + " " + Math.round(w.t) + "°</b> " + esc(s.label) +
-        '<span class="wxn-m"> · 체감 ' + Math.round(feels(w.t, w.wind)) + "° · 구름 " + Math.round(w.cloud) + "%</span></a>";
+      h += '<a class="wxn-l" href="' + place.yr + '" target="_blank" rel="noopener"><b>' + s.ic + " " + Math.round(w.t) + "° " + esc(s.label) + '</b><span class="wxn-m"> 체감 ' + Math.round(feels(w.t, w.wind)) + "°</span></a>";
     }
     if (k || (w && w.nightCloud != null)) {
       var kv = k ? (k.tonight != null ? k.tonight : k.now) : null;
       var ch = auroraChance(w ? w.nightCloud : null, kv);
-      h += '<a class="wxn-l" href="https://www.swpc.noaa.gov/products/aurora-30-minute-forecast" target="_blank" rel="noopener">오늘 밤 오로라 <b class="wx-c wx-' + ch.c + '">' + ch.t + "</b>" +
-        '<span class="wxn-m"> · ' + (kv != null ? "Kp " + (Math.round(kv * 10) / 10) : "") + (w && w.nightCloud != null ? (kv != null ? " · " : "") + "밤 구름 " + w.nightCloud + "%" : "") + "</span></a>";
+      h += '<a class="wxn-l" href="https://www.swpc.noaa.gov/products/aurora-30-minute-forecast" target="_blank" rel="noopener">오늘 밤 오로라 <b class="wx-c wx-' + ch.c + '">' + ch.t + "</b></a>";
     }
-    var age = now - at, ago = age > 3600e3 ? " · " + (age > 864e5 ? Math.floor(age / 864e5) + "일" : Math.floor(age / 3600e3) + "시간") + " 전" : "";
-    h += '<p class="wxn-l wxn-m">' + esc(daylight(now, place.at)) + " · 📍 " + esc(place.name) + ago + "</p>";
+    var age = now - at, ago = age > 3600e3 ? " · " + (age > 864e5 ? Math.floor(age / 864e5) + "일" : Math.floor(age / 3600e3) + "시간") + " 전 정보" : "";
+    h += '<p class="wxn-l wxn-m">' + esc(daylight(now, place.at).replace("극야 · ", "")) + ago + "</p>";
     el.innerHTML = h;
   }
   var wxBusy = false;
@@ -1782,7 +1781,7 @@
   });
 
   /* ---------- 진단 창: 맨 아래 "Tromsø 2026" 을 5번 연속 누르면 ---------- */
-  var APP_VERSION = "2026-11-27.w2";
+  var APP_VERSION = "2026-11-27.w3";
   var brandTaps = [];
   document.getElementById("footBrand").addEventListener("click", function () {
     var now = Date.now();

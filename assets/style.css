@@ -772,7 +772,7 @@ details.fold > summary:active .fold-btn { background: var(--line-2); }
 @media print { .subnav { display: none !important; } }
 
 /* 출발까지 옆 지금 날씨 · 오로라 (작게) */
-.wxn { min-width: 0; padding: 14px 0 12px 16px; display: flex; flex-direction: column; justify-content: center; gap: 3px; font-size: 13.5px; line-height: 1.35; }
+.wxn { min-width: 0; padding: 14px 0 12px 16px; display: flex; flex-direction: column; justify-content: center; gap: 4px; font-size: 14px; line-height: 1.35; }
 .wxn:empty { display: none; }
 .wxn-l { display: block; margin: 0; color: var(--ink); text-decoration: none; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .wxn-l b { font-weight: 650; }
