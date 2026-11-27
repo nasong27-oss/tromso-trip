@@ -1289,6 +1289,9 @@
     { sortOptions: ["🏙 시내 관광", "🚗 반나절 드라이브 (12/26 또는 12/27 추천)", "🌌 투어 없는 맑은 밤 · 직접 오로라 보기", "🚶 가벼운 산책 · Prestvannet 호수"] }
   ]}, { id: "2026-11-27-no-dist", ops: [
     { optionsCleanup: { dropKey: "dist", dropItem: "숙소 1에서 걸어가면 약 41분", dropFoldsTitlePrefix: "🚗", replace: { from: "투어 없는 맑은 밤에 차로 8분 올라가 오로라 — 섬 안에서도 주변 불빛이 적은 편", to: "투어 없는 맑은 밤에 가볍게 오로라 — 섬 안에서도 주변 불빛이 적은 편" } } }
+  ]}, { id: "2026-11-27-cablecar-time", ops: [
+    { optionItemSplice: { from: "**Fjellheisen 케이블카 + 북극 대성당** — 다리 건너 같은 동네라 묶어 가기 좋음 · 전망은 밝은 시간(~14시)이나 블루아워", to: ["**Fjellheisen 케이블카 + 북극 대성당** — 다리 건너 같은 동네라 묶어 가기 좋음", "💬 케이블카 추천 시간 **12:00 ~ 14:00** — 12~13시는 설산·피오르가 가장 선명 / 13~14시는 짙은 블루아워에 시내·다리 불빛까지"] } },
+    { pickDesc: { name: "Fjellheisen 케이블카", from: "트롬쇠 최고의 전망. 낮 · 블루아워 모두 좋고 시내 전경을 한눈에.", to: "트롬쇠 최고의 전망. 추천 시간 12:00 ~ 14:00 — 12~13시 설산·피오르가 가장 선명, 13~14시 블루아워에 시내 불빛까지." } }
   ]}];
   function migrate(doc) {
     // 새로 생긴 큰 항목(예: 현지 정보)은 저장본에 없으면 기본값을 붙인다
@@ -1338,6 +1341,19 @@
           }
           if (op.optionSet) {
             (doc.options || []).forEach(function (o) { if (o && o.title === op.optionSet.title && o[op.optionSet.key] == null) o[op.optionSet.key] = clone(op.optionSet.value); });
+            return;
+          }
+          if (op.optionItemSplice) {
+            (doc.options || []).forEach(function (o) {
+              var k = o && o.items ? o.items.indexOf(op.optionItemSplice.from) : -1;
+              if (k >= 0) Array.prototype.splice.apply(o.items, [k, 1].concat(clone(op.optionItemSplice.to)));
+            });
+            return;
+          }
+          if (op.pickDesc) {
+            ((doc.picks || {}).groups || []).forEach(function (g) { (g.items || []).forEach(function (it) {
+              if (it.name === op.pickDesc.name && it.desc === op.pickDesc.from) it.desc = op.pickDesc.to;
+            }); });
             return;
           }
           if (op.optionItemReplace) {
@@ -1611,7 +1627,7 @@
   });
 
   /* ---------- 진단 창: 맨 아래 "Tromsø 2026" 을 5번 연속 누르면 ---------- */
-  var APP_VERSION = "2026-11-27.c5";
+  var APP_VERSION = "2026-11-27.c6";
   var brandTaps = [];
   document.getElementById("footBrand").addEventListener("click", function () {
     var now = Date.now();
