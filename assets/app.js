@@ -887,7 +887,7 @@
     var el = document.getElementById("wxNow");
     if (!el || !WX_LAST) return;
     body = WX_LAST.body; place = WX_LAST.place; at = WX_LAST.at;
-    var now = Date.now(), w = body.wx, k = body.kp, h = "";
+    var now = Date.now(), w = body.wx, k = body.kp, h = "", aur = "";
     // 한눈에: 기온 · 하늘 / 오로라 가능성 / 밝은 시간 — 숫자(Kp · 구름)는 눌러서 보는 상세 화면으로
     if (w) {
       var s = symInfo(w.symbol);
@@ -896,10 +896,11 @@
     if (k || (w && w.nightCloud != null)) {
       var kv = k ? (k.tonight != null ? k.tonight : k.now) : null;
       var ch = auroraChance(w ? w.nightCloud : null, kv);
-      h += '<a class="wxn-l" href="https://www.swpc.noaa.gov/products/aurora-30-minute-forecast" target="_blank" rel="noopener">오늘 밤 오로라 <b class="wx-c wx-' + ch.c + '">' + ch.t + "</b></a>";
+      aur = '<a href="https://www.swpc.noaa.gov/products/aurora-30-minute-forecast" target="_blank" rel="noopener">오늘 밤 오로라 <b class="wx-c wx-' + ch.c + '">' + ch.t + "</b></a>";
     }
+    // 두 줄: D-day(큰 숫자 + 작은 설명)와 높이를 맞춤
     var age = now - at, ago = age > 3600e3 ? " · " + (age > 864e5 ? Math.floor(age / 864e5) + "일" : Math.floor(age / 3600e3) + "시간") + " 전 정보" : "";
-    h += '<p class="wxn-l wxn-m">' + esc(daylight(now, place.at).replace("극야 · ", "")) + ago + "</p>";
+    h += '<p class="wxn-l wxn-2">' + (aur ? aur + '<span class="wxn-m"> · </span>' : "") + '<span class="wxn-m">' + esc(daylight(now, place.at).replace("극야 · ", "")) + ago + "</span></p>";
     el.innerHTML = h;
   }
   var wxBusy = false;
@@ -1781,7 +1782,7 @@
   });
 
   /* ---------- 진단 창: 맨 아래 "Tromsø 2026" 을 5번 연속 누르면 ---------- */
-  var APP_VERSION = "2026-11-27.w3";
+  var APP_VERSION = "2026-11-27.w4";
   var brandTaps = [];
   document.getElementById("footBrand").addEventListener("click", function () {
     var now = Date.now();
