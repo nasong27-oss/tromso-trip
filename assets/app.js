@@ -1266,6 +1266,14 @@
     { foldReplace: { date: "2026-12-24", from: "**AY542** 트롬쇠(TOS) → 헬싱키(HEL) · 1/1(금) **10:25** → **14:40** (3시간 15분) · 이코노미", to: ["**AY542** 트롬쇠(TOS) → 헬싱키(HEL) · 1/1(금) **10:25** → **14:40** (3시간 15분)", "💬 로바니에미(핀란드) **기술 착륙 45분** 포함 — 12:30 착륙 · 13:15 출발 (같은 비행기, 보통 기내 대기)"] } },
     { optionEdit: { title: "🚶 Prestvannet 호수 산책 · 트롬쇠 숙박 중 옵션 (12/25–28 · 12/30–1/1)", set: { after: "end", title: "🚶 Prestvannet 호수 산책 · 트롬쇠 숙소에 있는 날 언제든 (12/25–28 · 12/30–1/1)" } } },
     { optionGroupRename: { title: "🚶 Prestvannet 호수 산책 · 트롬쇠 숙소에 있는 날 언제든 (12/25–28 · 12/30–1/1)", from: "시간대 (12/25~27 기준)", to: "시간대 (12월 말 기준)" } }
+  ]}, { id: "2026-11-27-anytime", ops: [
+    { optionEdit: { title: "🚗 드라이브 후보 · 12/26 또는 12/27", set: { title: "🚗 반나절 드라이브 · 트롬쇠 섬 숙박 중 (12/26 또는 12/27)", after: "end", folds: [{"title": "다른 코스 (시간이 남으면)", "groups": [{"h": "Kvaløya 쪽 — 캐빈(12/28–30)에서 가까움", "list": ["Tromvik · Rekvik · Kaldfjord · Hillesøy · Brensholmen · Kattfjordeidet"]}]}] } } },
+    { optionEdit: { title: "🚶 Prestvannet 호수 산책 · 트롬쇠 숙소에 있는 날 언제든 (12/25–28 · 12/30–1/1)", set: { title: "🚶 가벼운 산책 · Prestvannet 호수 (트롬쇠 섬 숙박 중)" } } },
+    { addOption: { item: {"after": "end", "title": "🏙 시내 관광 · 트롬쇠 섬 숙박 중", "tone": "info", "items": ["**Fjellheisen 케이블카 + 북극 대성당** — 다리 건너 같은 동네라 묶어 가기 좋음 · 전망은 밝은 시간(~14시)이나 블루아워", "날씨 궂은 날 실내: **Polar Museum** (약 1시간) · **Polaria** (1~2시간, 물범)", "저녁: **Mack Brewery · Ølhallen** · 항구 산책 (블루아워 사진)", "12/25·26 공휴일 · 12/27 일요일은 운영시간이 줄거나 휴무일 수 있어요 — 가기 전에 확인 (자세한 소개는 추천 탭)"]} } },
+    { addOption: { item: {"after": "end", "title": "🌌 투어 없는 맑은 밤 · 직접 오로라 보기", "tone": "info", "items": ["**트롬쇠 섬 숙박 중** (12/25–28 · 12/30–31): Prestvannet (숙소 1에서 차 8분) · Sydspissen (섬 남쪽 끝 바닷가)", "**캐빈 숙박 중** (12/28–29): 숙소 데크에서 바로 — 도심 불빛이 없어 투어 없이 봤다는 후기가 많음", "오로라 예보보다 **맑은 하늘이 먼저** — 구름 없는 날, 북쪽 하늘이 트인 곳으로", "방한 완전무장 · 헤드랜턴 · 보조배터리 (추위에 휴대폰 배터리가 빨리 닳음)"]} } },
+    { sortOptions: ["🏙 시내 관광 · 트롬쇠 섬 숙박 중", "🚗 반나절 드라이브 · 트롬쇠 섬 숙박 중 (12/26 또는 12/27)", "🌌 투어 없는 맑은 밤 · 직접 오로라 보기", "🚶 가벼운 산책 · Prestvannet 호수 (트롬쇠 섬 숙박 중)"] },
+    { editDayItem: { date: "2026-12-26", from: "트롬쇠 시내 관광 · 경우에 따라 드라이브", to: "낮 자유 시간 — 아래 **숙박 중 언제든** 참고 (시내 관광 · 드라이브 · 산책)" } },
+    { editDayItem: { date: "2026-12-27", from: "가벼운 시내 관광 — Fjellheisen 케이블카 · Arctic Cathedral · 항구 산책 · Mack Brewery", to: "오후 자유 시간 — 아래 **숙박 중 언제든** 참고" } }
   ]}];
   function migrate(doc) {
     // 새로 생긴 큰 항목(예: 현지 정보)은 저장본에 없으면 기본값을 붙인다
@@ -1298,6 +1306,14 @@
               if (dup) os.splice(oi2, 1); // 같은 내용이 이미 새 제목으로 있으면 옛것은 지운다
               else Object.keys(oe.set).forEach(function (k) { os[oi2][k] = oe.set[k]; });
             }
+            return;
+          }
+          if (op.sortOptions) {
+            var ord = op.sortOptions;
+            (doc.options || []).sort(function (a, b) {
+              var ia = ord.indexOf(a && a.title), ib = ord.indexOf(b && b.title);
+              return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib);
+            });
             return;
           }
           if (op.optionGroupRename) {
@@ -1559,7 +1575,7 @@
   });
 
   /* ---------- 진단 창: 맨 아래 "Tromsø 2026" 을 5번 연속 누르면 ---------- */
-  var APP_VERSION = "2026-11-27.c2";
+  var APP_VERSION = "2026-11-27.c3";
   var brandTaps = [];
   document.getElementById("footBrand").addEventListener("click", function () {
     var now = Date.now();
