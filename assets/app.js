@@ -15,19 +15,22 @@
   function clone(o) { return JSON.parse(JSON.stringify(o)); }
   function D() { return editing ? WORK : DOC; }
 
+  // 위 탭 줄. subs가 있으면 한 탭 안에서 작은 버튼으로 나눠 본다 (주소는 #stay1 · #eat 처럼 그대로)
   var TABS = [
     { id: "home", label: "일정" },
     { id: "map", label: "지도" },
     { id: "cost", label: "비용 상세" },
-    { id: "stay1", label: "12/25–28 숙소" },
-    { id: "stay2", label: "12/28–30 숙소" },
-    { id: "stay3", label: "12/30–1/1 숙소" },
+    { id: "stay", label: "숙소", subs: ["stay1", "stay2", "stay3"] },
     { id: "aurora", label: "오로라 투어" },
     { id: "car", label: "렌터카" },
-    { id: "picks", label: "추천" },
-    { id: "eat", label: "식당 · 카페" },
+    { id: "picks", label: "추천", subs: ["picks", "eat"] },
     { id: "info", label: "추가 정보" }
   ];
+  var SUB_LABEL = { stay1: "12/25–28 숙소", stay2: "12/28–30 숙소", stay3: "12/30–1/1 숙소", picks: "가볼 곳", eat: "식당 · 카페" };
+  // 스와이프 · 인쇄 순서: 묶음 안 하위 화면까지 펼친 목록
+  var FLAT = [];
+  TABS.forEach(function (t) { (t.subs || [t.id]).forEach(function (s) { FLAT.push({ id: s, label: t.subs ? SUB_LABEL[s] : t.label, group: t.id }); }); });
+  function groupOf(id) { for (var i = 0; i < FLAT.length; i++) if (FLAT[i].id === id) return FLAT[i].group; return id; }
 
   /* =========================================================
      기본 도우미
@@ -331,6 +334,7 @@
         return '<li><label><input type="checkbox" data-id="' + esc(c.id) + '"' + (done[c.id] ? " checked" : "") + ">" +
           "<span>" + esc(c.text) + (c.link ? ' <a href="' + esc(c.link) + '" target="_blank" rel="noopener">링크 ↗</a>' : "") + "</span></label></li>";
       }).join("") + "</ul>" + add("checklist", "check", "할 일 추가") +
+      packList(done) +
       '<p class="note">체크 표시는 이 기기에만 저장돼요.</p></section>';
 
     // 마감 일정: 보기 모드에선 지나간 것 빼고 시간순, 편집 모드에선 전체
@@ -460,6 +464,19 @@
       }).join("") + "</ul>" + add(p, "bd", "요금 항목 추가") + "</section>";
   }
 
+  // 짐 챙기기: 여러 탭에 흩어진 준비물을 한곳에 (체크는 할 일과 같은 저장소)
+  function packList(done) {
+    var P = D().packing;
+    if (!P) return "";
+    return '<h4 class="pack-h">🧳 짐 챙기기</h4>' + P.map(function (g, gi) {
+      var gp = "packing." + gi;
+      return '<p class="pack-g">' + E(gp + ".h", { plain: true }) + '</p><ul class="checks">' + (g.items || []).map(function (c, i) {
+        var p = gp + ".items." + i;
+        if (editing) return '<li><div class="check-ed"><input type="checkbox" disabled><span>' + E(p + ".text") + "</span>" + del(p) + "</div></li>";
+        return '<li><label><input type="checkbox" data-id="' + esc(c.id) + '"' + (done[c.id] ? " checked" : "") + "><span>" + md(c.text) + "</span></label></li>";
+      }).join("") + "</ul>" + add(gp + ".items", "check", "준비물 추가");
+    }).join("");
+  }
   function viewPicks() {
     var P = D().picks;
     var h = staticHead("PICKS", "트롬쇠 여행 추천", "노션 「트롬쇠 여행 추천 사항 (by ChatGPT)」 정리");
@@ -682,12 +699,23 @@
     tabsEl.innerHTML = TABS.map(function (t) {
       var home = t.id === "home";
       var badge = t.id === "info" && info && info.draft ? '<span class="tab-badge">작성 중</span>' : "";
-      return '<a role="tab" href="#' + t.id + '" data-tab="' + t.id + '"' + (home ? ' class="tab-home"' : "") + ">" +
+      return '<a role="tab" href="#' + (t.subs ? t.subs[0] : t.id) + '" data-tab="' + t.id + '"' + (home ? ' class="tab-home"' : "") + ">" +
         (home ? HOME_IC : "") + esc(t.label) + badge + "</a>" + (home ? '<span class="tab-sep" aria-hidden="true"></span>' : "");
     }).join("");
   }
   renderTabs();
 
+  // 묶음 탭 안의 작은 전환 버튼 (숙소 1·2·3 / 가볼 곳 · 식당)
+  function subNav(id) {
+    var g = TABS.filter(function (t) { return t.id === groupOf(id) && t.subs; })[0];
+    if (!g) return "";
+    var stays = D().stays || [];
+    return '<nav class="subnav" aria-label="' + esc(g.label) + '">' + g.subs.map(function (s) {
+      var st = stays.filter(function (x) { return x.tab === s; })[0];
+      var lab = st ? '<b>' + esc(st.dates.replace(/\s/g, "")) + "</b><small>" + esc(st.label) + "</small>" : "<b>" + esc(SUB_LABEL[s]) + "</b>";
+      return '<a href="#' + s + '"' + (s === id ? ' class="on" aria-current="page"' : "") + ">" + lab + "</a>";
+    }).join("") + "</nav>";
+  }
   function current() {
     var id = (location.hash || "#home").slice(1);
     return VIEWS[id] ? id : "home";
@@ -809,10 +837,10 @@
     var slide = swipeDir ? " slide-" + swipeDir : "";
     swipeDir = null;
     if (bigMap) { try { bigMap.remove(); } catch (e) { /* 무시 */ } bigMap = null; }
-    app.innerHTML = '<div class="view view-' + id + slide + '">' + VIEWS[id]() + "</div>";
+    app.innerHTML = '<div class="view view-' + id + slide + '">' + subNav(id) + VIEWS[id]() + "</div>";
     var sl = tabsEl.scrollLeft; renderTabs(); tabsEl.scrollLeft = sl;
     tabsEl.querySelectorAll("a").forEach(function (a) {
-      var on = a.getAttribute("data-tab") === id;
+      var on = a.getAttribute("data-tab") === groupOf(id);
       a.classList.toggle("on", on);
       a.setAttribute("aria-selected", on ? "true" : "false");
       if (on) {
@@ -860,11 +888,11 @@
     var t = e.changedTouches[0], dx = t.clientX - sw.x, dy = t.clientY - sw.y;
     sw = null;
     if (Math.abs(dx) < MIN_DX || Math.abs(dx) < Math.abs(dy) * 1.5) return;
-    var idx = TABS.findIndex(function (x) { return x.id === current(); });
+    var idx = FLAT.findIndex(function (x) { return x.id === current(); });
     var next = idx + (dx < 0 ? 1 : -1);
-    if (next < 0 || next >= TABS.length) return;   // 처음·마지막 탭에서는 그대로
+    if (next < 0 || next >= FLAT.length) return;   // 처음·마지막 탭에서는 그대로
     swipeDir = dx < 0 ? "next" : "prev";
-    location.hash = TABS[next].id;
+    location.hash = FLAT[next].id;
   }, { passive: true });
 
   /* =========================================================
@@ -1630,7 +1658,7 @@
     var html = '<header class="p-cover"><h1>Tromsø, Norway <span>69° N</span></h1><p>' + esc(period) +
       ' · ' + esc(stamp) + " · 최신 내용은 사이트에서 확인</p></header>";
     var wasEditing = editing; editing = false; // 편집 칸 표시 없이
-    TABS.forEach(function (t) {
+    FLAT.forEach(function (t) {
       if (t.id === "map") return;
       var body = "";
       try { body = VIEWS[t.id](); } catch (e) { body = "<p>(이 부분은 불러오지 못했어요)</p>"; }
@@ -1655,7 +1683,7 @@
   });
 
   /* ---------- 진단 창: 맨 아래 "Tromsø 2026" 을 5번 연속 누르면 ---------- */
-  var APP_VERSION = "2026-11-27.e2";
+  var APP_VERSION = "2026-11-27.f1";
   var brandTaps = [];
   document.getElementById("footBrand").addEventListener("click", function () {
     var now = Date.now();

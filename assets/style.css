@@ -757,3 +757,16 @@ details.fold > summary:active .fold-btn { background: var(--line-2); }
 .eat-n { margin: 0 0 6px; padding: 6px 10px; border-radius: 8px; background: var(--warn-soft); font-size: 13px; line-height: 1.5; color: var(--ink-2); }
 .eat-m { margin: 0; display: flex; flex-direction: column; gap: 2px; font-size: 13px; color: var(--muted); }
 .eat-m a { color: var(--info); text-decoration: none; font-weight: 600; }
+
+/* 묶음 탭 안의 작은 전환 버튼 (숙소 1·2·3 / 가볼 곳 · 식당) */
+.subnav { display: flex; gap: 6px; margin: 4px 0 18px; padding: 4px; background: var(--line-2); border-radius: 14px; }
+.subnav a { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; padding: 8px 6px; border-radius: 10px; text-decoration: none; color: var(--muted); font-size: 14px; line-height: 1.25; text-align: center; }
+.subnav a b { font-weight: 600; white-space: nowrap; }
+.subnav a small { font-size: 10.5px; letter-spacing: .08em; opacity: .8; }
+.subnav a.on { background: var(--paper); color: var(--ink); box-shadow: 0 1px 3px rgba(15, 23, 42, .12); }
+.subnav a.on b { font-weight: 700; }
+.subnav + .back { margin-top: 0; }
+/* 짐 챙기기 */
+.pack-h { margin: 28px 0 4px; font-size: 16px; font-weight: 700; }
+.pack-g { margin: 14px 0 2px; font-size: 12px; font-weight: 650; letter-spacing: .06em; color: var(--muted); }
+@media print { .subnav { display: none !important; } }
