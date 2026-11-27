@@ -706,3 +706,20 @@ table.places .pl-desc { color: var(--ink-2); line-height: 1.5; }
 table.places .places-cat th { padding: 12px 0 4px; text-align: left; font-size: 11px; font-weight: 700; letter-spacing: .12em; color: var(--aurora); }
 table.places tr.places-cat:first-child th { padding-top: 2px; }
 table.places tr.places-cat + tr td { border-top-color: var(--line); }
+
+/* 접어 두는 상세 (항공일정 · 산책 상세) */
+details.fold { margin: 10px 0 2px; border-radius: 10px; background: var(--card); padding: 10px 14px; }
+details.fold > summary { cursor: pointer; font-size: 14px; font-weight: 650; color: var(--ink); list-style: none; }
+details.fold > summary::-webkit-details-marker { display: none; }
+details.fold > summary::after { content: "▾"; margin-left: 6px; font-size: 11px; color: var(--muted); }
+details.fold[open] > summary::after { content: "▴"; }
+.fold-warn { margin: 10px 0 4px; padding: 8px 10px; border-radius: 8px; background: var(--warn-soft); color: var(--ink-2); font-size: 13.5px; line-height: 1.5; }
+.fold-h { margin: 12px 0 4px; font-size: 12px; font-weight: 700; letter-spacing: .02em; color: var(--muted); }
+.fold-list { margin: 0; padding-left: 18px; }
+.fold-list li { margin: 3px 0; font-size: 13.5px; line-height: 1.5; color: var(--ink-2); }
+.callout details.fold { background: var(--paper); }
+.block ul.list li.sub { list-style: none; margin: 2px 0 4px 2px; padding-left: 10px; border-left: 2px solid var(--line); font-size: 13px; color: var(--muted); }
+@media print { .print-doc details.fold { background: none; padding: 0; } .print-doc details.fold > summary::after { content: ""; } }
+.day-body .fold-list { list-style: disc; padding-left: 18px; }
+.day-body .fold-list li { display: list-item; padding: 0; }
+.day-body .fold-list li > span { display: inline; }

@@ -240,7 +240,7 @@
   function strList(p, cls) {
     var arr = getPath(D(), p) || [];
     return '<ul class="' + (cls || "list") + '">' + arr.map(function (_, i) {
-      return "<li>" + E(p + "." + i) + del(p + "." + i) + "</li>";
+      return "<li" + (/^\s*💬/.test(arr[i] || "") ? ' class="sub"' : "") + ">" + E(p + "." + i) + del(p + "." + i) + "</li>";
     }).join("") + "</ul>" + add(p, "str", "줄 추가");
   }
   function section(p) {
@@ -307,13 +307,16 @@
           return "<li>" + (it.tab ? '<a href="#' + esc(it.tab) + '">' + inner + '<span class="go">›</span></a>' : '<span class="row">' + inner + "</span>") + "</li>";
         }).join("") + "</ul>" + add(dp + ".items", "dayItem", "일정 추가") +
         (d.maps && !editing ? d.maps.map(function (m) { return mapBlock(m, false); }).join("") : "") +
+        (d.folds || []).map(function (f, fi) { return foldBlock(dp + ".folds." + fi, f); }).join("") +
         (d.quote != null ? '<blockquote class="quote">' + E(dp + ".quote", { plain: true, ph: "메모" }) + "</blockquote>" : "") +
         "</div></li>";
       // 일정 사이 후보 박스 (예: 12/26 또는 12/27 드라이브 후보)
       (T.options || []).forEach(function (o, oi) {
         if (o.after !== d.date) return;
         var box = callout("options." + oi, "info");
-        if (o.maps && !editing) box = box.replace(/<\/aside>$/, o.maps.map(function (m) { return mapBlock(m, false); }).join("") + "</aside>");
+        var extra = (o.maps && !editing ? o.maps.map(function (m) { return mapBlock(m, false); }).join("") : "") +
+          (o.folds || []).map(function (f, fi) { return foldBlock("options." + oi + ".folds." + fi, f); }).join("");
+        if (extra) box = box.replace(/<\/aside>$/, extra + "</aside>");
         h += '<li class="day-opt">' + box + "</li>";
       });
     });
@@ -380,6 +383,16 @@
     return h;
   }
 
+  // 접어 두는 상세 (항공일정, 산책 상세 등): 제목 / 주의 문구 / 묶음별 목록
+  function foldBlock(p, f) {
+    var h = '<details class="fold"' + (editing ? " open" : "") + "><summary>" + E(p + ".title", { plain: true }) + "</summary>";
+    if (f.warn != null) h += '<p class="fold-warn">⚠️ ' + E(p + ".warn") + "</p>";
+    (f.groups || []).forEach(function (g, gi) {
+      var gp = p + ".groups." + gi;
+      h += '<p class="fold-h">' + E(gp + ".h", { plain: true }) + "</p>" + strList(gp + ".list", "list fold-list");
+    });
+    return h + "</details>";
+  }
   // 추천 장소 표: 분류별로 묶고, 장소 이름 | 설명
   function placesTable(p, im) {
     if (!im.places || !im.places.length) return "";
@@ -1234,6 +1247,15 @@
     { replaceListItem: { p: "stay1.images.0.list", from: "자연·오로라: Sydspissen · Prestvannet · Ersfjordbotn · Skulsvik / 문화: 북극 대성당(Ishavskatedralen) · 극지 박물관 · Polaria", to: ["**오로라·자연** Sydspissen — 트롬쇠 섬 남쪽 끝 바닷가, 시내 불빛에서 벗어나 섬 안에서 오로라 보기 좋은 곳", "**오로라·자연** Prestvannet — 섬 언덕 위 호수, 숙소에서 가까워 투어 없는 밤에 들르기 좋음", "**오로라·자연** Ersfjordbotn — 서쪽 섬 Kvaløya의 피오르 끝 마을 · 12/28 해안 드라이브 경로", "**오로라·자연** Skulsvik — 위치 확인 필요", "**문화** 북극 대성당 (Ishavskatedralen) — 다리 건너 삼각형 하얀 교회, 트롬쇠 대표 건물 · 12/27 시내 관광 후보", "**문화** 극지 박물관 (Polar Museum) — 북극 탐험·사냥의 역사", "**문화** Polaria — 북극 수족관 겸 체험관 · 물범, 얼음 조각이 쓰러진 듯한 건물"] } }
   ]}, { id: "2026-11-26-stay1-places", ops: [
     { recsToTable: { p: "stay1.images.0", remove: ["**오로라·자연** Sydspissen — 트롬쇠 섬 남쪽 끝 바닷가, 시내 불빛에서 벗어나 섬 안에서 오로라 보기 좋은 곳", "**오로라·자연** Prestvannet — 섬 언덕 위 호수, 숙소에서 가까워 투어 없는 밤에 들르기 좋음", "**오로라·자연** Ersfjordbotn — 서쪽 섬 Kvaløya의 피오르 끝 마을 · 12/28 해안 드라이브 경로", "**오로라·자연** Skulsvik — 위치 확인 필요", "**문화** 북극 대성당 (Ishavskatedralen) — 다리 건너 삼각형 하얀 교회, 트롬쇠 대표 건물 · 12/27 시내 관광 후보", "**문화** 극지 박물관 (Polar Museum) — 북극 탐험·사냥의 역사", "**문화** Polaria — 북극 수족관 겸 체험관 · 물범, 얼음 조각이 쓰러진 듯한 건물"], title: "현지 추천 장소", places: [{"cat": "오로라·자연", "name": "Sydspissen", "desc": "트롬쇠 섬 남쪽 끝 바닷가 · 시내 불빛에서 벗어나 섬 안에서 오로라 보기 좋은 곳"}, {"cat": "오로라·자연", "name": "Prestvannet", "desc": "섬 언덕 위 호수 · 숙소에서 가까워 투어 없는 밤에 들르기 좋음"}, {"cat": "오로라·자연", "name": "Ersfjordbotn", "desc": "서쪽 섬 Kvaløya의 피오르 끝 마을 · 12/28 해안 드라이브 경로"}, {"cat": "오로라·자연", "name": "Skulsvik", "desc": "위치 확인 필요"}, {"cat": "문화", "name": "북극 대성당", "sub": "Ishavskatedralen", "desc": "다리 건너 삼각형 하얀 교회, 트롬쇠 대표 건물 · 12/27 시내 관광 후보"}, {"cat": "문화", "name": "극지 박물관", "sub": "Polar Museum", "desc": "북극 탐험·사냥의 역사"}, {"cat": "문화", "name": "Polaria", "desc": "북극 수족관 겸 체험관 · 물범, 얼음 조각이 쓰러진 듯한 건물"}] } }
+  ]}, { id: "2026-11-27-flight-prest-lauk", ops: [
+    { setDayField: { date: "2026-12-24", key: "folds", value: [{"title": "✈️ 항공일정 (나승민) · Finnair", "warn": "**헬싱키 환승 1시간 30분** — 솅겐 입국심사까지 거쳐야 해서 빠듯해요. 내리면 바로 환승(Transfer) 안내를 따라 이동", "groups": [{"h": "출국 · 12/24 – 12/25 · 총 18시간 40분", "list": ["**AY042** 인천(ICN, T1) → 헬싱키(HEL) · 12/24(목) **23:00** → 12/25(금) **05:40** (13시간 40분)", "헬싱키 환승 **1시간 30분** (솅겐 입국심사)", "**AY541** 헬싱키(HEL) → 트롬쇠(TOS) · 12/25(금) **07:10** → **09:40** (3시간 30분) · 이코노미"]}, {"h": "귀국 · 1/1 – 1/2 · 총 18시간 0분", "list": ["**AY542** 트롬쇠(TOS) → 헬싱키(HEL) · 1/1(금) **10:25** → **14:40** (3시간 15분) · 이코노미", "헬싱키 환승 2시간 55분 (솅겐 출국심사)", "**AY041** 헬싱키(HEL) → 인천(ICN, T1) · 1/1(금) **17:35** → 1/2(토) **12:25** (11시간 50분)"]}]}] } },
+    { addOption: { item: {"after": "2026-12-25", "title": "🚶 Prestvannet 호수 산책 · 트롬쇠 숙박 중 옵션 (12/25–28 · 12/30–1/1)", "tone": "info", "items": ["섬 중앙 언덕 위 호수 한 바퀴 **1.7km · 30~45분** · 난이도 쉬움 · 24시간 무료", "숙소 1(Dramsvegen 167)에서 차 **8분** · 도보 41분", "낮 **10:30 ~ 13:00** 설산·푸른 박명 산책 / 맑은 밤 **20:00 ~ 23:00** 가볍게 오로라 보기"], "maps": [{"label": "Prestvannet", "q": "Prestvannet, Langnesvegen 33, 9016 Tromsø", "open": "https://maps.google.com/?cid=135143847667223419"}], "folds": [{"title": "자세히 보기", "groups": [{"h": "코스 · 풍경", "list": ["대부분 평탄한 자갈·아스팔트 길 · 일부 구간은 경사가 있음", "자작나무 숲 사이로 본토 Tromsdalstinden 산 · Fjellheisen · 주변 섬 설산 조망", "섬 중앙 크로스컨트리 스키 트랙(Lysløypa Tromsøya) · 넓은 산책로와 연결"]}, {"h": "이동 · 주차", "list": ["시내 중심에서 도보 오르막 20~30분 · 버스 **28 · 40 · 42번**", "주차: Prestvannet parkering (Prestvannvegen 44 또는 Stalheimvegen 19) · Langnesvegen · 학생 기숙사 근처", "유료 구간은 **EasyPark** 또는 **Tromsø Parkering** 앱으로 결제"]}, {"h": "시간대 (12/25~27 기준)", "list": ["시민박명 09:31 ~ 13:57 · 가장 밝은 때 11:44 — 10:30~13:00이면 손전등 없이 설산·호수 감상·촬영", "투어 없는 맑은 밤에 차로 8분 올라가 오로라 — 섬 안에서도 주변 불빛이 적은 편"]}, {"h": "12월 주의사항", "list": ["다져진 눈·빙판이 많아 방한화 + **간이 아이젠** 권장", "산책로 일부만 조명 — 어두울 땐 **헤드랜턴 · 손전등** 필수", "스키 트랙·다른 산책로 갈림길이 많아요 — 한 바퀴만 돌 땐 계속 호수 쪽 길 유지", "**얼음 위 진입 금지** — 얼음이 고르지 않고 북쪽 배수구 쪽은 겨울 내내 얇을 수 있음 (시청 안전 표지 확인 전)", "현장에 카페·매점 없음 — 따뜻한 음료·간식 챙기기"]}]}]}, first: true } },
+    { addDayItem: { date: "2026-12-28", after: "Kvaløya 해안 드라이브", item: {"text": "🛒 체크인 전 시내에서 **장보기** — 캐빈 주변에 식당·카페 없음"} } },
+    { insertSections: { p: "stay2.sections", afterH: "체크인 안내", items: [{"h": "캐빈 구조 · 100㎡ 2층 목조 · 최대 6인", "list": ["**1층** 주방 · 거실 · 욕실(샤워·화장실) · 침실 1 (90cm 침대 1) · 현관 쪽 **장비 보관·건조실** — 눈 맞은 외투·방한화 말리기 좋음", "**2층** 침실 2 (90cm 침대 3개 방 + 2개 방) · 욕실 1 → 3명이 **방 하나씩** 사용 가능", "전통 통나무 단열 구조 + 에어컨·전기 난방 — 한겨울에도 따뜻함", "소유주(Hanna & Andreas Nilsen) 가족이 현장에 상주하는 작은 캐빈 단지 (총 6채) · 평점 4.8 / 후기 132건"]}, {"h": "준비할 것", "list": ["**12/28 체크인 전 트롬쇠 시내에서 장보기** — 걸어갈 수 있는 거리에 식당·카페가 전혀 없음", "**샴푸 · 바디워시 미제공** (손비누만) — 개인 세면도구 챙기기"]}, {"h": "숙소에서 즐길 거리", "list": ["**데크에서 오로라** — 전 객실 바다·피오르 전망, 도심 불빛이 없어 투어 없이 숙소에서 봤다는 후기가 많음", "**해변 프라이빗 사우나** — 투숙객 **1,995 NOK / 2시간** · 1~6인 단독 · 대형 목욕타월·가운·생수 포함", "💬 예열에 최소 2시간 걸려 **사전 예약 필수** — +47 77 65 60 80 · post@lauklines.no", "겨울 장비 대여 (스노슈즈 · 크로스컨트리 스키 · 킥슬레드 · 방한복) · 개썰매 · 순록썰매 · 빙어낚시 · 가이드 하이킹 예약 — 리셉션 문의", "캐빈 뒤편으로 바로 산책·하이킹 코스 연결"]}] } },
+    { editChips: { p: "stay2.sections", h: "포함 사항", replace: { "수건": "수건 (1인 큰 것 1 + 작은 것 1)", "냉동고": "공용 대형 냉동고" }, add: ["무료 주차", "헤어드라이어", "화장지", "손비누", "공용 세탁기 · 건조기"] } },
+    { appendList: { p: "stay2.sections", h: "이용 규칙", items: ["금연 · 반려동물 동반 불가 (알레르기 친화 객실)", "레이트 체크아웃은 가능할 때 유료로 문의"] } },
+    { appendArr: { p: "stay2.refs", key: "href", items: [{"k": "캐빈 안내", "v": "Standard cabin", "href": "https://lauklines.no/en/general-information/standard-cabin/"}, {"k": "사우나", "v": "예약 안내", "href": "https://lauklines.no/en/activities/sauna/"}] } },
+    { appendArr: { p: "stay2.contacts", items: ["+47 77 65 60 80"] } }
   ]}];
   function migrate(doc) {
     // 새로 생긴 큰 항목(예: 현지 정보)은 저장본에 없으면 기본값을 붙인다
@@ -1245,6 +1267,47 @@
         try {
           if (op.addDeadline) {
             if (!doc.deadlines.some(function (d) { return d.title === op.addDeadline.title; })) doc.deadlines.unshift(clone(op.addDeadline));
+            return;
+          }
+          if (op.setDayField) {
+            var sd = (doc.days || []).filter(function (x) { return x.date === op.setDayField.date; })[0];
+            if (sd && sd[op.setDayField.key] == null) sd[op.setDayField.key] = clone(op.setDayField.value);
+            return;
+          }
+          if (op.addOption) {
+            doc.options = doc.options || [];
+            if (!doc.options.some(function (o) { return o && o.title === op.addOption.item.title; })) doc.options[op.addOption.first ? "unshift" : "push"](clone(op.addOption.item));
+            return;
+          }
+          if (op.insertSections) {
+            var isl = getPath(doc, op.insertSections.p);
+            if (!isl) return;
+            var at = isl.length;
+            isl.forEach(function (x, k) { if (x && x.h === op.insertSections.afterH) at = k + 1; });
+            op.insertSections.items.forEach(function (it) {
+              if (!isl.some(function (x) { return x && x.h === it.h; })) isl.splice(at++, 0, clone(it));
+            });
+            return;
+          }
+          if (op.editChips) {
+            var ecs = (getPath(doc, op.editChips.p) || []).filter(function (x) { return x && x.h === op.editChips.h && x.chips; })[0];
+            if (!ecs) return;
+            ecs.chips = ecs.chips.map(function (c) { return op.editChips.replace[c] || c; });
+            op.editChips.add.forEach(function (c) { if (ecs.chips.indexOf(c) < 0) ecs.chips.push(c); });
+            return;
+          }
+          if (op.appendList) {
+            var als = (getPath(doc, op.appendList.p) || []).filter(function (x) { return x && x.h === op.appendList.h && x.list; })[0];
+            if (als) op.appendList.items.forEach(function (t) { if (als.list.indexOf(t) < 0) als.list.push(t); });
+            return;
+          }
+          if (op.appendArr) {
+            var aa = getPath(doc, op.appendArr.p);
+            if (!aa) return;
+            op.appendArr.items.forEach(function (it) {
+              var k = op.appendArr.key;
+              if (!aa.some(function (x) { return k ? x && x[k] === it[k] : x === it; })) aa.push(clone(it));
+            });
             return;
           }
           if (op.recsToTable) {
@@ -1461,7 +1524,7 @@
   });
 
   /* ---------- 진단 창: 맨 아래 "Tromsø 2026" 을 5번 연속 누르면 ---------- */
-  var APP_VERSION = "2026-11-26.s14";
+  var APP_VERSION = "2026-11-27.c1";
   var brandTaps = [];
   document.getElementById("footBrand").addEventListener("click", function () {
     var now = Date.now();
