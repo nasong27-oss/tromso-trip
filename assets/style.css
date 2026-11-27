@@ -732,3 +732,10 @@ details.fold > summary:active .fold-btn { background: var(--line-2); }
 .day-body .fold-list li.sub { list-style: none; margin: 0 0 4px -2px; padding-left: 10px; border-left: 2px solid var(--line); font-size: 12.5px; color: var(--muted); }
 .list li.sub::before { display: none; }
 .fold-list li::before { display: none; }
+
+/* 숙소 1 · 3에서 차로 걸리는 시간 */
+table.dist { width: 100%; margin: 10px 0 2px; border-collapse: collapse; font-size: 13px; background: var(--paper); border-radius: 10px; overflow: hidden; }
+table.dist th { padding: 7px 10px 5px; text-align: left; font-size: 11px; font-weight: 600; color: var(--muted); }
+table.dist td { padding: 6px 10px; border-top: 1px solid var(--line); vertical-align: top; }
+table.dist .d-name { font-weight: 600; color: var(--ink); }
+table.dist .d-v { white-space: nowrap; color: var(--ink-2); font-variant-numeric: tabular-nums; }

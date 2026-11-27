@@ -319,7 +319,7 @@
     h += "</ol></section>";
     // 날짜와 상관없는 옵션 (예: 트롬쇠 숙박 중 언제든 할 수 있는 산책) — 체크리스트 위
     var anyday = (T.options || []).map(function (o, oi) { return o.after === "end" ? optionBox(o, oi) : ""; }).join("");
-    if (anyday) h += '<section class="block"><p class="eyebrow">ANYTIME</p><h3 class="block-h big">숙박 중 언제든</h3>' + anyday + "</section>";
+    if (anyday) h += '<section class="block"><p class="eyebrow">WHILE ON TROMSØYA</p><h3 class="block-h big">트롬쇠 섬에 머무르는 기간 중 할 만한 것들</h3><p class="note">숙소 1 (12/25–28) · 숙소 3 (12/30–1/1) 기준 차로 걸리는 시간</p>' + anyday + "</section>";
 
     var done = store("tt-check") || {};
     h += '<section class="block"><p class="eyebrow">BEFORE YOU GO</p><h3 class="block-h big">출발 전 체크리스트</h3><ul class="checks">' +
@@ -382,9 +382,50 @@
     return h;
   }
 
+  /* 숙소 1 · 숙소 3에서 각 장소까지 차로 걸리는 시간 — 휴대폰에서 경로 서버(OSRM)로 계산해 이 기기에 기억.
+     계산이 안 되면(오프라인 등) 직선거리로 대신 표시 */
+  function distTable(list) {
+    return '<table class="dist"><thead><tr><th></th><th>숙소 1에서</th><th>숙소 3에서</th></tr></thead><tbody>' +
+      list.map(function (d) {
+        var at = d.at.join(",");
+        return '<tr><td class="d-name">' + esc(d.name) + '</td><td class="d-v" data-from="stay1" data-to="' + at + '">…</td><td class="d-v" data-from="stay3" data-to="' + at + '">…</td></tr>';
+      }).join("") + "</tbody></table>";
+  }
+  function km(a, b) {
+    var R = 6371, t = Math.PI / 180, dLat = (b[0] - a[0]) * t, dLon = (b[1] - a[1]) * t;
+    var x = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(a[0] * t) * Math.cos(b[0] * t) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    return 2 * R * Math.asin(Math.sqrt(x));
+  }
+  function fillDistances(root) {
+    var cells = [].slice.call(root.querySelectorAll("td.d-v"));
+    if (!cells.length) return;
+    var s1 = MAP_POINTS.filter(function (p) { return p.id === "stay1"; })[0];
+    var s3 = MAP_POINTS.filter(function (p) { return p.id === "stay3"; })[0];
+    Promise.all([geocode(s1), geocode(s3)]).then(function (from) {
+      var origin = { stay1: from[0], stay3: from[1] };
+      cells.forEach(function (td) {
+        var a = origin[td.getAttribute("data-from")], b = td.getAttribute("data-to").split(",").map(Number);
+        var key = "tt-dist-v1-" + a.join(",") + "-" + b.join(",");
+        var hit = store(key);
+        if (hit) { td.textContent = hit; return; }
+        td.textContent = "약 " + Math.max(1, Math.round(km(a, b) * 1.3)) + " km";
+        fetch("https://router.project-osrm.org/route/v1/driving/" + a[1] + "," + a[0] + ";" + b[1] + "," + b[0] + "?overview=false")
+          .then(function (r) { return r.json(); })
+          .then(function (j) {
+            var rt = j && j.routes && j.routes[0];
+            if (!rt) return;
+            var min = Math.max(1, Math.round(rt.duration / 60));
+            var txt = "차 " + (min >= 60 ? Math.floor(min / 60) + "시간 " + (min % 60 ? (min % 60) + "분" : "") : min + "분") + " · " + (rt.distance / 1000).toFixed(rt.distance < 10000 ? 1 : 0) + " km";
+            store(key, txt);
+            td.textContent = txt;
+          }).catch(function () {});
+      });
+    });
+  }
   function optionBox(o, oi) {
     var box = callout("options." + oi, "info");
-    var extra = (o.maps && !editing ? o.maps.map(function (m) { return mapBlock(m, false); }).join("") : "") +
+    var extra = (o.dist && !editing ? distTable(o.dist) : "") +
+      (o.maps && !editing ? o.maps.map(function (m) { return mapBlock(m, false); }).join("") : "") +
       (o.folds || []).map(function (f, fi) { return foldBlock("options." + oi + ".folds." + fi, f); }).join("");
     return extra ? box.replace(/<\/aside>$/, extra + "</aside>") : box;
   }
@@ -798,6 +839,7 @@
       }
     });
     wireMaps(app);
+    fillDistances(app);
     renderBar();
     if (scroll) {
       // 탭을 바꾸면 그 탭의 맨 위(접힌 상단 바로 아래)에서 시작
@@ -1274,6 +1316,19 @@
     { sortOptions: ["🏙 시내 관광 · 트롬쇠 섬 숙박 중", "🚗 반나절 드라이브 · 트롬쇠 섬 숙박 중 (12/26 또는 12/27)", "🌌 투어 없는 맑은 밤 · 직접 오로라 보기", "🚶 가벼운 산책 · Prestvannet 호수 (트롬쇠 섬 숙박 중)"] },
     { editDayItem: { date: "2026-12-26", from: "트롬쇠 시내 관광 · 경우에 따라 드라이브", to: "낮 자유 시간 — 아래 **숙박 중 언제든** 참고 (시내 관광 · 드라이브 · 산책)" } },
     { editDayItem: { date: "2026-12-27", from: "가벼운 시내 관광 — Fjellheisen 케이블카 · Arctic Cathedral · 항구 산책 · Mack Brewery", to: "오후 자유 시간 — 아래 **숙박 중 언제든** 참고" } }
+  ]}, { id: "2026-11-27-anytime-dist", ops: [
+    { optionEdit: { title: "🏙 시내 관광 · 트롬쇠 섬 숙박 중", set: { title: "🏙 시내 관광" } } },
+    { optionEdit: { title: "🚗 반나절 드라이브 · 트롬쇠 섬 숙박 중 (12/26 또는 12/27)", set: { title: "🚗 반나절 드라이브 (12/26 또는 12/27 추천)" } } },
+    { optionEdit: { title: "🚶 가벼운 산책 · Prestvannet 호수 (트롬쇠 섬 숙박 중)", set: { title: "🚶 가벼운 산책 · Prestvannet 호수" } } },
+    { optionSet: { title: "🏙 시내 관광", key: "dist", value: [{"name": "Fjellheisen 케이블카", "at": [69.64096, 18.98724]}, {"name": "북극 대성당", "at": [69.6482, 18.9871]}, {"name": "Polar Museum", "at": [69.6522, 18.9633]}, {"name": "Polaria", "at": [69.6439, 18.9494]}, {"name": "Mack Brewery · Ølhallen", "at": [69.6463, 18.9548]}] } },
+    { optionSet: { title: "🚗 반나절 드라이브 (12/26 또는 12/27 추천)", key: "dist", value: [{"name": "Breivikeidet 페리 선착장", "at": [69.6699174, 19.6500408]}] } },
+    { optionSet: { title: "🌌 투어 없는 맑은 밤 · 직접 오로라 보기", key: "dist", value: [{"name": "Prestvannet", "at": [69.6594, 18.9359]}, {"name": "Sydspissen", "at": [69.6274, 18.9112]}] } },
+    { optionSet: { title: "🚶 가벼운 산책 · Prestvannet 호수", key: "dist", value: [{"name": "Prestvannet", "at": [69.6594, 18.9359]}] } },
+    { optionItemReplace: { from: "숙소 1(Dramsvegen 167)에서 차 **8분** · 도보 41분", to: "숙소 1에서 걸어가면 약 41분" } },
+    { optionItemReplace: { from: "**트롬쇠 섬 숙박 중** (12/25–28 · 12/30–31): Prestvannet (숙소 1에서 차 8분) · Sydspissen (섬 남쪽 끝 바닷가)", to: "**트롬쇠 섬 숙박 중** (12/25–28 · 12/30–31): Prestvannet (섬 언덕 위 호수) · Sydspissen (섬 남쪽 끝 바닷가)" } },
+    { editDayItem: { date: "2026-12-26", from: "낮 자유 시간 — 아래 **숙박 중 언제든** 참고 (시내 관광 · 드라이브 · 산책)", to: "낮 자유 시간 — 아래 **트롬쇠 섬에서 할 만한 것들** 참고 (시내 관광 · 드라이브 · 산책)" } },
+    { editDayItem: { date: "2026-12-27", from: "오후 자유 시간 — 아래 **숙박 중 언제든** 참고", to: "오후 자유 시간 — 아래 **트롬쇠 섬에서 할 만한 것들** 참고", dropTab: true } },
+    { sortOptions: ["🏙 시내 관광", "🚗 반나절 드라이브 (12/26 또는 12/27 추천)", "🌌 투어 없는 맑은 밤 · 직접 오로라 보기", "🚶 가벼운 산책 · Prestvannet 호수"] }
   ]}];
   function migrate(doc) {
     // 새로 생긴 큰 항목(예: 현지 정보)은 저장본에 없으면 기본값을 붙인다
@@ -1306,6 +1361,14 @@
               if (dup) os.splice(oi2, 1); // 같은 내용이 이미 새 제목으로 있으면 옛것은 지운다
               else Object.keys(oe.set).forEach(function (k) { os[oi2][k] = oe.set[k]; });
             }
+            return;
+          }
+          if (op.optionSet) {
+            (doc.options || []).forEach(function (o) { if (o && o.title === op.optionSet.title && o[op.optionSet.key] == null) o[op.optionSet.key] = clone(op.optionSet.value); });
+            return;
+          }
+          if (op.optionItemReplace) {
+            (doc.options || []).forEach(function (o) { if (o && o.items) o.items = o.items.map(function (t) { return t === op.optionItemReplace.from ? op.optionItemReplace.to : t; }); });
             return;
           }
           if (op.sortOptions) {
@@ -1409,7 +1472,7 @@
           if (op.editDayItem) {
             var ed = op.editDayItem;
             (doc.days || []).forEach(function (x) {
-              if (x.date === ed.date) (x.items || []).forEach(function (it) { if (it.text === ed.from) it.text = ed.to; });
+              if (x.date === ed.date) (x.items || []).forEach(function (it) { if (it.text === ed.from) { it.text = ed.to; if (ed.dropTab) delete it.tab; } });
             });
             return;
           }
@@ -1563,6 +1626,10 @@
     printDoc.querySelectorAll("[id]").forEach(function (el) { el.removeAttribute("id"); });
     // 인쇄본에는 사진을 넣지 않는다 (쪽수 절약 + 사진을 기다리지 않고 바로 인쇄 창)
     printDoc.querySelectorAll(".pick-imgs, img").forEach(function (el) { el.remove(); });
+    printDoc.querySelectorAll("td.d-v").forEach(function (td) {
+      var src = app.querySelector('td.d-v[data-from="' + td.getAttribute("data-from") + '"][data-to="' + td.getAttribute("data-to") + '"]');
+      td.textContent = src ? src.textContent : "-";
+    });
   }
   window.addEventListener("beforeprint", buildPrint);
   document.getElementById("footPrint").addEventListener("click", function () {
@@ -1575,7 +1642,7 @@
   });
 
   /* ---------- 진단 창: 맨 아래 "Tromsø 2026" 을 5번 연속 누르면 ---------- */
-  var APP_VERSION = "2026-11-27.c3";
+  var APP_VERSION = "2026-11-27.c4";
   var brandTaps = [];
   document.getElementById("footBrand").addEventListener("click", function () {
     var now = Date.now();
