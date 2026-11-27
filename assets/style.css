@@ -745,3 +745,15 @@ details.fold > summary:active .fold-btn { background: var(--line-2); }
 .callout .fold-list li::before { display: none; }
 .callout .fold-list { list-style: disc; }
 .callout .fold-list li { padding-left: 2px; }
+
+/* 식당 · 카페 */
+.eats { display: flex; flex-direction: column; }
+.eat { position: relative; padding: 14px 0; border-top: 1px solid var(--line); }
+.eat:first-child { border-top: 0; padding-top: 4px; }
+.eat-h { display: flex; align-items: baseline; gap: 8px; margin-bottom: 4px; }
+.eat-h b { font-size: 17px; font-weight: 700; letter-spacing: -0.02em; color: var(--ink); }
+.eat-p { font-size: 12px; font-weight: 600; color: var(--muted); letter-spacing: .04em; }
+.eat-d { margin: 0 0 6px; font-size: 14.5px; line-height: 1.55; color: var(--ink-2); }
+.eat-n { margin: 0 0 6px; padding: 6px 10px; border-radius: 8px; background: var(--warn-soft); font-size: 13px; line-height: 1.5; color: var(--ink-2); }
+.eat-m { margin: 0; display: flex; flex-direction: column; gap: 2px; font-size: 13px; color: var(--muted); }
+.eat-m a { color: var(--info); text-decoration: none; font-weight: 600; }

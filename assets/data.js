@@ -332,6 +332,189 @@ window.TRIP = {
   },
 
   /* ---------- 현지 정보 (출처: Visit Tromsø · tromsowinter.com · 외교부 · UiT 등, 2026-11 조사) ---------- */
+  eat: {
+    "eyebrow": "EAT & COFFEE",
+    "title": "식당 · 카페",
+    "original": "운영시간은 평소 기준 — 연휴엔 휴무·단축 영업이 많아요",
+    "warn": {
+      "title": "연휴 주의",
+      "items": [
+        "**12/25·26 공휴일 · 12/27 일요일 · 12/31 새해 전야**는 휴무·단축 영업이 많아요 — 가기 전에 공식 사이트·구글맵에서 당일 영업과 예약 확인",
+        "인기 식당은 **미리 예약** (특히 금·토 저녁)"
+      ]
+    },
+    "holiday": {
+      "h": "연휴에 문 여는 곳 (확인된 곳)",
+      "list": [
+        "**12/25 (금)** Clarion Hotel The Edge **크리스마스 디너 뷔페 17:00–22:00** — 사전 예약 · 선결제 필수 / 낮엔 Fjellheisen 정상 카페",
+        "**12/26 (토)** 확인된 곳 없음 — 호텔 레스토랑에 문의",
+        "**12/27 (일)** Sumo Vervet **13:00–22:00** (공식 연휴 시간표) · 평소 일요일 영업: Smørtorget · Burgr · Yonas · Casa Inferno · Skarven Kro",
+        "**12/31 (목)** Clarion Hotel The Edge **새해 전야 뷔페** (The Social Bar & Bistro) — 예약 필요 · Sumo 휴무",
+        "**1/1 (금)** Sumo Vervet 15:00–22:00"
+      ]
+    },
+    "groups": [
+      {
+        "title": "시푸드 · 파인다이닝 (예약 필수)",
+        "items": [
+          {
+            "name": "Fiskekompaniet",
+            "price": "$$$$",
+            "desc": "항구 앞 대표 시푸드. 점심 아라카르트가 저녁 코스(3·5코스)보다 부담이 적어요",
+            "hours": "점심 월–토 11:30–14:00 (평일 15:00까지라는 안내도 있음) · 저녁 월–토 17:00–22:00 · 일 휴무",
+            "addr": "Killengreens gate 6",
+            "map": "https://maps.google.com/?cid=17982134320915230315"
+          },
+          {
+            "name": "Restaurant Smak",
+            "price": "$$$$",
+            "desc": "트롬쇠 대표 북유럽 테이스팅 코스 (약 2,500 NOK · 16–18코스 · 4–5시간). 좌석이 적어 예약 경쟁이 치열하고 보증금 필요",
+            "hours": "수–토 18:00–24:00 · 일–화 휴무",
+            "addr": "Stakkevollvegen 39",
+            "map": "https://maps.google.com/?cid=4979463353818118703"
+          },
+          {
+            "name": "Emmas Drømmekjøkken",
+            "price": "$$$$",
+            "desc": "트롬쇠 대성당(시내 Domkirke) 맞은편, 노르웨이식 테이스팅 메뉴",
+            "note": "리노베이션으로 임시 휴업 중이라는 정보가 많아요 — 재개 여부 확인 필요",
+            "hours": "화–토 저녁 (재개 시 확인)",
+            "addr": "Kirkegata 8",
+            "map": "https://maps.google.com/?cid=10759602435588270016"
+          },
+          {
+            "name": "Arctandria",
+            "price": "$$$",
+            "desc": "항구 Vertshuset Skarven 2층, 북노르웨이 전통 해산물",
+            "hours": "월–목 16:00–22:00 · 금–토 16:00–23:00 · 일 휴무",
+            "addr": "Strandtorget 1",
+            "map": "https://maps.google.com/?cid=4643929146814904705"
+          }
+        ]
+      },
+      {
+        "title": "노르웨이 로컬 · 비스트로",
+        "items": [
+          {
+            "name": "Bardus Bistro",
+            "price": "$$",
+            "desc": "순록 버거 · 제철 로컬 비스트로 요리. 점심이 비교적 합리적이고 옆 바에서 한잔하기 좋음 (예약 권장)",
+            "hours": "화–금 11:00–15:00 · 16:00–22:00 / 토 12:00–15:00 · 16:00–22:00 · 일·월 휴무",
+            "addr": "Cora Sandels gate 4",
+            "map": "https://maps.google.com/?cid=6013747455949090020"
+          },
+          {
+            "name": "Mathallen Tromsø",
+            "price": "$$$",
+            "desc": "북노르웨이 식재료 모던 비스트로 · 작은 델리도 있음",
+            "hours": "월–토 점심 11:00–15:00 · 저녁 17:00–22:00 · 일 휴무",
+            "addr": "Grønnegata 60",
+            "map": "https://maps.google.com/?cid=14836058510433319348"
+          },
+          {
+            "name": "Hildr Gastro Bar",
+            "price": "$$$",
+            "desc": "지역 해산물 · 허브를 쓰는 아늑한 가스트로 바",
+            "hours": "화–토 18:00–22:00 · 일·월 휴무 (확인 필요)",
+            "addr": "Skippergata 11",
+            "map": "https://maps.google.com/?cid=17661979957214610675"
+          },
+          {
+            "name": "Maskinverkstedet",
+            "price": "$$",
+            "desc": "옛 조선소 작업장을 고친 Vervet 해안가 비스트로",
+            "hours": "월–토 점심 · 저녁 · 일 휴무 (확인 필요)",
+            "addr": "Nordøstpassasjen 49",
+            "map": "https://maps.google.com/?cid=7468916533296865478"
+          },
+          {
+            "name": "Full Steam Tromsø",
+            "price": "$$",
+            "desc": "어업 역사가 담긴 항구 목조 건물, 생선 · 대구 요리 (해안 박물관 함께)",
+            "hours": "월–토 11:00–22:00 · 일 11:00–18:00 (확인 필요)",
+            "addr": "Søndre Tollbodgate 3",
+            "map": "https://maps.google.com/?cid=3127136208423542837"
+          },
+          {
+            "name": "Skarven Kro",
+            "price": "$$",
+            "desc": "항구 앞 캐주얼 펍 겸 식당 — 생선 수프 · 순록 버거 · 와플",
+            "hours": "매일 11:00부터",
+            "addr": "Strandtorget 1",
+            "map": "https://maps.google.com/?cid=16022609803222577800"
+          }
+        ]
+      },
+      {
+        "title": "캐주얼 · 피자 · 버거 · 아시안",
+        "items": [
+          {
+            "name": "Burgr",
+            "price": "$",
+            "desc": "레트로 게임 콘셉트 가성비 수제버거 · 밀크셰이크 — 예약 안 받음 (선착순)",
+            "hours": "매일 12:00–22:00",
+            "addr": "Skippergata 6A",
+            "map": "https://maps.google.com/?cid=13820675339499060405"
+          },
+          {
+            "name": "Casa Inferno",
+            "price": "$$",
+            "desc": "화덕 피자 인기 맛집 — 해산물이 질릴 때. 예약은 일–목만 가능, 포장 가능",
+            "hours": "일–화 16:00–22:00 · 수–토 16:00–23:00",
+            "addr": "Vestregata 2",
+            "map": "https://maps.google.com/?cid=2146077502820686340"
+          },
+          {
+            "name": "Yonas Pizzeria",
+            "price": "$$",
+            "desc": "1974년부터 영업한 피자집, Radisson Blu 옆 · 북극 대성당이 보이는 바닷가",
+            "hours": "매일 11:00–23:00",
+            "addr": "Sjøgata 7",
+            "map": "https://maps.google.com/?cid=8029326161991184215"
+          },
+          {
+            "name": "Sumo Vervet",
+            "price": "$$",
+            "desc": "스시 · 따뜻한 아시안 요리",
+            "note": "연휴 공식 시간표: 12/24–26 · 12/31 휴무 / 12/27 13:00–22:00 / 12/28–30 15:00–22:00 / 1/1 15:00–22:00",
+            "hours": "평일 15:00–22:00 · 주말 13:00–22:00",
+            "addr": "Nordøstpassasjen 43",
+            "map": "https://maps.google.com/?cid=1412683388499850784"
+          }
+        ]
+      },
+      {
+        "title": "카페",
+        "items": [
+          {
+            "name": "Risø mat og kaffebar",
+            "price": "$$",
+            "desc": "트롬쇠 대표 스페셜티 커피 · 시나몬롤 · 가벼운 점심",
+            "hours": "평일 08:00부터 · 토 09:00–17:00 · 일 휴무 (출처마다 마감 시간이 달라요)",
+            "addr": "Strandgata 32",
+            "map": "https://maps.google.com/?cid=10895374863184765445"
+          },
+          {
+            "name": "Smørtorget",
+            "price": "$$",
+            "desc": "빈티지 소품샵 겸 아늑한 카페 — 따뜻한 점심 · 케이크 · 오트밀 죽",
+            "hours": "월–금 08:00–18:00 · 토 10:00–18:00 · 일 11:00–18:00",
+            "addr": "Sjøgata 11 (Fredrik Langes gate 쪽)",
+            "map": "https://maps.google.com/?cid=3251428853782886088"
+          },
+          {
+            "name": "Clarion Hotel The Edge",
+            "price": "",
+            "desc": "연휴용 대안 — 12/25 크리스마스 디너 뷔페 17:00–22:00, 12/31 새해 전야 뷔페 (사전 예약 · 선결제)",
+            "hours": "행사별 예약",
+            "addr": "Kaigata 6",
+            "map": "https://maps.google.com/?cid=569256658187534540"
+          }
+        ]
+      }
+    ]
+  },
+
   info: {
     draft: false,
     notice: "확인하면서 계속 업데이트 합니다",

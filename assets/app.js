@@ -25,6 +25,7 @@
     { id: "aurora", label: "오로라 투어" },
     { id: "car", label: "렌터카" },
     { id: "picks", label: "추천" },
+    { id: "eat", label: "식당 · 카페" },
     { id: "info", label: "추가 정보" }
   ];
 
@@ -133,6 +134,7 @@
     link: function () { return { label: "링크 이름", href: "https://" }; },
     cost: function () { return { name: "새 항목", sub: "", krw: 0, nok: null, status: "", tab: "cost" }; },
     pick: function () { return { name: "새 장소", desc: "설명", time: "" }; },
+    eat: function () { return { name: "새 식당", price: "", desc: "설명", hours: "운영시간", addr: "주소", map: "" }; },
     extra: function () { return { k: "항목", v: "내용" }; },
     bd: function () { return { k: "항목", v: 0 }; },
     stay: function () { return { tab: "home", dates: "날짜", nights: 1, name: "숙소 이름", area: "위치", label: "STAY" }; },
@@ -617,6 +619,26 @@
     if (wrap) { var y = wrap.getBoundingClientRect().top + window.scrollY - 110; if (window.scrollY > y) window.scrollTo(0, y); }
   });
 
+  function viewEat() {
+    var d = D().eat;
+    if (!d) return staticHead("EAT & COFFEE", "식당 · 카페", "준비 중이에요");
+    var h = head("eat") + callout("eat.warn");
+    if (d.holiday) h += section("eat.holiday");
+    (d.groups || []).forEach(function (g, gi) {
+      var gp = "eat.groups." + gi;
+      h += '<section class="block"><h3 class="block-h">' + E(gp + ".title", { plain: true }) + '</h3><div class="eats">' +
+        (g.items || []).map(function (it, ii) {
+          var p = gp + ".items." + ii;
+          return '<article class="eat">' + del(p) +
+            '<div class="eat-h"><b>' + E(p + ".name", { plain: true }) + "</b>" + ((it.price || editing) ? '<span class="eat-p">' + E(p + ".price", { plain: true, ph: "$$" }) + "</span>" : "") + "</div>" +
+            '<p class="eat-d">' + E(p + ".desc") + "</p>" +
+            ((it.note || editing) ? '<p class="eat-n">' + E(p + ".note", { ph: "주의 (선택)" }) + "</p>" : "") +
+            '<p class="eat-m"><span>🕘 ' + E(p + ".hours", { plain: true }) + "</span><span>📍 " + E(p + ".addr", { plain: true }) +
+            (it.map && !editing ? ' · <a href="' + esc(it.map) + '" target="_blank" rel="noopener">지도 ↗</a>' : "") + "</span></p></article>";
+        }).join("") + "</div>" + add(gp + ".items", "eat", "장소 추가") + "</section>";
+    });
+    return h;
+  }
   function viewInfo() {
     var d = D().info;
     if (!d) return staticHead("LOCAL INFO", "추가 정보", "준비 중이에요");
@@ -638,6 +660,7 @@
     aurora: function () { return viewDetail("aurora"); },
     car: function () { return viewDetail("car", breakdownBlock("car.breakdown")); },
     picks: viewPicks,
+    eat: viewEat,
     map: viewMap,
     info: viewInfo
   };
@@ -1629,7 +1652,7 @@
   });
 
   /* ---------- 진단 창: 맨 아래 "Tromsø 2026" 을 5번 연속 누르면 ---------- */
-  var APP_VERSION = "2026-11-27.c7";
+  var APP_VERSION = "2026-11-27.e1";
   var brandTaps = [];
   document.getElementById("footBrand").addEventListener("click", function () {
     var now = Date.now();
