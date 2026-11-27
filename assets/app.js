@@ -302,7 +302,8 @@
       h += '<li class="day tone-' + esc(d.tone) + '">' +
         '<div class="day-date"><span class="day-num serif">' + dt.getUTCDate() + "</span>" +
         '<span class="day-mon">' + MON[dt.getUTCMonth()] + " · " + WEEK[dt.getUTCDay()] + "</span></div>" +
-        '<div class="day-body"><span class="tag">' + E(dp + ".tag", { plain: true }) + "</span><ul>" +
+        '<div class="day-body"><span class="tag">' + E(dp + ".tag", { plain: true }) + "</span>" +
+        (di > 0 && di < T.days.length - 1 && !editing ? '<span class="day-aur" data-night="' + esc(d.date) + '"></span>' : "") + "<ul>" +
         d.items.map(function (it, ii) {
           var ip = dp + ".items." + ii;
           var inner = ((it.time || editing) ? '<span class="time">' + E(ip + ".time", { plain: true, ph: "시간" }) + "</span>" : "") +
@@ -903,8 +904,54 @@
     h += '<p class="wxn-l wxn-2">' + (aur ? aur + '<span class="wxn-m"> · </span>' : "") + '<span class="wxn-m">' + esc(daylight(now, place.at).replace("극야 · ", "")) + ago + "</span></p>";
     el.innerHTML = h;
   }
+  // 일정 카드: 날짜별 밤 오로라 (그 밤 묵는 숙소 기준 · 구름 예보 닿는 약 9일 전부터)
+  function nightPlace(date) { var p = date.split("-"); return wxPlace(Date.UTC(+p[0], +p[1] - 1, +p[2], 17)); }
+  function paintNights() {
+    var els = document.querySelectorAll(".day-aur[data-night]");
+    if (!els.length) return;
+    var cache = store("tt-wxn") || {}, now = Date.now();
+    els.forEach(function (el) {
+      var date = el.getAttribute("data-night"), p = date.split("-");
+      var night0 = Date.UTC(+p[0], +p[1] - 1, +p[2], 17);
+      if (night0 + 8 * 3600e3 < now) { el.innerHTML = ""; return; }
+      var c = cache[nightPlace(date).at.join(",")], n = c && (c.nights || []).filter(function (x) { return x.date === date; })[0];
+      if (n) {
+        var ch = auroraChance(n.cloud, n.kp);
+        el.innerHTML = '🌌 오로라 <b class="wx-c wx-' + ch.c + '">' + ch.t + "</b>";
+        el.title = (n.cloud != null ? "밤 구름 " + n.cloud + "%" : "") + (n.kp != null ? " · Kp " + Math.round(n.kp * 10) / 10 : "");
+      } else if (night0 - now > 8 * 864e5) {
+        var from = new Date(night0 - 9 * 864e5);
+        el.innerHTML = '<span class="wxn-m">🌌 오로라 예보 ' + (from.getUTCMonth() + 1) + "/" + from.getUTCDate() + "부터</span>";
+      } else el.innerHTML = "";
+    });
+  }
+  function saveNights(key, b) {
+    if (!b || !b.nights) return;
+    var c = store("tt-wxn") || {};
+    c[key] = { at: b.at || Date.now(), nights: b.nights };
+    store("tt-wxn", c);
+  }
+  var nightsBusy = {};
+  function loadNights() {
+    var T = D(), now = Date.now(), want = {}, c = store("tt-wxn") || {};
+    (T.days || []).forEach(function (d, i) {
+      if (i === 0 || i === T.days.length - 1) return;
+      var p = d.date.split("-"), n0 = Date.UTC(+p[0], +p[1] - 1, +p[2], 17);
+      if (n0 + 8 * 3600e3 < now || n0 - now > 11 * 864e5) return;
+      var pl = nightPlace(d.date); want[pl.at.join(",")] = pl;
+    });
+    Object.keys(want).forEach(function (key) {
+      if ((c[key] && now - c[key].at < 30 * 6e4) || nightsBusy[key]) return;
+      nightsBusy[key] = true;
+      fetch("/api/wx?lat=" + want[key].at[0] + "&lon=" + want[key].at[1], { credentials: "same-origin", cache: "no-store" })
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (b) { saveNights(key, b); paintNights(); })
+        .catch(function () {}).then(function () { nightsBusy[key] = false; });
+    });
+  }
   var wxBusy = false;
   function loadWx() {
+    loadNights();
     var place = wxPlace(Date.now()), key = place.at.join(","), c = store("tt-wx");
     if (c && c.key === key) renderWx(c.body, place, c.at);
     if ((c && c.key === key && Date.now() - c.at < 30 * 6e4) || wxBusy || !window.fetch) return;
@@ -914,10 +961,11 @@
       .then(function (b) {
         if (!b || (!b.wx && !b.kp)) return;
         store("tt-wx", { key: key, at: b.at || Date.now(), body: b });
+        saveNights(key, b);
         renderWx(b, place, b.at || Date.now());
       })
       .catch(function () {})
-      .then(function () { wxBusy = false; });
+      .then(function () { wxBusy = false; paintNights(); loadNights(); });
   }
   function renderHero() {
     var T = D();
@@ -937,6 +985,7 @@
     if (bigMap) { try { bigMap.remove(); } catch (e) { /* 무시 */ } bigMap = null; }
     app.innerHTML = '<div class="view view-' + id + slide + '">' + subNav(id) + VIEWS[id]() + "</div>";
     renderWx();
+    paintNights();
     var sl = tabsEl.scrollLeft; renderTabs(); tabsEl.scrollLeft = sl;
     tabsEl.querySelectorAll("a").forEach(function (a) {
       var on = a.getAttribute("data-tab") === groupOf(id);
@@ -1782,7 +1831,7 @@
   });
 
   /* ---------- 진단 창: 맨 아래 "Tromsø 2026" 을 5번 연속 누르면 ---------- */
-  var APP_VERSION = "2026-11-27.w4";
+  var APP_VERSION = "2026-11-27.w5";
   var brandTaps = [];
   document.getElementById("footBrand").addEventListener("click", function () {
     var now = Date.now();

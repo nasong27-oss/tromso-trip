@@ -63,6 +63,26 @@ function aurora(j, now) {
   return { now: cur.kp, tonight: night.length ? Math.max(...night) : null };
 }
 
+// 날짜별 밤(현지 18시 ~ 02시) 요약: 구름 평균(예보 닿는 날까지 · 약 9~10일) + Kp 최대(3일)
+function nights(met, kp, now) {
+  const ts = (met && met.properties && met.properties.timeseries) || [];
+  const rows = kpRows(kp);
+  const out = [];
+  const d0 = new Date(now - 5 * 3600e3);
+  for (let i = 0; i < 12; i++) {
+    const a = Date.UTC(d0.getUTCFullYear(), d0.getUTCMonth(), d0.getUTCDate() + i, 17), b = a + 8 * 3600e3;
+    if (b < now) continue;
+    const cl = ts.filter((t) => { const x = Date.parse(t.time); return x >= a && x <= b; })
+      .map((t) => t.data.instant.details.cloud_area_fraction).filter((v) => typeof v === "number");
+    const k = rows.filter((r) => r.t + 3 * 3600e3 > a && r.t < b).map((r) => r.kp);
+    if (!cl.length && !k.length) continue;
+    out.push({ date: new Date(a).toISOString().slice(0, 10),
+      cloud: cl.length ? Math.round(cl.reduce((x, y) => x + y, 0) / cl.length) : null,
+      kp: k.length ? Math.max(...k) : null });
+  }
+  return out;
+}
+
 export default async function handler(req, res) {
   const q = new URL(req.url, "http://x").searchParams;
   const lat = Math.round(parseFloat(q.get("lat")) * 100) / 100;
@@ -81,7 +101,8 @@ export default async function handler(req, res) {
   const body = {
     at: now,
     wx: met.status === "fulfilled" ? weather(met.value, now) : null,
-    kp: kp.status === "fulfilled" ? aurora(kp.value, now) : null
+    kp: kp.status === "fulfilled" ? aurora(kp.value, now) : null,
+    nights: nights(met.status === "fulfilled" ? met.value : null, kp.status === "fulfilled" ? kp.value : null, now)
   };
   if (!body.wx && !body.kp) return send(res, 502, { error: "upstream" });
   CACHE.set(key, { at: now, body });

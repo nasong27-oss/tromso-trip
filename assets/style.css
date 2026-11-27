@@ -786,4 +786,7 @@ p.wxn-m { font-size: 12px; }
 .wx-good { background: #d7f5e8; color: #0b6b48; }
 .wx-mid { background: #eef6f2; color: #2c6b55; }
 .wx-low { background: var(--line-2); color: var(--muted); }
-@media print { .wxn { display: none !important; } }
+.day-aur { margin-left: 8px; font-size: 12px; white-space: nowrap; }
+.day-aur:empty { display: none; }
+.day-aur .wx-c { font-size: 11.5px; }
+@media print { .wxn, .day-aur { display: none !important; } }
