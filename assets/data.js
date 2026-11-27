@@ -336,11 +336,19 @@ window.TRIP = {
     "eyebrow": "EAT & COFFEE",
     "title": "식당 · 카페",
     "original": "운영시간은 평소 기준 — 연휴엔 휴무·단축 영업이 많아요",
+    "ai": {
+      "title": "AI 추천 리스트",
+      "tone": "info",
+      "items": [
+        "**AI(클로드, 피클) 추천 리스트**예요 — 방문하려는 곳은 영업 여부 · 시간 · 예약을 **직접 확인** 필요"
+      ]
+    },
     "warn": {
       "title": "연휴 주의",
       "items": [
         "**12/25·26 공휴일 · 12/27 일요일 · 12/31 새해 전야**는 휴무·단축 영업이 많아요 — 가기 전에 공식 사이트·구글맵에서 당일 영업과 예약 확인",
-        "인기 식당은 **미리 예약** (특히 금·토 저녁)"
+        "인기 식당은 **미리 예약** (특히 금·토 저녁)",
+        "식당 주류는 비싼 편 · 마트 맥주 판매 시간 제한은 **추가 정보** 탭 참고"
       ]
     },
     "holiday": {
@@ -348,7 +356,7 @@ window.TRIP = {
       "list": [
         "**12/25 (금)** Clarion Hotel The Edge **크리스마스 디너 뷔페 17:00–22:00** — 사전 예약 · 선결제 필수 / 낮엔 Fjellheisen 정상 카페",
         "**12/26 (토)** 확인된 곳 없음 — 호텔 레스토랑에 문의",
-        "**12/27 (일)** Sumo Vervet **13:00–22:00** (공식 연휴 시간표) · 평소 일요일 영업: Smørtorget · Burgr · Yonas · Casa Inferno · Skarven Kro",
+        "**12/27 (일)** Sumo Vervet **13:00–22:00** (공식 연휴 시간표) · 평소 일요일 영업: Smørtorget · Kaffebønna · Svermeri · Ølhallen(13–18) · Burgr · Yonas · Casa Inferno · Skarven Kro",
         "**12/31 (목)** Clarion Hotel The Edge **새해 전야 뷔페** (The Social Bar & Bistro) — 예약 필요 · Sumo 휴무",
         "**1/1 (금)** Sumo Vervet 15:00–22:00"
       ]
@@ -442,6 +450,14 @@ window.TRIP = {
             "hours": "매일 11:00부터",
             "addr": "Strandtorget 1",
             "map": "https://maps.google.com/?cid=16022609803222577800"
+          },
+          {
+            "name": "Ølhallen (Mack)",
+            "price": "$$",
+            "desc": "1928년 문을 연 트롬쇠에서 가장 오래된 펍 — Mack 양조장 탭룸, 탭 맥주 60종 이상 · 옆 Kjeller 5에서 양조장 투어",
+            "hours": "월–목 12:00–00:30 · 금–토 12:00–01:30 · 일 13:00–18:00 (시즌)",
+            "addr": "Storgata 4",
+            "map": "https://www.google.com/maps/search/?api=1&query=%C3%98lhallen+Storgata+4+Troms%C3%B8"
           }
         ]
       },
@@ -501,6 +517,22 @@ window.TRIP = {
             "hours": "월–금 08:00–18:00 · 토 10:00–18:00 · 일 11:00–18:00",
             "addr": "Sjøgata 11 (Fredrik Langes gate 쪽)",
             "map": "https://maps.google.com/?cid=3251428853782886088"
+          },
+          {
+            "name": "Kaffebønna (Stortorget)",
+            "price": "$",
+            "desc": "1998년부터 이어온 트롬쇠 스페셜티 커피 원조 — 샌드위치 · 베이커리, 시내에 지점 여러 곳",
+            "hours": "월–금 07:30–18:00 · 토 09:00–18:00 · 일 10:00–18:00",
+            "addr": "Stortorget 3",
+            "map": "https://www.google.com/maps/search/?api=1&query=Kaffeb%C3%B8nna+Stortorget+3+Troms%C3%B8"
+          },
+          {
+            "name": "Svermeri Kafé og Redesign",
+            "price": "$$",
+            "desc": "아늑한 빈티지 카페 — 아침 · 키시 점심 · 치즈케이크, 바깥 화롯가 자리",
+            "hours": "매일 09:00–17:00",
+            "addr": "Skippergata 2",
+            "map": "https://www.google.com/maps/search/?api=1&query=Svermeri+Skippergata+2+Troms%C3%B8"
           },
           {
             "name": "Clarion Hotel The Edge",
