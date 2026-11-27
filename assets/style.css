@@ -154,10 +154,11 @@ main { padding-top: 8px; padding-bottom: 40px; outline: none; }
 
 /* intro stats */
 .intro { padding: 28px 0 8px; }
-.stats { display: grid; grid-template-columns: repeat(4, 1fr); border-top: 1px solid var(--ink); border-bottom: 1px solid var(--line); }
+.stats { display: grid; grid-template-columns: auto minmax(0, 1fr); border-top: 1px solid var(--ink); border-bottom: 1px solid var(--line); }
 .stat { padding: 16px 4px 14px; display: flex; flex-direction: column; gap: 2px; border-right: 1px solid var(--line); padding-left: 14px; }
 .stat:first-child { padding-left: 0; }
 .stat:last-child { border-right: 0; }
+.stats .stat { padding-right: 16px; }
 .stat-v { font-size: clamp(26px, 6vw, 38px); line-height: 1; }
 .stat-k { font-size: 12px; color: var(--muted); }
 
@@ -323,10 +324,9 @@ details.more[open] summary { margin-bottom: 8px; }
   .hero-inner { padding: 0 16px 32px; }
   .hero { height: 52vh; min-height: 300px; }
   .mini { padding: 0 16px; }
-  .stats { grid-template-columns: repeat(2, 1fr); }
-  .stat:nth-child(2) { border-right: 0; }
-  .stat:nth-child(3) { padding-left: 0; }
-  .stat:nth-child(-n+2) { border-bottom: 1px solid var(--line); }
+  .wxn { padding-left: 12px; gap: 5px; }
+  .wxn-l { white-space: normal; }
+  .stat-k .dd-range { display: none; }
   .stay-cards { grid-template-columns: 1fr; }
   .stay-card { display: grid; grid-template-columns: 44px 1fr; grid-template-areas: "no label" "no dates" "no name" "no area"; column-gap: 10px; }
   .stay-no { grid-area: no; font-size: 28px; }
@@ -633,7 +633,7 @@ html.hv-d .hero { height: 300px; min-height: 0; background: var(--paper); color:
   .print-doc .note, .print-doc .muted { font-size: 8.5pt !important; }
 
   /* 요약 숫자 · 숙소 카드 */
-  .print-doc .stats { grid-template-columns: repeat(4, 1fr) !important; }
+  .print-doc .stats { grid-template-columns: 1fr !important; }
   .print-doc .stat { padding: 4px 8px !important; }
   .print-doc .stat-v { font-size: 13pt !important; }
   .print-doc .stay-cards { grid-template-columns: repeat(3, 1fr) !important; gap: 6px !important; }
@@ -771,19 +771,15 @@ details.fold > summary:active .fold-btn { background: var(--line-2); }
 .pack-g { margin: 14px 0 2px; font-size: 12px; font-weight: 650; letter-spacing: .06em; color: var(--muted); }
 @media print { .subnav { display: none !important; } }
 
-/* 상단 날씨 · 오로라 카드 (상단 이미지 오른쪽 위) */
-.wx { position: absolute; z-index: 3; top: calc(env(safe-area-inset-top, 0px) + 14px); right: max(14px, calc((100% - 760px) / 2 + 20px)); width: 204px; padding: 10px 12px 9px; border-radius: 16px; background: rgba(8, 14, 32, .42); border: 1px solid rgba(255,255,255,.16); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); color: #fff; font-size: 12px; line-height: 1.35; }
-.wx[hidden] { display: none; }
-.wx a { display: block; color: inherit; text-decoration: none; }
-.wx a + a { margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,.14); }
-.wx-top { display: flex; align-items: baseline; justify-content: space-between; gap: 6px; font-size: 13px; }
-.wx-t { font-size: 26px; font-weight: 650; letter-spacing: -.03em; line-height: 1; }
-.wx-s { font-size: 12.5px; opacity: .9; text-align: right; }
-.wx-d { display: block; margin-top: 3px; font-size: 11.5px; opacity: .72; }
-.wx-c { font-weight: 700; padding: 1px 7px; border-radius: 999px; font-size: 12px; }
-.wx-good { background: #6fe3b4; color: #062a1d; }
-.wx-mid { background: rgba(111,227,180,.28); color: #c9f7e5; }
-.wx-low { background: rgba(255,255,255,.16); color: rgba(255,255,255,.85); }
-.wx-l { margin: 8px 0 0; padding-top: 7px; border-top: 1px solid rgba(255,255,255,.14); font-size: 11px; opacity: .7; }
-@media screen and (max-width: 380px) { .wx { width: 190px; padding: 9px 10px 8px; } .wx-t { font-size: 23px; } }
-@media print { .wx { display: none !important; } }
+/* 출발까지 옆 지금 날씨 · 오로라 (작게) */
+.wxn { min-width: 0; padding: 14px 0 12px 16px; display: flex; flex-direction: column; justify-content: center; gap: 3px; font-size: 13.5px; line-height: 1.35; }
+.wxn:empty { display: none; }
+.wxn-l { display: block; margin: 0; color: var(--ink); text-decoration: none; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.wxn-l b { font-weight: 650; }
+.wxn-m { color: var(--muted); font-size: 12.5px; }
+p.wxn-m { font-size: 12px; }
+.wx-c { font-weight: 700; padding: 0 7px; border-radius: 999px; font-size: 12px; }
+.wx-good { background: #d7f5e8; color: #0b6b48; }
+.wx-mid { background: #eef6f2; color: #2c6b55; }
+.wx-low { background: var(--line-2); color: var(--muted); }
+@media print { .wxn { display: none !important; } }

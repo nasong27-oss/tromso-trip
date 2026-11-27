@@ -279,11 +279,10 @@
     var ddText = dd > 0 ? "D-" + dd : dd === 0 ? "D-DAY" : "여행 중";
     var h = "";
 
+    // 출발까지 + 지금 날씨 · 오로라 (날씨 칸은 loadWx 가 채움)
     h += '<section class="intro"><div class="stats">' +
-      '<div class="stat"><span class="stat-v serif">' + ddText + '</span><span class="stat-k">출발까지</span></div>' +
-      '<div class="stat"><span class="stat-v serif">' + (T.stays || []).reduce(function (a, x) { return a + (+x.nights || 0); }, 0) + '박</span><span class="stat-k">12/24 – 1/1</span></div>' +
-      '<div class="stat"><span class="stat-v serif">' + T.stays.length + '</span><span class="stat-k">숙소</span></div>' +
-      '<div class="stat"><span class="stat-v serif">' + esc(T.travelers) + '</span><span class="stat-k">여행자</span></div>' +
+      '<div class="stat"><span class="stat-v serif">' + ddText + '</span><span class="stat-k">' + (dd > 0 ? '출발까지<span class="dd-range"> · 12/24 – 1/1</span>' : "12/24 – 1/1") + "</span></div>" +
+      '<div class="wxn" id="wxNow"></div>' +
       "</div></section>";
 
     h += '<section class="block"><p class="eyebrow">STAY</p><h3 class="block-h big">숙소 ' + T.stays.length + '곳</h3><div class="stay-cards">' +
@@ -882,27 +881,27 @@
     var s = clear + act;
     return s >= 3 ? { t: "좋음", c: "good" } : s === 2 ? { t: "보통", c: "mid" } : { t: "낮음", c: "low" };
   }
+  var WX_LAST = null;
   function renderWx(body, place, at) {
-    var el = document.getElementById("wx");
-    if (!el || !body) return;
+    if (body) WX_LAST = { body: body, place: place, at: at };
+    var el = document.getElementById("wxNow");
+    if (!el || !WX_LAST) return;
+    body = WX_LAST.body; place = WX_LAST.place; at = WX_LAST.at;
     var now = Date.now(), w = body.wx, k = body.kp, h = "";
     if (w) {
       var s = symInfo(w.symbol);
-      h += '<a class="wx-w" href="' + place.yr + '" target="_blank" rel="noopener">' +
-        '<span class="wx-top"><b class="wx-t">' + Math.round(w.t) + "°</b><span class=\"wx-s\">" + s.ic + " " + esc(s.label) + "</span></span>" +
-        '<span class="wx-d">체감 ' + Math.round(feels(w.t, w.wind)) + "° · 바람 " + Math.round(w.wind) + "m/s · 구름 " + Math.round(w.cloud) + "%</span></a>";
+      h += '<a class="wxn-l" href="' + place.yr + '" target="_blank" rel="noopener"><b>' + s.ic + " " + Math.round(w.t) + "°</b> " + esc(s.label) +
+        '<span class="wxn-m"> · 체감 ' + Math.round(feels(w.t, w.wind)) + "° · 구름 " + Math.round(w.cloud) + "%</span></a>";
     }
     if (k || (w && w.nightCloud != null)) {
       var kv = k ? (k.tonight != null ? k.tonight : k.now) : null;
       var ch = auroraChance(w ? w.nightCloud : null, kv);
-      h += '<a class="wx-a" href="https://www.swpc.noaa.gov/products/aurora-30-minute-forecast" target="_blank" rel="noopener">' +
-        '<span class="wx-top">오늘 밤 오로라 <b class="wx-c wx-' + ch.c + '">' + ch.t + "</b></span>" +
-        '<span class="wx-d">' + (kv != null ? "Kp " + (Math.round(kv * 10) / 10) : "") + (w && w.nightCloud != null ? (kv != null ? " · " : "") + "밤 구름 " + w.nightCloud + "%" : "") + "</span></a>";
+      h += '<a class="wxn-l" href="https://www.swpc.noaa.gov/products/aurora-30-minute-forecast" target="_blank" rel="noopener">오늘 밤 오로라 <b class="wx-c wx-' + ch.c + '">' + ch.t + "</b>" +
+        '<span class="wxn-m"> · ' + (kv != null ? "Kp " + (Math.round(kv * 10) / 10) : "") + (w && w.nightCloud != null ? (kv != null ? " · " : "") + "밤 구름 " + w.nightCloud + "%" : "") + "</span></a>";
     }
     var age = now - at, ago = age > 3600e3 ? " · " + (age > 864e5 ? Math.floor(age / 864e5) + "일" : Math.floor(age / 3600e3) + "시간") + " 전" : "";
-    h += '<p class="wx-l">' + esc(daylight(now, place.at)) + "<br>📍 " + esc(place.name) + ago + "</p>";
+    h += '<p class="wxn-l wxn-m">' + esc(daylight(now, place.at)) + " · 📍 " + esc(place.name) + ago + "</p>";
     el.innerHTML = h;
-    el.hidden = false;
   }
   var wxBusy = false;
   function loadWx() {
@@ -937,6 +936,7 @@
     swipeDir = null;
     if (bigMap) { try { bigMap.remove(); } catch (e) { /* 무시 */ } bigMap = null; }
     app.innerHTML = '<div class="view view-' + id + slide + '">' + subNav(id) + VIEWS[id]() + "</div>";
+    renderWx();
     var sl = tabsEl.scrollLeft; renderTabs(); tabsEl.scrollLeft = sl;
     tabsEl.querySelectorAll("a").forEach(function (a) {
       var on = a.getAttribute("data-tab") === groupOf(id);
@@ -1782,7 +1782,7 @@
   });
 
   /* ---------- 진단 창: 맨 아래 "Tromsø 2026" 을 5번 연속 누르면 ---------- */
-  var APP_VERSION = "2026-11-27.w1";
+  var APP_VERSION = "2026-11-27.w2";
   var brandTaps = [];
   document.getElementById("footBrand").addEventListener("click", function () {
     var now = Date.now();
