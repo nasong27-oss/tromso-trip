@@ -19,12 +19,12 @@
   var TABS = [
     { id: "home", label: "일정" },
     { id: "map", label: "지도" },
-    { id: "cost", label: "비용 상세" },
     { id: "stay", label: "숙소", subs: ["stay1", "stay2", "stay3"] },
     { id: "aurora", label: "오로라 투어" },
     { id: "car", label: "렌터카" },
     { id: "picks", label: "추천", subs: ["picks", "eat"] },
-    { id: "info", label: "추가 정보" }
+    { id: "info", label: "추가 정보" },
+    { id: "cost", label: "비용 상세" }
   ];
   var SUB_LABEL = { stay1: "12/25–28 숙소", stay2: "12/28–30 숙소", stay3: "12/30–1/1 숙소", picks: "가볼 곳", eat: "식당 · 카페" };
   // 스와이프 · 인쇄 순서: 묶음 안 하위 화면까지 펼친 목록
@@ -1683,7 +1683,7 @@
   });
 
   /* ---------- 진단 창: 맨 아래 "Tromsø 2026" 을 5번 연속 누르면 ---------- */
-  var APP_VERSION = "2026-11-27.f1";
+  var APP_VERSION = "2026-11-27.f2";
   var brandTaps = [];
   document.getElementById("footBrand").addEventListener("click", function () {
     var now = Date.now();
