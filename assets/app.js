@@ -313,14 +313,13 @@
       // 일정 사이 후보 박스 (예: 12/26 또는 12/27 드라이브 후보)
       (T.options || []).forEach(function (o, oi) {
         if (o.after !== d.date) return;
-        var box = callout("options." + oi, "info");
-        var extra = (o.maps && !editing ? o.maps.map(function (m) { return mapBlock(m, false); }).join("") : "") +
-          (o.folds || []).map(function (f, fi) { return foldBlock("options." + oi + ".folds." + fi, f); }).join("");
-        if (extra) box = box.replace(/<\/aside>$/, extra + "</aside>");
-        h += '<li class="day-opt">' + box + "</li>";
+        h += '<li class="day-opt">' + optionBox(o, oi) + "</li>";
       });
     });
     h += "</ol></section>";
+    // 날짜와 상관없는 옵션 (예: 트롬쇠 숙박 중 언제든 할 수 있는 산책) — 체크리스트 위
+    var anyday = (T.options || []).map(function (o, oi) { return o.after === "end" ? optionBox(o, oi) : ""; }).join("");
+    if (anyday) h += '<section class="block"><p class="eyebrow">ANYTIME</p><h3 class="block-h big">숙박 중 언제든</h3>' + anyday + "</section>";
 
     var done = store("tt-check") || {};
     h += '<section class="block"><p class="eyebrow">BEFORE YOU GO</p><h3 class="block-h big">출발 전 체크리스트</h3><ul class="checks">' +
@@ -383,9 +382,15 @@
     return h;
   }
 
+  function optionBox(o, oi) {
+    var box = callout("options." + oi, "info");
+    var extra = (o.maps && !editing ? o.maps.map(function (m) { return mapBlock(m, false); }).join("") : "") +
+      (o.folds || []).map(function (f, fi) { return foldBlock("options." + oi + ".folds." + fi, f); }).join("");
+    return extra ? box.replace(/<\/aside>$/, extra + "</aside>") : box;
+  }
   // 접어 두는 상세 (항공일정, 산책 상세 등): 제목 / 주의 문구 / 묶음별 목록
   function foldBlock(p, f) {
-    var h = '<details class="fold"' + (editing ? " open" : "") + "><summary>" + E(p + ".title", { plain: true }) + "</summary>";
+    var h = '<details class="fold"' + (editing ? " open" : "") + '><summary><span class="fold-t">' + E(p + ".title", { plain: true }) + '</span><span class="fold-btn" aria-hidden="true"></span></summary>';
     if (f.warn != null) h += '<p class="fold-warn">⚠️ ' + E(p + ".warn") + "</p>";
     (f.groups || []).forEach(function (g, gi) {
       var gp = p + ".groups." + gi;
@@ -1256,6 +1261,11 @@
     { appendList: { p: "stay2.sections", h: "이용 규칙", items: ["금연 · 반려동물 동반 불가 (알레르기 친화 객실)", "레이트 체크아웃은 가능할 때 유료로 문의"] } },
     { appendArr: { p: "stay2.refs", key: "href", items: [{"k": "캐빈 안내", "v": "Standard cabin", "href": "https://lauklines.no/en/general-information/standard-cabin/"}, {"k": "사우나", "v": "예약 안내", "href": "https://lauklines.no/en/activities/sauna/"}] } },
     { appendArr: { p: "stay2.contacts", items: ["+47 77 65 60 80"] } }
+  ]}, { id: "2026-11-27-flight-ts", ops: [
+    { foldReplace: { date: "2026-12-24", from: "**AY541** 헬싱키(HEL) → 트롬쇠(TOS) · 12/25(금) **07:10** → **09:40** (3시간 30분) · 이코노미", to: ["**AY541** 헬싱키(HEL) → 트롬쇠(TOS) · 12/25(금) **07:10** → **09:40** (3시간 30분)", "💬 로바니에미(핀란드) **기술 착륙 45분** 포함 — 08:40 착륙 · 09:25 출발 (같은 비행기, 보통 기내 대기)"] } },
+    { foldReplace: { date: "2026-12-24", from: "**AY542** 트롬쇠(TOS) → 헬싱키(HEL) · 1/1(금) **10:25** → **14:40** (3시간 15분) · 이코노미", to: ["**AY542** 트롬쇠(TOS) → 헬싱키(HEL) · 1/1(금) **10:25** → **14:40** (3시간 15분)", "💬 로바니에미(핀란드) **기술 착륙 45분** 포함 — 12:30 착륙 · 13:15 출발 (같은 비행기, 보통 기내 대기)"] } },
+    { optionEdit: { title: "🚶 Prestvannet 호수 산책 · 트롬쇠 숙박 중 옵션 (12/25–28 · 12/30–1/1)", set: { after: "end", title: "🚶 Prestvannet 호수 산책 · 트롬쇠 숙소에 있는 날 언제든 (12/25–28 · 12/30–1/1)" } } },
+    { optionGroupRename: { title: "🚶 Prestvannet 호수 산책 · 트롬쇠 숙소에 있는 날 언제든 (12/25–28 · 12/30–1/1)", from: "시간대 (12/25~27 기준)", to: "시간대 (12월 말 기준)" } }
   ]}];
   function migrate(doc) {
     // 새로 생긴 큰 항목(예: 현지 정보)은 저장본에 없으면 기본값을 붙인다
@@ -1267,6 +1277,31 @@
         try {
           if (op.addDeadline) {
             if (!doc.deadlines.some(function (d) { return d.title === op.addDeadline.title; })) doc.deadlines.unshift(clone(op.addDeadline));
+            return;
+          }
+          if (op.foldReplace) {
+            var fr = op.foldReplace;
+            (doc.days || []).forEach(function (x) {
+              if (x.date !== fr.date) return;
+              (x.folds || []).forEach(function (f) { (f.groups || []).forEach(function (g) {
+                var k = (g.list || []).indexOf(fr.from);
+                if (k >= 0) Array.prototype.splice.apply(g.list, [k, 1].concat(clone(fr.to)));
+              }); });
+            });
+            return;
+          }
+          if (op.optionEdit) {
+            var oe = op.optionEdit, os = doc.options || [];
+            var dup = oe.set.title && os.some(function (o) { return o && o.title === oe.set.title; });
+            for (var oi2 = os.length - 1; oi2 >= 0; oi2--) {
+              if (!os[oi2] || os[oi2].title !== oe.title) continue;
+              if (dup) os.splice(oi2, 1); // 같은 내용이 이미 새 제목으로 있으면 옛것은 지운다
+              else Object.keys(oe.set).forEach(function (k) { os[oi2][k] = oe.set[k]; });
+            }
+            return;
+          }
+          if (op.optionGroupRename) {
+            (doc.options || []).forEach(function (o) { if (o && o.title === op.optionGroupRename.title) (o.folds || []).forEach(function (f) { (f.groups || []).forEach(function (g) { if (g.h === op.optionGroupRename.from) g.h = op.optionGroupRename.to; }); }); });
             return;
           }
           if (op.setDayField) {
@@ -1524,7 +1559,7 @@
   });
 
   /* ---------- 진단 창: 맨 아래 "Tromsø 2026" 을 5번 연속 누르면 ---------- */
-  var APP_VERSION = "2026-11-27.c1";
+  var APP_VERSION = "2026-11-27.c2";
   var brandTaps = [];
   document.getElementById("footBrand").addEventListener("click", function () {
     var now = Date.now();
