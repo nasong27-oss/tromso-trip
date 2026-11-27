@@ -770,3 +770,20 @@ details.fold > summary:active .fold-btn { background: var(--line-2); }
 .pack-h { margin: 28px 0 4px; font-size: 16px; font-weight: 700; }
 .pack-g { margin: 14px 0 2px; font-size: 12px; font-weight: 650; letter-spacing: .06em; color: var(--muted); }
 @media print { .subnav { display: none !important; } }
+
+/* 상단 날씨 · 오로라 카드 (상단 이미지 오른쪽 위) */
+.wx { position: absolute; z-index: 3; top: calc(env(safe-area-inset-top, 0px) + 14px); right: max(14px, calc((100% - 760px) / 2 + 20px)); width: 204px; padding: 10px 12px 9px; border-radius: 16px; background: rgba(8, 14, 32, .42); border: 1px solid rgba(255,255,255,.16); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); color: #fff; font-size: 12px; line-height: 1.35; }
+.wx[hidden] { display: none; }
+.wx a { display: block; color: inherit; text-decoration: none; }
+.wx a + a { margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,.14); }
+.wx-top { display: flex; align-items: baseline; justify-content: space-between; gap: 6px; font-size: 13px; }
+.wx-t { font-size: 26px; font-weight: 650; letter-spacing: -.03em; line-height: 1; }
+.wx-s { font-size: 12.5px; opacity: .9; text-align: right; }
+.wx-d { display: block; margin-top: 3px; font-size: 11.5px; opacity: .72; }
+.wx-c { font-weight: 700; padding: 1px 7px; border-radius: 999px; font-size: 12px; }
+.wx-good { background: #6fe3b4; color: #062a1d; }
+.wx-mid { background: rgba(111,227,180,.28); color: #c9f7e5; }
+.wx-low { background: rgba(255,255,255,.16); color: rgba(255,255,255,.85); }
+.wx-l { margin: 8px 0 0; padding-top: 7px; border-top: 1px solid rgba(255,255,255,.14); font-size: 11px; opacity: .7; }
+@media screen and (max-width: 380px) { .wx { width: 190px; padding: 9px 10px 8px; } .wx-t { font-size: 23px; } }
+@media print { .wx { display: none !important; } }

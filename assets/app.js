@@ -821,6 +821,105 @@
     window.scrollTo({ top: collapseY, behavior: "smooth" });
   });
 
+
+  /* ---------- 상단 날씨 · 오로라 카드 ----------
+     위치는 GPS가 아니라 날짜로: 그날 묵는 숙소 근처 (체크인 날 15시에 바뀜)
+     데이터: /api/wx (MET Norway 예보 + NOAA Kp), 30분마다 새로. 못 받으면 마지막 값 */
+  var WX_PLACES = [
+    { until: Date.UTC(2026, 11, 28, 14), name: "트롬쇠 시내", at: [69.6715, 18.9654], yr: "https://www.yr.no/en/forecast/daily-table/1-305409/Norway/Troms/Troms%C3%B8/Troms%C3%B8" },
+    { until: Date.UTC(2026, 11, 30, 14), name: "Kvaløya 캐빈", at: [69.6209, 18.2857], yr: "https://www.yr.no/en/forecast/daily-table/69.621,18.286" },
+    { until: Infinity, name: "공항 쪽 (MOXY)", at: [69.6812, 18.9225], yr: "https://www.yr.no/en/forecast/daily-table/69.681,18.923" }
+  ];
+  function wxPlace(now) { for (var i = 0; i < WX_PLACES.length; i++) if (now < WX_PLACES[i].until) return WX_PLACES[i]; return WX_PLACES[0]; }
+  var SYM = [
+    [/thunder/, "⛈", "뇌우"], [/heavysnow/, "🌨", "폭설"], [/lightsnow/, "🌨", "약한 눈"], [/snow/, "🌨", "눈"],
+    [/sleet/, "🌨", "진눈깨비"], [/heavyrain/, "🌧", "강한 비"], [/lightrain/, "🌧", "약한 비"], [/rain/, "🌧", "비"],
+    [/fog/, "🌫", "안개"], [/partlycloudy/, "⛅", "구름 조금"], [/cloudy/, "☁️", "흐림"], [/fair/, "🌤", "대체로 맑음"], [/clearsky/, "☀️", "맑음"]
+  ];
+  function symInfo(code) {
+    code = code || "";
+    for (var i = 0; i < SYM.length; i++) if (SYM[i][0].test(code)) {
+      var ic = SYM[i][1], dark = /night|polartwilight/.test(code);
+      if (dark && /clearsky|fair/.test(code)) ic = "🌙";
+      return { ic: ic, label: SYM[i][2] + (/showers/.test(code) ? " (소나기)" : "") };
+    }
+    return { ic: "", label: "" };
+  }
+  // 체감온도 (풍속냉각, 10°C 이하 · 바람 있을 때)
+  function feels(t, ms) {
+    var v = ms * 3.6;
+    if (t > 10 || v < 4.8) return t;
+    return 13.12 + 0.6215 * t - 11.37 * Math.pow(v, 0.16) + 0.3965 * t * Math.pow(v, 0.16);
+  }
+  // 해 고도 (도) — 극야에도 '밝은 시간'(시민박명, -6° 위)을 계산
+  function sunElev(ms, lat, lon) {
+    var rad = Math.PI / 180, d = ms / 864e5 - 10957.5;
+    var g = (357.529 + 0.98560028 * d) * rad, q = 280.459 + 0.98564736 * d;
+    var L = (q + 1.915 * Math.sin(g) + 0.020 * Math.sin(2 * g)) * rad, e = (23.439 - 0.00000036 * d) * rad;
+    var ra = Math.atan2(Math.cos(e) * Math.sin(L), Math.cos(L)), dec = Math.asin(Math.sin(e) * Math.sin(L));
+    var gmst = (18.697374558 + 24.06570982441908 * d) % 24;
+    var ha = (gmst * 15 + lon) * rad - ra;
+    return Math.asin(Math.sin(lat * rad) * Math.sin(dec) + Math.cos(lat * rad) * Math.cos(dec) * Math.cos(ha)) / rad;
+  }
+  function osloHM(ms) { var d = new Date(ms + 3600e3); return pad2(d.getUTCHours()) + ":" + pad2(d.getUTCMinutes()); }
+  function pad2(n) { return (n < 10 ? "0" : "") + n; }
+  function daylight(now, at) {
+    var o = new Date(now + 3600e3), day0 = Date.UTC(o.getUTCFullYear(), o.getUTCMonth(), o.getUTCDate()) - 3600e3;
+    var up = [], light = [];
+    for (var m = 0; m <= 1440; m += 4) {
+      var x = day0 + m * 6e4, el = sunElev(x, at[0], at[1]);
+      if (el > -0.833) up.push(x);
+      if (el > -6) light.push(x);
+    }
+    if (up.length > 5) return "해 " + osloHM(up[0]) + "–" + osloHM(up[up.length - 1]);
+    if (light.length) return "극야 · 밝은 시간 " + osloHM(light[0]) + "–" + osloHM(light[light.length - 1]);
+    return "극야 · 하루 종일 어두움";
+  }
+  function auroraChance(cloud, kp) {
+    if (cloud != null && cloud >= 70) return { t: "낮음", why: "구름 많음", c: "low" };
+    var clear = cloud == null ? 1 : cloud < 35 ? 2 : 1;
+    var act = kp == null ? 1 : kp >= 4 ? 2 : kp >= 2 ? 1 : 0;
+    var s = clear + act;
+    return s >= 3 ? { t: "좋음", c: "good" } : s === 2 ? { t: "보통", c: "mid" } : { t: "낮음", c: "low" };
+  }
+  function renderWx(body, place, at) {
+    var el = document.getElementById("wx");
+    if (!el || !body) return;
+    var now = Date.now(), w = body.wx, k = body.kp, h = "";
+    if (w) {
+      var s = symInfo(w.symbol);
+      h += '<a class="wx-w" href="' + place.yr + '" target="_blank" rel="noopener">' +
+        '<span class="wx-top"><b class="wx-t">' + Math.round(w.t) + "°</b><span class=\"wx-s\">" + s.ic + " " + esc(s.label) + "</span></span>" +
+        '<span class="wx-d">체감 ' + Math.round(feels(w.t, w.wind)) + "° · 바람 " + Math.round(w.wind) + "m/s · 구름 " + Math.round(w.cloud) + "%</span></a>";
+    }
+    if (k || (w && w.nightCloud != null)) {
+      var kv = k ? (k.tonight != null ? k.tonight : k.now) : null;
+      var ch = auroraChance(w ? w.nightCloud : null, kv);
+      h += '<a class="wx-a" href="https://www.swpc.noaa.gov/products/aurora-30-minute-forecast" target="_blank" rel="noopener">' +
+        '<span class="wx-top">오늘 밤 오로라 <b class="wx-c wx-' + ch.c + '">' + ch.t + "</b></span>" +
+        '<span class="wx-d">' + (kv != null ? "Kp " + (Math.round(kv * 10) / 10) : "") + (w && w.nightCloud != null ? (kv != null ? " · " : "") + "밤 구름 " + w.nightCloud + "%" : "") + "</span></a>";
+    }
+    var age = now - at, ago = age > 3600e3 ? " · " + (age > 864e5 ? Math.floor(age / 864e5) + "일" : Math.floor(age / 3600e3) + "시간") + " 전" : "";
+    h += '<p class="wx-l">' + esc(daylight(now, place.at)) + "<br>📍 " + esc(place.name) + ago + "</p>";
+    el.innerHTML = h;
+    el.hidden = false;
+  }
+  var wxBusy = false;
+  function loadWx() {
+    var place = wxPlace(Date.now()), key = place.at.join(","), c = store("tt-wx");
+    if (c && c.key === key) renderWx(c.body, place, c.at);
+    if ((c && c.key === key && Date.now() - c.at < 30 * 6e4) || wxBusy || !window.fetch) return;
+    wxBusy = true;
+    fetch("/api/wx?lat=" + place.at[0] + "&lon=" + place.at[1], { credentials: "same-origin", cache: "no-store" })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (b) {
+        if (!b || (!b.wx && !b.kp)) return;
+        store("tt-wx", { key: key, at: b.at || Date.now(), body: b });
+        renderWx(b, place, b.at || Date.now());
+      })
+      .catch(function () {})
+      .then(function () { wxBusy = false; });
+  }
   function renderHero() {
     var T = D();
     var meta = document.getElementById("heroMeta");
@@ -1683,7 +1782,7 @@
   });
 
   /* ---------- 진단 창: 맨 아래 "Tromsø 2026" 을 5번 연속 누르면 ---------- */
-  var APP_VERSION = "2026-11-27.f2";
+  var APP_VERSION = "2026-11-27.w1";
   var brandTaps = [];
   document.getElementById("footBrand").addEventListener("click", function () {
     var now = Date.now();
@@ -1737,6 +1836,7 @@
   // 저장된 최신 내용을 받아서 그린다 (서버가 느리면 최대 4초 뒤 data.js 로)
   app.innerHTML = '<p class="loading">불러오는 중…</p>';
   loadLatest().then(function () { render(false); });
+  loadWx();
 
   /* ---------- 다시 열 때 최신으로 ----------
      아이폰 홈 화면 앱은 껐다 켜도 멈춰 있던 화면을 그대로 보여 준다.
@@ -1746,6 +1846,7 @@
     if (editing || document.visibilityState === "hidden") return;
     if (Date.now() - lastSync < 10000) return;
     lastSync = Date.now();
+    loadWx();
     var before = VERSION;
     loadLatest().then(function () {
       if (editing) return;
