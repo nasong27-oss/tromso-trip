@@ -1498,6 +1498,9 @@
   ]}, { id: "2026-11-28-moxy-taxi", ops: [
     { copyDefault: ["stay3.sections", "days.8.items"] },
     { appendArr: { p: "checklist", key: "id", items: [{ id: "taxi11", text: "**1/1 08:15 MOXY → 공항 택시 예약** (3명 + 캐리어) — 12/30 체크인 때 리셉션에 부탁" }] } }
+  ]}, { id: "2026-11-28-nattmal", ops: [
+    { addOption: { item: DEFAULT.options.filter(function (o) { return o.title.indexOf("Nattmålsfjellet") >= 0; })[0] } },
+    { copyDefault: ["days.6.items"] }
   ]}, { id: "2026-11-27-eat-ai", ops: [
     { resetKey: "eat" }
   ]}];
@@ -1844,7 +1847,7 @@
   });
 
   /* ---------- 진단 창: 맨 아래 "Tromsø 2026" 을 5번 연속 누르면 ---------- */
-  var APP_VERSION = "2026-11-28.m2";
+  var APP_VERSION = "2026-11-28.n1";
   var brandTaps = [];
   document.getElementById("footBrand").addEventListener("click", function () {
     var now = Date.now();
