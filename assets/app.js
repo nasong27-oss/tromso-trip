@@ -1493,6 +1493,8 @@
     { pickDesc: { name: "Fjellheisen 케이블카", from: "트롬쇠 최고의 전망. 낮 · 블루아워 모두 좋고 시내 전경을 한눈에.", to: "트롬쇠 최고의 전망. 추천 시간 12:00 ~ 14:00 — 12~13시 설산·피오르가 가장 선명, 13~14시 블루아워에 시내 불빛까지." } }
   ]}, { id: "2026-11-27-cablecar-fold", ops: [
     { optionSet: { title: "🏙 시내 관광", key: "folds", value: [{"title": "케이블카 · 대성당 자세히 보기", "groups": [{"h": "시간대 (12월 말 태양 고도)", "list": ["11:44 하루 중 가장 밝음 (약 -3°) — 11:30쯤 올라가도 충분", "12:00 약 -3.1° · 설산·피오르가 가장 선명", "13:00 약 -4.0° · 하늘이 짙은 파란색이 되는 블루아워 시작", "14:00 약 -6.2° · 박명 끝 — 이후엔 야경·오로라"]}, {"h": "이용 정보", "list": ["케이블카 매일 **09:00 ~ 00:00** 운행 · 정상까지 4~5분 (해발 421m)", "정상 카페 Fjellstua **09:00 ~ 23:30** — 커피 · 와플 · 따뜻한 식사", "공휴일(12/25·26) 운영시간은 출발 전 fjellheisen.no에서 확인"]}, {"h": "주차 · 가는 법", "list": ["공사 중이라 **승강장 앞 주차 불가** → 임시 무료 주차장 **Solstrandvegen 30** (도보 약 5분)", "버스 26번 · 시내에서 걸어서 약 45분"]}, {"h": "주의사항", "list": ["정상은 바람이 세고 추워요 — 방한복 · 장갑 · 모자", "흐리거나 눈이 오면 전망이 없고 강풍 땐 운행이 멈출 수 있어요 — 당일 날씨 보고 결정", "북극 대성당은 **12/24~26 · 12/31 · 1/1 관람 휴무**로 알려져 있어요 (오래된 정보일 수 있음 — 확인 필요)"]}]}] } }
+  ]}, { id: "2026-11-28-moxy", ops: [
+    { copyDefault: ["stay3.original", "stay3.facts", "stay3.sections"] }
   ]}, { id: "2026-11-27-eat-ai", ops: [
     { resetKey: "eat" }
   ]}];
@@ -1504,6 +1506,14 @@
       if (doc._patches.indexOf(patch.id) >= 0) return;
       patch.ops.forEach(function (op) {
         try {
+          if (op.copyDefault) {
+            op.copyDefault.forEach(function (path) {
+              var ks = path.split("."), src = DEFAULT, dst = doc;
+              for (var i = 0; i < ks.length - 1; i++) { src = src && src[ks[i]]; dst = dst && dst[ks[i]]; }
+              if (src && dst && src[ks[ks.length - 1]] !== undefined) dst[ks[ks.length - 1]] = clone(src[ks[ks.length - 1]]);
+            });
+            return;
+          }
           if (op.resetKey) { doc[op.resetKey] = clone(DEFAULT[op.resetKey]); return; }
           if (op.addDeadline) {
             if (!doc.deadlines.some(function (d) { return d.title === op.addDeadline.title; })) doc.deadlines.unshift(clone(op.addDeadline));
@@ -1831,7 +1841,7 @@
   });
 
   /* ---------- 진단 창: 맨 아래 "Tromsø 2026" 을 5번 연속 누르면 ---------- */
-  var APP_VERSION = "2026-11-28.o1";
+  var APP_VERSION = "2026-11-28.m1";
   var brandTaps = [];
   document.getElementById("footBrand").addEventListener("click", function () {
     var now = Date.now();
