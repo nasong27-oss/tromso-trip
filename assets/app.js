@@ -1831,7 +1831,7 @@
   });
 
   /* ---------- 진단 창: 맨 아래 "Tromsø 2026" 을 5번 연속 누르면 ---------- */
-  var APP_VERSION = "2026-11-27.w5";
+  var APP_VERSION = "2026-11-28.o1";
   var brandTaps = [];
   document.getElementById("footBrand").addEventListener("click", function () {
     var now = Date.now();
@@ -1871,7 +1871,55 @@
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", function () { navigator.serviceWorker.register("/sw.js").catch(function () {}); });
   }
-  window.addEventListener("online", function () { if (!editing) loadLatest().then(function () { render(false); }); });
+
+  /* ---------- 오프라인 준비 (비행기 · 통신 안 될 때) ----------
+     인터넷이 될 때 화면 · 내용 · 사진을 모두 이 기기에 저장하고 하단에 시각을 보여준다 */
+  function offlineUrls() {
+    var urls = ["/", "/assets/style.css", "/assets/app.js", "/assets/data.js", "/api/data", "/apple-touch-icon.png", "/manifest.webmanifest"];
+    (function walk(v) {
+      if (typeof v === "string") { if (/^\/assets\/[^"' ]+\.(jpe?g|png|webp|gif|svg)$/i.test(v) && urls.indexOf(v) < 0) urls.push(v); }
+      else if (v && typeof v === "object") Object.keys(v).forEach(function (k) { walk(v[k]); });
+    })(D());
+    return urls;
+  }
+  function paintOffline(state) {
+    var el = document.getElementById("footOffline");
+    if (!el) return;
+    var s = store("tt-offline");
+    if (state === "busy") { el.textContent = "✈️ 오프라인용 저장 중…"; el.hidden = false; return; }
+    if (!s) { el.hidden = true; return; }
+    var d = new Date(s.at);
+    el.textContent = "✈️ 오프라인 준비 " + (s.ok >= s.total ? "완료" : "일부만 (" + s.ok + "/" + s.total + ")") + " · " +
+      (d.getMonth() + 1) + "/" + d.getDate() + " " + pad2(d.getHours()) + ":" + pad2(d.getMinutes()) + " 저장";
+    el.hidden = false;
+  }
+  var prepBusy = false;
+  function prepOffline(force) {
+    var sw = navigator.serviceWorker;
+    if (!sw || !window.MessageChannel || !navigator.onLine || prepBusy || editing) return;
+    var s = store("tt-offline");
+    var sig = (BUILD || "") + "|" + (VERSION || "");
+    if (!force && s && s.sig === sig && s.ok >= s.total && Date.now() - s.at < 6 * 3600e3) return;
+    sw.ready.then(function (reg) {
+      var target = sw.controller || reg.active;
+      if (!target) return;
+      prepBusy = true;
+      paintOffline("busy");
+      var ch = new MessageChannel(), urls = offlineUrls();
+      var timer = setTimeout(function () { prepBusy = false; paintOffline(); }, 60000);
+      ch.port1.onmessage = function (e) {
+        clearTimeout(timer);
+        prepBusy = false;
+        var r = e.data || {};
+        if (r.ok > 0) store("tt-offline", { at: Date.now(), ok: r.ok, total: r.total, sig: sig });
+        paintOffline();
+      };
+      target.postMessage({ type: "prep", urls: urls }, [ch.port2]);
+    });
+  }
+  paintOffline();
+  window.addEventListener("load", function () { setTimeout(prepOffline, 2500); });
+  window.addEventListener("online", function () { if (!editing) loadLatest().then(function () { render(false); prepOffline(); }); });
   window.addEventListener("offline", function () { setOffline(true); });
   // 로그아웃하면 이 기기에 저장해 둔 여행 내용도 지운다
   document.getElementById("logout").addEventListener("click", function (e) {
